@@ -20,17 +20,15 @@ import DeleteExploracion from './components/exploraciones/deleteExploracion'
 import { BrowserRouter, Route } from 'react-router-dom'
 import Nav from "./components/Navbar"
 
-
+import './App.css';
+import Excavacion from './areaGeospatial/index';
 
 
 class App extends Component {
 
-  
-
-  render() 
-  {
+  render() {
     return (
-      <div>
+      <div className="App">
        
         <BrowserRouter>
           <div>
@@ -51,12 +49,12 @@ class App extends Component {
             <Route path="/addExcavacion" component={AddExcavacion} />
             <Route path="/editExcavacion/:id" component={EditExcavacion} />
             <Route path="/deleteExcavacion/:id" component={DeleteExcavacion} />
-            
           </div>
         </BrowserRouter>
-      
+        {/* <Area /> */}
       </div>
     );
   }
 }
+
 export default App;
