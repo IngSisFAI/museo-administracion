@@ -1,4 +1,4 @@
-# App Museo Administracion
+# Aplicacion Museo Administracion
 
 Este proyecto corresponde al front-end del administrador del museo. Esta creada con "create-react-app".
 
@@ -12,4 +12,4 @@ Clonar el repo
 
 `cd admin`
 
-`yarn start`
+`yarn start` o `npm start`
