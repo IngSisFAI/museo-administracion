@@ -1,0 +1,10 @@
+Falta persona:
+-------------
+
+-Verificar que no exista otra persona con ese DNI
+-Guardar las fotos con un nombre especifico
+-Llenar los titulos desde la BD
+-Mostrar Foto al modificar
+-Guardar al Modificar
+-Eliminar Persona
+-Paginado
