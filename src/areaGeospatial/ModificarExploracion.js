@@ -43,8 +43,7 @@ export default class ModificarExploracion extends Component {
   };
 
   obtenerExploracion = async () => {
-    // recuperar id correspondiente
-    const idExploracion = "5cfe8d0c385be24fc56da297";
+    const idExploracion = this.props.exploracionId;
 
     const response = await fetch(`/api/areaExploracion/${idExploracion}`, {
       method: 'GET',

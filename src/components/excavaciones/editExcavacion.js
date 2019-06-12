@@ -3,6 +3,7 @@ import Select from 'react-select';
 import ListaImagen from './listaImagen'
 import ListaVideo from './listaVideo'
 import Moment from 'moment';
+import ModificarExcavacion from '../../areaGeospatial/ModificarExcavacion';
 
 
 
@@ -11,7 +12,7 @@ function validate(nombre, codigo, fechaInicio,  selectedExploracion) {
    
   return {
     nombre: nombre.length === 0,
-    codigo: codigo.length === 0,
+    codigo: codigo ? codigo.length === 0 : false,
     fechaInicio: fechaInicio.length === 0,
     selectedExploracion:  selectedExploracion === null
   };
@@ -108,17 +109,10 @@ class EditExcavacion extends Component {
         .then((countries) => {
           this.setState({paises: countries.paises })
         });
-
-        
-
-       
-
   }
-
 
   //una vez cargado en el DOM
   componentDidMount() {
-    
     fetch('http://localhost:3001/api/excavacionId/'+this.props.match.params.id)
     .then((response) => {
         return response.json()
@@ -150,10 +144,6 @@ class EditExcavacion extends Component {
                           
                         })
       });
-
-     
-       
-
   }
 
 
@@ -784,7 +774,7 @@ class EditExcavacion extends Component {
                             <fieldset>
                                 <legend >Datos Geográficos</legend>
                                 <hr/>
-                                  <h4>**ACA IRIA LO REFERENTE A AREA** </h4>
+                                <ModificarExcavacion excavacionId={this.props.match.params.id} />
 
                                   <div className="input-group">
 

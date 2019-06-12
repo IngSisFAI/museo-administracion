@@ -1,4 +1,5 @@
 import React, {Component} from 'react';
+import CrearExploracion from '../../areaGeospatial/CrearExploracion';
 
 
 function validate(nombre, fecha) {
@@ -105,7 +106,7 @@ class AddExploracion extends Component {
                                          </div>
                                     </div>
                                     <br/>
-                                      <h4>******* Aca iria lo de area *************</h4>
+                                    <CrearExploracion />
                                     <br/>
                                     <br/>
                                     <div className="form-group">

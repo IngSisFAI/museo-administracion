@@ -40,10 +40,8 @@ export default class ModificarExcavacion extends Component {
   };
 
   obtenerExcavacion = async () => {
-    // recuperar id correspondiente
-    const idExcavacion = "5cfe8d59385be24fc56da2b2";
-
-    const response = await fetch(`api/areaExcavacion/${idExcavacion}`, {
+    const idExcavacion = this.props.excavacionId;
+    const response = await fetch(`http://localhost:3001/api/areaExcavacion/${idExcavacion}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',

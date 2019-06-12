@@ -281,7 +281,7 @@ export default class ObtenerExcavacion extends Component {
 
     if (!grilla) {
       grilla = agregarGrilla();
-      this.setState({ grilla: true });
+      this.setState({ grilla });
     }
 
     grilla.addTo(this.state.map);
