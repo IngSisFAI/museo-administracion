@@ -1,5 +1,6 @@
 import React, {Component} from 'react';
 import Select from 'react-select';
+import CrearExcavacion from '../../areaGeospatial/CrearExcavacion';
 
 
 function validate(nombre, codigo, fechaInicio,  selectedExploracion) {
@@ -513,7 +514,7 @@ class AddExcavacion extends Component {
                             <fieldset>
                                 <legend >Datos Geográficos</legend>
                                 <hr/>
-                                  <h4>**ACA IRIA LO REFERENTE A AREA** </h4>
+                                  <CrearExcavacion />
 
                                   <div className="input-group">
 

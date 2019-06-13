@@ -19,18 +19,14 @@ import DeleteExploracion from './components/exploraciones/deleteExploracion'
 
 import { BrowserRouter, Route } from 'react-router-dom'
 import Nav from "./components/Navbar"
-
-
+import './App.css';
 
 
 class App extends Component {
 
-  
-
-  render() 
-  {
+  render() {
     return (
-      <div>
+      <div className="App">
        
         <BrowserRouter>
           <div>
@@ -51,12 +47,11 @@ class App extends Component {
             <Route path="/addExcavacion" component={AddExcavacion} />
             <Route path="/editExcavacion/:id" component={EditExcavacion} />
             <Route path="/deleteExcavacion/:id" component={DeleteExcavacion} />
-            
           </div>
         </BrowserRouter>
-      
       </div>
     );
   }
 }
+
 export default App;
