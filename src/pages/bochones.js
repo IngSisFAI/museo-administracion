@@ -1,13 +1,15 @@
 import React from 'react';
-import ListarPersonas from '../components/personas/listarPersonas'
+import ListarBochones from '../components/bochones/listarBochones'
+
+
 
 export default () => (
 
   <div> 
-     <div className="row">
+       <div className="row">
 	   <div className="col-md-12">
             <div id="contenido" align="left" className="container">
-            <h2 className="page-header" align="left"><i class="fa fa-users" aria-hidden="true"></i> Gesti&oacute;n de Personas</h2>  
+            <h2 className="page-header" align="left"> <i class="fa fa-hand-lizard-o" aria-hidden="true"></i>    Gesti&oacute;n de Bochones</h2>  
             <hr/>
 
                 <form className="form-horizontal">
@@ -16,18 +18,7 @@ export default () => (
                         <div className="col-sm-6">
                             <label htmlFor="nombre">Nombre:</label>
                             <input name="nombre" type="text" className="form-control"  />
-                        </div>
-
-                        <div className="col-sm-6">
-                            <label htmlFor="apellido">Apellido:</label>
-                            <input name="apellido" type="text" className="form-control"  />
-                        </div>
-
-                        <div className="col-sm-6">
-                            <label htmlFor="dni">Nro. Doc.:</label>
-                            <input name="dni" type="text" className="form-control"  />
-                        </div>
-                        
+                        </div>   
                     </div>
                    
                     <div className="form-group">
@@ -37,7 +28,7 @@ export default () => (
                                     Buscar</button>
                             &nbsp;&nbsp;
                             <a className="btn btn-outline-primary my-2 my-sm-0" 
-                             href="/addPersona"><span className="fa fa-plus"></span> Agregar</a>
+                             href="/addBochon"><span className="fa fa-plus"></span> Agregar</a>
                       </div>
                     </div>
 
@@ -46,16 +37,13 @@ export default () => (
                 <form className="form-horizontal">
                 <legend>Listado</legend>
                 <hr/>
-                    <ListarPersonas />
+                   <ListarBochones/>
+                   
                 </form>
             
             </div>
         </div>
       </div>
-
-
-    
-
    </div>
 
 );

@@ -25,14 +25,19 @@ class Navbar extends React.Component {
                             Operaciones
                             </a>
                             <div className="dropdown-menu" aria-labelledby="navbarDropdown">
-                            <a className="dropdown-item" href="/personas"><span className="fa fa-users">
-                    </span> Gestión de Personas</a>
+                            
                             
                             <div className="dropdown-divider"></div>
+                            <a className="dropdown-item" href="/personas"><span className="fa fa-users">
+                    </span> Personas</a>
                                 <a className="dropdown-item" href="/excavaciones"><span className="fa fa-compass">
                     </span> Excavaciones</a>
                                 <a className="dropdown-item" href="/exploraciones"><span className="fa fa-map-marker">
                     </span> Exploraciones</a>
+					 <a className="dropdown-item" href="/ejemplares"><span className="fa fa-paw">
+                    </span> Ejemplares</a>
+                    <a className="dropdown-item" href="/bochones"><span className="fa fa-hand-lizard-o">
+                    </span> Bochones</a>
                             </div>
                         </li>
 

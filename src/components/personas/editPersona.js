@@ -2,7 +2,7 @@ import React from 'react';
 import Select from 'react-select';
 import axios from 'axios';
 import Moment from 'moment';
-import Imagen from '../../images/personas/Koala.jpg';
+//import Imagen from '../../images/personas';
 
 
 
@@ -34,7 +34,7 @@ class editPersona extends React.Component {
                           fbaja:null,
                           motivo:" ",
                           selectedOption:null,
-                          titulos:[],
+                          titulos:"",
                           foto:"",
                           everFocusedNombre: false,
                           everFocusedApellido: false,
@@ -124,13 +124,18 @@ class editPersona extends React.Component {
       };
 
 
-      handleChange = (selectedOption) => {
+      handleTituloChange = evt => {
+        this.setState({titulos: evt.target.value });
+      };
+
+
+     /* handleChange = (selectedOption) => {
         let titulos = Array.from(selectedOption, option => option.value);
         this.setState({selectedOption});
         this.setState({titulos});
         console.log(`Option selected:`, titulos );
        
-      }
+      }*/
 
 
     
@@ -155,7 +160,7 @@ class editPersona extends React.Component {
               
                  //Codigo para subir el archivo al server
                  //-----------------------------------------------------------------
-                const destino= 'src/images/personas/'+this.props.match.params.id
+                const destino= 'public/images/personas/'+this.props.match.params.id
 
    
                 const data1 = new FormData() 
@@ -209,15 +214,15 @@ class editPersona extends React.Component {
         const errors = validate(this.state.nombre, this.state.apellido, this.state.nroDoc);
         const isDisabled = Object.keys(errors).some(x => errors[x]);
         
-        
-  
+       
+       const Imagen="http://localhost:3000/images/personas/"+this.props.match.params.id+'/'+this.state.foto;
 
          
         return (  <div> 
                   <div className="row">
                   <div className="col-md-12">
                         <div id="contenido" align="left" className="container">
-                        <h3 className="page-header" align="left"> Editar Persona</h3>  
+                        <h3 className="page-header" align="left"> <i class="fa fa-users" aria-hidden="true"></i> Editar Persona</h3>  
                         <hr/>
 
                               <form className="form-horizontal" onSubmit={this.handleSubmit}>  
@@ -273,13 +278,9 @@ class editPersona extends React.Component {
                                     <div className="col-sm-12">
                                           <label htmlFor="titulo">Títulos:</label>
                                          
-                                            <Select  name="titulo" 
-                                                  placeholder={'Seleccione Titulos'} 
-                                                  isMulti
-                                                  options={opciones} 
-                                                  onChange={this.handleChange} 
-                                                  value={this.state.titulos.map(opt => ({ label: opt, value: opt }))}
-                                                  />
+                                          <input name="titulo" type="text" 
+                                                className="form-control" value={this.state.titulos} 
+                                                onChange={this.handleTituloChange} /> 
                                             
                                                 
                                     </div>   
