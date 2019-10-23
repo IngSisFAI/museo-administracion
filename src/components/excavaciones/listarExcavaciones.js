@@ -81,6 +81,10 @@ class listarExcavaciones extends Component {
                     <Link to={"/deleteExcavacion/"+excavacion._id} className="btn btn-outline-danger my-2 my-sm-0">
                             <span className="fa fa-trash" title="Editar"></span>
                     </Link>
+                    &nbsp;&nbsp;
+                    <Link to={"/multimedia/"+excavacion._id} className="btn btn-outline-success my-2 my-sm-0">
+                            <span className="fa fa-file-video-o" title="Multimedia"></span>
+                    </Link>
                     
                  
 

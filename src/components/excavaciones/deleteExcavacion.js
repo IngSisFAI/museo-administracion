@@ -1,8 +1,7 @@
 import React, {Component} from 'react';
 import Select from 'react-select';
-import ListaImagen from './listaImagen'
-import ListaVideo from './listaVideo'
 import Moment from 'moment';
+import axios from 'axios';
 
 
 
@@ -524,15 +523,39 @@ class DeleteExcavacion extends Component {
         {
 
               evt.preventDefault();
-
-              fetch('http://localhost:3001/api/excavacion/'+this.props.match.params.id, {
-                  method: 'delete'
-                  })
+              var idExc=this.props.match.params.id
+              axios.delete('http://localhost:3001/api/excavacion/'+this.props.match.params.id)
                   .then(function(response) {
-                      if(response.ok) {
-                      alert("¡Se eliminó la Excavación con Éxito!");
-                      window.location.href="/excavaciones"; 
-                      } 
+                      
+                           console.log("¡Se eliminó la Excavación con Éxito!");
+                           //window.location.href="/excavaciones"; 
+                           var destinoImg="public/images/excavaciones/imagenes/"+idExc
+                           var destinoVideo="public/images/excavaciones/videos/"+idExc
+                           
+                            axios.get('http://localhost:9000/'+destinoImg)
+                            .then(response1 => {
+                              
+                                  console.log("Imagenes eliminadas.")
+                                
+                            })
+                            .catch(function(error) {
+                                alert("Error al eliminar. Intente nuevamente. (1)");
+                                console.log('Hubo un problema con la petición Fetch:' + error.message);
+                            });
+
+                           
+                            axios.get('http://localhost:9000/'+destinoVideo)
+                            .then(function(response)  {
+                                     console.log("Se elimino con exito")
+                              })
+                             .catch(function(error) {
+                                      alert("Error al eliminar. Intente nuevamente. (2)" );
+                                      console.log('Hubo un problema con la petición Fetch:' + error.message);
+                            });
+
+                            alert('¡Se eliminó la Excavación con Éxito!');
+                             window.location.href="/excavaciones"; 
+                       
                   })
                   .catch(function(error) {
                       alert("Error al eliminar. Intente nuevamente.");
@@ -581,7 +604,7 @@ class DeleteExcavacion extends Component {
             <div className="row">
                   <div className="col-md-12">
                         <div id="contenido" align="left" className="container">
-                            <h3 className="page-header" align="left"> Eliminar Excavación</h3>  
+                            <h3 className="page-header" align="left"><i class="fa fa-compass" aria-hidden="true"></i>  Eliminar Excavación</h3>  
                             <hr/>
                             <form className="form-horizontal" onSubmit={this.handleSubmit} > 
                             <fieldset>

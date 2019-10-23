@@ -1,9 +1,8 @@
 import React, {Component} from 'react';
 import Select from 'react-select';
-import ListaImagen from './listaImagen'
-import ListaVideo from './listaVideo'
 import Moment from 'moment';
 import ModificarExcavacion from '../../areaGeospatial/ModificarExcavacion';
+
 
 
 
@@ -313,7 +312,7 @@ class EditExcavacion extends Component {
             "director": nameDirector,
             "colector": idColector,
             "paleontologo": idPaleontologo,
-            "bochonesEncontrados": this.state.bochonesId,
+          //  "bochonesEncontrados": this.state.bochonesId,
             "idArea": this.state.idArea,
             "puntoGPS": this.state.puntoGPS,
             "muestraHome": this.state.muestra,
@@ -335,7 +334,7 @@ class EditExcavacion extends Component {
           .then(function(response) {
             if(response.ok) {
               alert("¡Se actualizó la Excavacion con Éxito!");
-              //window.location.href="/excavaciones"; 
+              window.location.href="/excavaciones"; 
             } 
           })
           .catch(function(error) {
@@ -631,10 +630,13 @@ class EditExcavacion extends Component {
 
      return (
         <div>
+           
+            <br/>
+            <br/>
             <div className="row">
                   <div className="col-md-12">
                         <div id="contenido" align="left" className="container">
-                            <h3 className="page-header" align="left"> Editar Excavación</h3>  
+                            <h3 className="page-header" align="left"><i class="fa fa-compass" aria-hidden="true"></i>  Editar Excavación</h3>  
                             <hr/>
                             <form className="form-horizontal" onSubmit={this.handleSubmit} > 
                             <fieldset>
@@ -762,6 +764,7 @@ class EditExcavacion extends Component {
                                                  isMulti
                                                  placeholder={'Seleccione Bochones'} 
                                                  options={optBochones}
+                                                 isDisabled
                                                  onChange={this.handleBochonesChange} 
                                                  value={optBochones.filter(({value}) => this.state.bochonesId.includes(value))}
                                                 >
@@ -851,8 +854,14 @@ class EditExcavacion extends Component {
                                        name="muestra"
                                        checked={this.state.muestra}
                                        onChange={this.handleMuestraChange.bind(this)} />
-                                <label className="form-check-label" htmlFor="muestra">Muestra Home</label>
+                                <label className="form-check-label" htmlFor="muestra">Muestra en Página Web?</label>
                             </div>
+
+                            <br/>
+
+                            
+
+
 
                             <br/>
                               <p>(*) Datos Obligatorios</p>
@@ -865,7 +874,7 @@ class EditExcavacion extends Component {
                                                
 												
                                                 <a className="btn btn-outline-secondary my-2 my-sm-0" 
-                                                href="/excavaciones"><span className="fa fa-level-up"></span> Salir</a>
+                                                href="/excavaciones"><span className="fa fa-level-up"></span> Cancelar</a>
                                     </div>
                             </div>
 
@@ -875,16 +884,7 @@ class EditExcavacion extends Component {
 
                             <br/>
                             <br/>
-                            <fieldset>
-                                <legend >Archivos Multimedia</legend>
-                                <hr/>
-
-                                <ListaImagen/>
-                                <hr />
-                                <ListaVideo/>
-
-
-                            </fieldset>    
+                            
 
                             <br/>
                         </div>

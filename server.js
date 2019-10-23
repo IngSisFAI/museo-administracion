@@ -6,7 +6,7 @@ app.use(cors())
 var fs=require('fs')
 
 
-
+app.use(express.static('src'));
 
 
 
@@ -14,13 +14,13 @@ var storage = multer.diskStorage({
   destination: function (req, file, cb) {
     var name = req.headers.path
     console.log(req.headers.path)
+    console.log(file.originalname) 
     fs.mkdir(name, ()=> {
-       
             cb(null, name);
     });
 },
     filename: function (req, file, cb) {
-      cb(null, file.originalname)
+      cb(null, file.originalname.replace(/\s+/g,"_"))
     }
   })
   
@@ -43,10 +43,13 @@ app.post('/upload',function(req, res) {
           // An unknown error occurred when uploading.
         } 
         
-        return res.status(200).send(req.file)
+        return res.status(200).send(req.file) 
         // Everything went fine.
       })
 });
+
+
+
 
 app.listen(8000, function() {
     console.log('App running on port 8000: ');
