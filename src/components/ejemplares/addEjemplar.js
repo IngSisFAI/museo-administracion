@@ -8,7 +8,7 @@ const optTipos = [
         
       ];
 
-function validate(nombre, selectedTipo, dimensionAlto, dimensionAncho, peso, selectedArea) {
+function validate(nombre, selectedTipo, dimensionAlto, dimensionAncho, peso, selectedArea, selectedColeccion) {
         // true means invalid, so our conditions got reversed
         return {
           nombre: nombre.length === 0,
@@ -17,6 +17,7 @@ function validate(nombre, selectedTipo, dimensionAlto, dimensionAncho, peso, sel
           peso: peso.length === 0,
           selectedTipo:  selectedTipo === null,
           selectedArea:  selectedArea === null,
+          selectedColeccion:  selectedColeccion === null,
 
         };
 }
@@ -70,7 +71,9 @@ class AddEjemplar extends Component {
                 periodo2:"",
                 perteneceExca:"",
                 fotos:[],
-                videos:[]
+                videos:[],
+                colecciones:[],
+                selectedColeccion:null 
         }        
        
       }
@@ -95,6 +98,14 @@ class AddEjemplar extends Component {
             this.setState({ areas: areas2.areas })
           });
 
+          fetch('/api/coleccion')
+        .then((response) => {
+            return response.json()
+          })
+          .then((collection) => {
+            this.setState({ colecciones: collection.colecciones })
+          });
+
 
       }
       
@@ -110,9 +121,15 @@ class AddEjemplar extends Component {
        
       }
 
-      handleNroColeccionChange = evt => {
+     /* handleNroColeccionChange = evt => {
         this.cambioNumero(evt.target.value );
-      };
+      };*/
+
+       handleColeccionesChange = (selectedColeccion) => {
+        this.setState({selectedColeccion});
+        console.log(`Option selected:`, selectedColeccion );
+       
+      }
 
       handleFechaColeccionChange = evt => {
         this.setState({ fechaColeccion: evt.target.value });
@@ -329,7 +346,7 @@ class AddEjemplar extends Component {
                 "ilustracionCompleta":this.state.ilustracionCompleta,
                 "descripcionIC":this.state.descripcionIC,
                 "areaHallazgo": areaH,
-                "nroColeccion":this.state.nroColeccion,
+                "nroColeccion":this.state.selectedColeccion.value,
                 "dimensionLargo":this.state.dimensionAncho,
                 "dimensionAlto":this.state.dimensionAlto,
                 "peso": this.state.peso,
@@ -379,7 +396,7 @@ class AddEjemplar extends Component {
       {
         
 
-        const errors = validate(this.state.nombre, this.state.selectedTipo, this.state.dimensionAlto, this.state.dimensionAncho, this.state.peso, this.state.selectedArea );
+        const errors = validate(this.state.nombre, this.state.selectedTipo, this.state.dimensionAlto, this.state.dimensionAncho, this.state.peso, this.state.selectedArea, this.state.selectedColeccion );
         const isDisabled = Object.keys(errors).some(x => errors[x]);
 
         const { selectedPais } = this.state; 
@@ -387,11 +404,13 @@ class AddEjemplar extends Component {
         const { selectedCiudad } = this.state;
         const { selectedArea } = this.state;
         const { selectedTipo } = this.state;
+        const { selectedColeccion} = this.state;
 
         let optPaises = this.state.paises.map((opt) => ({ label: opt.nombre, value: opt._id }) );
         let optProvincias = this.state.provincias.map((opt) => ({ label: opt.nombre, value: opt._id }) );
         let optCiudades = this.state.ciudades.map((opt) => ({ label: opt.nombre, value: opt._id }) );
         let optAreas = this.state.areas.map((opt) => ({ label: opt.nombre, value: opt._id }) );
+        let optColecciones = this.state.colecciones.map((opt) => ({ label: opt.nombre, value: opt._id }) );
    
         return (
           
@@ -437,13 +456,15 @@ class AddEjemplar extends Component {
                                    
                                     <div className="col-sm-4">
                                         
-                                            <label htmlFor="nroColeccion" >Nro. Colección:</label>
-                                            <input type="text" 
-                                                    className="form-control" 
-                                                    name="nroColeccion"
-                                                    value={this.state.nroColeccion}
-                                                    onChange={this.handleNroColeccionChange} 
-                                                     />  
+                                            <label htmlFor="nroColeccion" > Colección (*):</label>
+                                            <Select name="nroColeccion"     
+                                                    placeholder={'Seleccione Colección'}
+                                                    options={optColecciones} 
+                                                    onChange={this.handleColeccionesChange} 
+                                                    value={selectedColeccion}
+                                                    >
+                                                
+                                            </Select>
                                     </div>
                                     <div className="col-sm-4">
                                         

@@ -103,7 +103,6 @@ class listarEjemplares extends Component {
     let imprimir= this.state.ejemplares.map(function(ejemplar, i){
         return <tr key={i}><td >{ejemplar.nombre}</td>
                    <td >{ejemplar.tipoEjemplar}</td>
-                   <td >{ejemplar.nroColeccion}</td>
                    <td >{ejemplar.ubicacionMuseo}</td>
                    <td>
                     <Link to={"/editEjemplar/"+ejemplar._id} className="btn btn-outline-primary my-2 my-sm-0">
@@ -131,7 +130,6 @@ class listarEjemplares extends Component {
                         <tr>               
                               <th>Nombre</th>
                               <th>Tipo</th>
-                              <th>Nro. Colección</th> 
                               <th>Ubicación Museo</th>
                               <th>Acciones</th>
                         </tr>

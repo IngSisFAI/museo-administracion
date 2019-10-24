@@ -20,10 +20,7 @@ export default () => (
                             <input name="nombre" type="text" className="form-control"  />
                         </div>
 
-                        <div className="col-sm-6">
-                            <label htmlFor="nroColeccion">Nro. Colección:</label>
-                            <input name="nroColeccion" type="text" className="form-control"  />
-                        </div>
+                        
 
                         <div className="col-sm-6">
                             <label htmlFor="ubicacion">Ubicación Museo:</label>
