@@ -9,7 +9,7 @@ const optTipos = [
         
       ];
 
-function validate(nombre, selectedTipo, dimensionAlto, dimensionAncho, peso, selectedArea) {
+function validate(nombre, selectedTipo, dimensionAlto, dimensionAncho, peso, selectedArea, selectedColeccion) {
         // true means invalid, so our conditions got reversed
     //  alert("Nombre:"+nombre+" - Tipo:"+selectedTipo+' - dimensionAlto:'+dimensionAlto+' - dimensionAncho:'+dimensionAncho+' - Peso:'+peso+ ' - selectedArea:'+selectedArea);
         return {
@@ -19,6 +19,7 @@ function validate(nombre, selectedTipo, dimensionAlto, dimensionAncho, peso, sel
           peso: peso.length === 0,
           selectedTipo:  selectedTipo === null,
           selectedArea:  selectedArea === null,
+          selectedColeccion:  selectedColeccion === null,
 
         };
 }
@@ -82,7 +83,11 @@ class EditEjemplar extends Component {
                 areas: [],
                 idArea:"",
                 readyTipo: false,
-                tipoEjemplar:null
+                tipoEjemplar:null,
+                colecciones:[],
+                selectedColeccion:null ,
+                idColeccion:"",
+                 readyArea: false,
         }        
        
       }
@@ -106,6 +111,14 @@ class EditEjemplar extends Component {
           })
           .then((areas2) => {
             this.setState({ areas: areas2.areas })
+          });
+
+           fetch('/api/coleccion')
+        .then((response) => {
+            return response.json()
+          })
+          .then((collection) => {
+            this.setState({ colecciones: collection.colecciones })
           });
 
 
@@ -174,7 +187,8 @@ class EditEjemplar extends Component {
                             descripcion1A:ejemplars.ejemplarId.descripcion1A,
                             descripcion2:ejemplars.ejemplarId.descripcion2,
                             descripcion3: ejemplars.ejemplarId.descripcion3,  
-                            perteneceExca: ejemplars.ejemplarId.perteneceExca
+                            perteneceExca: ejemplars.ejemplarId.perteneceExca,
+                            idColeccion:ejemplars.ejemplarId.nroColeccion
                           
                         })
       });
@@ -197,9 +211,16 @@ class EditEjemplar extends Component {
        
       }
 
-      handleNroColeccionChange = evt => {
+   /*   handleNroColeccionChange = evt => {
         this.cambioNumero(evt.target.value );
-      };
+      };*/
+
+      handleNroColeccionChange = (selectedColeccion) => {
+        this.setState({selectedColeccion});
+        this.setState({idColeccion: selectedColeccion.value});
+        console.log(`Option selected:`, selectedColeccion );
+       
+      }
 
       handleFechaColeccionChange = evt => {
         this.setState({ fechaColeccion: evt.target.value });
@@ -366,7 +387,7 @@ handleCiudadChange = (selectedCiudad) => {
       //******************************************************
 
       canBeSubmitted() {
-        const errors = validate(this.state.nombre, this.state.selectedTipo, this.state.dimensionAlto, this.state.dimensionAncho, this.state.peso, this.state.selectedArea );
+        const errors = validate(this.state.nombre, this.state.selectedTipo, this.state.dimensionAlto, this.state.dimensionAncho, this.state.peso, this.state.selectedArea, this.state.selectedColeccion );
         const isDisabled = Object.keys(errors).some(x => errors[x]);
         return !isDisabled;
       }
@@ -423,7 +444,7 @@ handleCiudadChange = (selectedCiudad) => {
                 "ilustracionCompleta":this.state.ilustracionCompleta,
                 "descripcionIC":this.state.descripcionIC,
                 "areaHallazgo": areaH,
-                "nroColeccion":this.state.nroColeccion,
+                "nroColeccion":this.state.selectedColeccion.value,
                 "dimensionLargo":this.state.dimensionAncho,
                 "dimensionAlto":this.state.dimensionAlto,
                 "peso": this.state.peso,
@@ -628,6 +649,40 @@ handleCiudadChange = (selectedCiudad) => {
       }
     }
 
+    traerColecciones() 
+    { 
+      
+      if(!this.state.readyColeccion)
+      {
+
+        if(this.state.idColeccion!=='')
+        { 
+          this.setState({readyColeccion:true}); 
+          fetch('/api/coleccion')
+          .then((response) => {
+              return response.json()
+            })
+            .then((coleccion2) => {
+              this.setState({ colecciones: coleccion2.colecciones })
+            });
+            
+            let optColecciones = this.state.colecciones.map((opt) => ({ label: opt.nombre, value: opt._id }) );
+            var coleccionArr= optColecciones.filter(opt => opt.value===this.state.idColeccion)
+            if(coleccionArr.length>0)
+            {
+                this.setState({selectedColeccion:coleccionArr[0]}) 
+
+            }
+            else{
+
+              this.setState({selectedColeccion:''}) 
+            }
+           
+        } 
+      }     
+
+    }
+
 
 
     
@@ -635,7 +690,7 @@ handleCiudadChange = (selectedCiudad) => {
       {
         
 
-        const errors = validate(this.state.nombre, this.state.selectedTipo, this.state.dimensionAlto, this.state.dimensionAncho, this.state.peso, this.state.selectedArea );
+        const errors = validate(this.state.nombre, this.state.selectedTipo, this.state.dimensionAlto, this.state.dimensionAncho, this.state.peso, this.state.selectedArea, this.state.selectedColeccion );
         const isDisabled = Object.keys(errors).some(x => errors[x]);
 
 
@@ -644,6 +699,7 @@ handleCiudadChange = (selectedCiudad) => {
          this.traerPais()
          this.traerAreas()
          this.traerTipo()
+         this.traerColecciones()
         
      //  console.log("Area seleccionada:", this.state.selectedArea);
         
@@ -656,6 +712,7 @@ handleCiudadChange = (selectedCiudad) => {
         let optProvincias = this.state.provincias.map((opt) => ({ label: opt.nombre, value: opt._id }) );
         let optCiudades = this.state.ciudades.map((opt) => ({ label: opt.nombre, value: opt._id }) );
         let optAreas = this.state.areas.map((opt) => ({ label: opt.nombre, value: opt._id }) );
+        let optColecciones = this.state.colecciones.map((opt) => ({ label: opt.nombre, value: opt._id }) );
    
         return (
           
@@ -701,13 +758,15 @@ handleCiudadChange = (selectedCiudad) => {
                                    
                                     <div className="col-sm-4">
                                         
-                                            <label htmlFor="nroColeccion" >Nro. Colección:</label>
-                                            <input type="text" 
-                                                    className="form-control" 
-                                                    name="nroColeccion"
-                                                    value={this.state.nroColeccion}
+                                            <label htmlFor="nroColeccion" >Colección (*):</label>
+                                            <Select name="nroColeccion"     
+                                                    placeholder={'Seleccione Colección'}
+                                                    options={optColecciones} 
                                                     onChange={this.handleNroColeccionChange} 
-                                                     />  
+                                                    value={optColecciones.filter(option => option.value === this.state.idColeccion)}
+                                                    >
+                                                
+                                            </Select>
                                     </div>
                                     <div className="col-sm-4">
                                         
