@@ -1,3 +1,0 @@
-https://react-select.com/home#getting-started
-
-https://reactjsexample.com/a-fork-of-react-select-with-support-for-option-groups/

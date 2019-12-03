@@ -2,7 +2,7 @@ import React from 'react';
 import Select from 'react-select';
 import axios from 'axios';
 import Moment from 'moment';
-import Imagen from '../../images/personas/Koala.jpg';
+
 
 
 const opciones = [
@@ -33,7 +33,7 @@ class DeletePersona extends React.Component {
                           fbaja:null,
                           motivo:" ",
                           selectedOption:null,
-                          titulos:[],
+                          titulos:"",
                           foto:"",
                           everFocusedNombre: false,
                           everFocusedApellido: false,
@@ -122,13 +122,18 @@ class DeletePersona extends React.Component {
       };
 
 
-      handleChange = (selectedOption) => {
+   /*   handleChange = (selectedOption) => {
         let titulos = Array.from(selectedOption, option => option.value);
         this.setState({selectedOption});
         this.setState({titulos});
         console.log(`Option selected:`, titulos );
        
       }
+*/
+
+      handleTituloChange = evt => {
+        this.setState({titulos: evt.target.value });
+      };
 
 
     
@@ -137,12 +142,32 @@ class DeletePersona extends React.Component {
           {
 
                 evt.preventDefault();
+                const destino="public/images/personas/"+this.props.match.params.id   
+                //const archivo= "public/images/persona/"+this.props.match.params.id+"/"+this.state.foto
+                const data1 = new FormData() 
+               
+              
+                fetch('http://localhost:9000/'+destino)
+                  .then(function(response) {
+                      if(response.ok) {
+                     
+                          console.log('Se eliminaron los archivos con exito.');
+                      } 
+                  })
+                  .catch(function(error) {
+                      alert("Error al eliminar. Intente nuevamente.");
+                      console.log('Hubo un problema con la petición Fetch:' + error.message);
+                  });
+
+
+                
 
                 fetch('http://localhost:3001/api/persona/'+this.props.match.params.id, {
                     method: 'delete'
                     })
                     .then(function(response) {
                         if(response.ok) {
+                       
                         alert("¡Se eliminó la Exploración con Éxito!");
                         window.location.href="/personas"; 
                         } 
@@ -151,6 +176,9 @@ class DeletePersona extends React.Component {
                         alert("Error al eliminar. Intente nuevamente.");
                         console.log('Hubo un problema con la petición Fetch:' + error.message);
                     });
+
+
+
                 
                 return;
       
@@ -171,7 +199,7 @@ class DeletePersona extends React.Component {
         const errors = validate(this.state.nombre, this.state.apellido, this.state.nroDoc);
         const isDisabled = Object.keys(errors).some(x => errors[x]);
         
-        
+        const Imagen="http://localhost:3000/images/personas/"+this.props.match.params.id+'/'+this.state.foto;
   
 
          
@@ -179,7 +207,7 @@ class DeletePersona extends React.Component {
                   <div className="row">
                   <div className="col-md-12">
                         <div id="contenido" align="left" className="container">
-                        <h3 className="page-header" align="left"> Eliminar Persona</h3>  
+                        <h3 className="page-header" align="left"><i class="fa fa-users" aria-hidden="true"></i> Eliminar Persona</h3>  
                         <hr/>
 
                               <form className="form-horizontal" onSubmit={this.handleSubmit}>  
@@ -235,13 +263,9 @@ class DeletePersona extends React.Component {
                                     <div className="col-sm-12">
                                           <label htmlFor="titulo">Títulos:</label>
                                          
-                                            <Select  name="titulo" isDisabled
-                                                  placeholder={'Seleccione Titulos'} 
-                                                  isMulti
-                                                  options={opciones} 
-                                                  onChange={this.handleChange} 
-                                                  value={this.state.titulos.map(opt => ({ label: opt, value: opt }))}
-                                                  />
+                                          <input name="titulo" type="text" 
+                                                className="form-control" value={this.state.titulos} 
+                                                onChange={this.handleTituloChange} /> 
                                             
                                                 
                                     </div>   

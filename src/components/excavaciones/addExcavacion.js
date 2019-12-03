@@ -23,7 +23,7 @@ class AddExcavacion extends Component {
                      colectores:[],
                      directores:[],
                      paleontologos:[],
-                     bochones: [],
+              //       bochones: [],
                      exploraciones: [],
                      paises: [],
                      selectedPais:null ,
@@ -144,13 +144,13 @@ class AddExcavacion extends Component {
 
 
 
-      handleBochonesChange = (selectedBochones) => {
+    /*  handleBochonesChange = (selectedBochones) => {
         let bochons = Array.from(selectedBochones, option => option.value);
         this.setState({selectedBochones});
         this.setState({bochonesId:bochons});
         console.log(`Option selected:`, bochons );
        
-      }
+      }*/
 
       handleExploracionesChange = (selectedExploracion) => {
         this.setState({selectedExploracion});
@@ -251,7 +251,7 @@ class AddExcavacion extends Component {
                 "director": nameDirector,
                 "colector": idColector,
                 "paleontologo": idPaleontologo,
-                "bochonesEncontrados": this.state.bochonesId,
+               // "bochonesEncontrados": this.state.bochonesId,
                 "idArea": this.state.idArea,
                 "puntoGPS": this.state.puntoGPS,
                 "muestraHome": this.state.muestra,
@@ -262,34 +262,7 @@ class AddExcavacion extends Component {
                
     
              };
-              /*
-              var data = {
-                "nombre": this.state.nombre,
-                "descripcion": this.state.descripcion,
-                "codigo": this.state.codigo,
-                "fechaInicio": this.state.fechaInicio,
-                "fechaBaja": this.state.fbaja, 
-                "motivoBaja": this.state.motivoBaja,
-                "directorId": this.state.selectedDirector.value,
-                "director": this.state.selectedDirector.label,
-                "colector": this.state.selectedColector.value,
-                "paleontologo": this.state.selectedPaleontologo.value,
-                "bochonesEncontrados": this.state.bochonesId,
-                "idArea": this.state.idArea,
-                "puntoGPS": this.state.puntoGPS,
-                "muestraHome": this.state.muestra,
-                 "idPais": this.state.selectedPais.value,
-                "idExploracion":this.state.selectedExploracion.value,
-                "idProvincia": this.state.selectedProvincia.value,
-                "idCiudad":  this.state.selectedCiudad.value*/
-               /* "idExploracion": {"type": this.state.selectedPais.value, "ref":'Exploracion'},
-                "idPais": {"type": this.state.selectedExploracion.value, "ref":'Pais'},
-                "idProvincia": {"type": this.state.selectedProvincia.value, "ref":'Provincia'},
-                "idCiudad": {"type": this.state.selectedCiudad.value, "ref":'Ciudad'}
-
-
-        };*/
-
+              
              fetch('api/excavacion', {
               method: 'post',
               body: JSON.stringify(data),
@@ -356,13 +329,13 @@ class AddExcavacion extends Component {
     const { selectedDirector } = this.state; 
     const { selectedPaleontologo } = this.state;
     const { selectedExploracion } = this.state;
-    const { selectedBochones } = this.state;
+   // const { selectedBochones } = this.state;
 
      
      let optColectores = this.state.colectores.map((opt) => ({ label: opt.nombres+" "+opt.apellidos, value: opt._id }) );
      let optDirectores = this.state.directores.map((opt) => ({ label: opt.nombres+" "+opt.apellidos, value: opt._id }) );
      let optPaleontologos = this.state.paleontologos.map((opt) => ({ label: opt.nombres+" "+opt.apellidos, value: opt._id }) );
-     let optBochones = this.state.bochones.map((opt) => ({ label: opt.nombre, value: opt._id }) );
+  //   let optBochones = this.state.bochones.map((opt) => ({ label: opt.nombre, value: opt._id }) );
      let optExploraciones = this.state.exploraciones.map((opt) => ({ label: opt.nombre, value: opt._id }) );
      let optPaises = this.state.paises.map((opt) => ({ label: opt.nombre, value: opt._id }) );
      let optProvincias = this.state.provincias.map((opt) => ({ label: opt.nombre, value: opt._id }) );
@@ -375,7 +348,7 @@ class AddExcavacion extends Component {
             <div className="row">
                   <div className="col-md-12">
                         <div id="contenido" align="left" className="container">
-                            <h3 className="page-header" align="left"> Agregar Excavación</h3>  
+                            <h3 className="page-header" align="left"><i class="fa fa-compass" aria-hidden="true"></i>  Agregar Excavación</h3>  
                             <hr/>
                             <form className="form-horizontal" onSubmit={this.handleSubmit}> 
                             <fieldset>
@@ -495,19 +468,7 @@ class AddExcavacion extends Component {
                                     </div>
                                 </div>
 
-                                <div className="input-group">
-                                    <div className="col-sm-12">
-                                        <label htmlFor="bochones">Bochones Encontrados:</label>
-                                        <Select  name="bochones"  
-                                                 isMulti
-                                                 placeholder={'Seleccione Bochones'} 
-                                                 options={optBochones}
-                                                 onChange={this.handleBochonesChange} 
-                                                 value={selectedBochones}
-                                                >
-                                        </Select>
-                                    </div>
-                                </div>
+
 
                             </fieldset>
                             <br/>
@@ -592,7 +553,7 @@ class AddExcavacion extends Component {
                                        name="muestra"
                                        checked={this.state.muestra}
                                        onChange={this.handleMuestraChange.bind(this)} />
-                                <label className="form-check-label" htmlFor="muestra">Muestra Home</label>
+                                <label className="form-check-label" htmlFor="muestra">Muestra en Página Web?</label>
                             </div>
 
                             <br/>

@@ -33,13 +33,14 @@ class addPersona extends React.Component {
                               fbaja:"",
                               motivo:"",
                               selectedOption:null,
-                              titulos:[],
+                              titulos:"",
                               foto:"",
                               everFocusedNombre: false,
                               everFocusedApellido: false,
                               everFocusedNroDoc: false,
                               inFocus: "",
-                              selectedFile: null
+                              selectedFile: null,
+                              id:""
                    };
             this.cambioNumero = this.cambioNumero.bind(this);
    
@@ -47,6 +48,7 @@ class addPersona extends React.Component {
 
         
           onClickHandler = () => {
+            console.log(this.state.selectedFile)
             const data = new FormData() 
             data.append('file', this.state.selectedFile)
             axios.post("http://localhost:8000/upload", data, {
@@ -96,13 +98,17 @@ class addPersona extends React.Component {
           };
 
 
-          handleChange = (selectedOption) => {
+        /*  handleChange = (selectedOption) => {
             let titulos = Array.from(selectedOption, option => option.value);
             this.setState({selectedOption});
             this.setState({titulos});
             console.log(`Option selected:`, titulos );
            
-          }
+          }*/
+
+          handleTituloChange = evt => {
+            this.setState({ titulos: evt.target.value });
+          };
 
     
         
@@ -124,24 +130,7 @@ class addPersona extends React.Component {
                         "motivoBaja": this.state.motivo
                      };
                   
-                     //Codigo para subir el archivo al server
-                     //-----------------------------------------------------------------
-                    const data1 = new FormData() 
-                     data1.append('file',this.state.selectedFile)
-                     data1.append('destino','/src/images/personas')
-                     const config = {
-                      headers: {
-                          'content-type': 'multipart/form-data'
-                          }
-                      };
-
-                     axios.post("http://localhost:8000/upload", data1, {
-                       onUploadProgress: ProgressEvent => {
-                         this.setState({
-                           loaded: (ProgressEvent.loaded / ProgressEvent.total*100),
-                         })
-                       }, config
-                     }); 
+                     
 
                     
   
@@ -156,15 +145,56 @@ class addPersona extends React.Component {
                         })
                         .then(function(response) {
                           if(response.ok) {
-                            alert("¡Se guardó la Persona con Éxito!");
-                            window.location.href="/personas"; 
+                            console.log("¡Se guardó la Persona con Éxito!");
+                           
                           } 
                         })
                         .catch(function(error) {
                           alert("Error al guardar. Intente nuevamente.");
                           console.log('Hubo un problema con la petición Fetch:' + error.message);
                         });
-                  
+
+               
+                    const archivo= this.state.selectedFile;
+                    var destino="";
+                  //------------------------------------------------------------------
+                   //Busco el id de la persona recientemente cargada
+                //   console.log('API: ', 'api/personaDni/'+this.state.nroDoc)
+                   var id="";
+                   axios.get('api/personaDni/'+this.state.nroDoc)
+                   .then(function(response) {
+                     
+                        console.log("ID Persona:",response.data.persona._id);
+                        id=response.data.persona._id;
+                     
+                        destino= 'public/images/personas/'+id
+                        console.log("DESTINO:"+destino);
+
+                        const data1 = new FormData() 
+                        data1.append('file',archivo)
+
+                        axios.post("http://localhost:8000/upload", data1, {
+                          headers: { 
+                            'Content-Type': undefined,
+                            'path': destino
+                          }
+                        }).then(response => {
+                          
+                              alert("¡Se guardó la Persona con Éxito!");
+                              window.location.href="/personas"; 
+
+                          
+                        })
+                        .catch(error => {
+                          console.log(error);
+                        });
+
+                     })
+                     .catch(function (error) {
+                      console.log(error);
+                    }); 
+
+     
                   return;
             }
 
@@ -187,7 +217,7 @@ class addPersona extends React.Component {
                 return response.json()
               })
               .then((persons) => {
-                 if(persons.persona.length>0)
+                 if(persons.personas.length>0)
                   {
                     alert("Existe Persona con ese DNI. Ingrese uno correcto."); 
                     this.setState({nroDoc:''});
@@ -226,7 +256,7 @@ class addPersona extends React.Component {
                   <div className="row">
                   <div className="col-md-12">
                         <div id="contenido" align="left" className="container">
-                        <h3 className="page-header" align="left"> Agregar Persona</h3>  
+                        <h3 className="page-header" align="left"><i class="fa fa-users" aria-hidden="true"></i> Agregar Persona</h3>  
                         <hr/>
 
                               <form className="form-horizontal" onSubmit={this.handleSubmit}>  
@@ -288,13 +318,9 @@ class addPersona extends React.Component {
                                     <div className="col-sm-12">
                                           <label htmlFor="titulo">Títulos:</label>
                                          
-                                            <Select  name="titulo" 
-                                                  placeholder={'Seleccione Titulos'} 
-                                                  isMulti
-                                                  options={opciones} 
-                                                  onChange={this.handleChange} 
-                                                  value={selectedOption}
-                                                  />
+                                          <input name="titulo" type="text" 
+                                                className="form-control" value={this.state.titulos} 
+                                                onChange={this.handleTituloChange} /> 
                                             
                                                 
                                     </div>   

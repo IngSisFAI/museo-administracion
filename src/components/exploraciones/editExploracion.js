@@ -102,7 +102,7 @@ function validate(nombre, fecha) {
             <div className="row">
                 <div className="col-md-12">
                     <div id="contenido" align="left" className="container">
-                        <h3 className="page-header" align="left"> Agregar Exploración</h3>  
+                        <h3 className="page-header" align="left"><i class="fa fa-map-marker" aria-hidden="true"></i> Editar Exploración</h3>  
                         <hr/>
 
                             <form className="form-horizontal" onSubmit={this.handleSubmit}> 

@@ -7,7 +7,7 @@ export default () => (
      <div className="row">
 	   <div className="col-md-12">
             <div id="contenido" align="left" className="container">
-            <h2 className="page-header" align="left"> Gesti&oacute;n de Exploraciones</h2>  
+            <h2 className="page-header" align="left"><i class="fa fa-map-marker" aria-hidden="true"></i> Gesti&oacute;n de Exploraciones</h2>  
             <hr/>
 
                 <form className="form-horizontal">
