@@ -45,7 +45,7 @@ export default class ObtenerExcavacion extends Component {
       flyTo: true,
       keepCurrentZoomLevel: true,
       returnToPrevBounds: true,
-      onActivate: () => {},
+      onActivate: () => { },
     }
     const controlLocacion = L.control.locate(opcionesLocacion).addTo(map);
     this.setState({
@@ -56,7 +56,7 @@ export default class ObtenerExcavacion extends Component {
     this.obtenerTodasExploraciones();
   };
 
-// get excavacion y get exploraciondebe buscar los nombres correspondientes a los ids ciudad, provincia y pais
+  // get excavacion y get exploraciondebe buscar los nombres correspondientes a los ids ciudad, provincia y pais
 
   onClickMap = event => {
     const datosAreaExcavacion = this.perteneceAlgunArea('excavaciones', event.latlng);
@@ -69,8 +69,8 @@ export default class ObtenerExcavacion extends Component {
       <br />Pais: ${datosAreaExcavacion.pais}</p>`;
 
       const nuevoPopUpExcavacion = new L.popup({ elevation: 260.0 })
-      .setLatLng([event.latlng.lat, event.latlng.lng])
-      .setContent(datosExcavacion);
+        .setLatLng([event.latlng.lat, event.latlng.lng])
+        .setContent(datosExcavacion);
       this.state.map.addLayer(nuevoPopUpExcavacion);
     } else {
       const datosAreaExploracion = this.perteneceAlgunArea('exploraciones', event.latlng);
@@ -84,8 +84,8 @@ export default class ObtenerExcavacion extends Component {
         <br />Pais: ${datosAreaExploracion.pais}</p>`;
 
         const nuevoPopUpExploracion = new L.popup({ elevation: 260.0 })
-        .setLatLng([event.latlng.lat , event.latlng.lng])
-        .setContent(datosExploracion);
+          .setLatLng([event.latlng.lat, event.latlng.lng])
+          .setContent(datosExploracion);
         this.state.map.addLayer(nuevoPopUpExploracion);
       }
     }
@@ -110,14 +110,14 @@ export default class ObtenerExcavacion extends Component {
         'Content-Type': 'application/json',
       },
     });
-    
+
     if (response.status !== 200) {
       return toast.error('No existen areas de exploracion cargadas en el sistema');
     }
 
     const resultado = await response.json();
     const exploracionesCompletas = resultado.exploraciones;
-    
+
     if (exploracionesCompletas.length) {
       let poligonosExcavaciones = [],
         coordenadasExcavaciones = [],
@@ -126,7 +126,7 @@ export default class ObtenerExcavacion extends Component {
         puntosGpsExcavaciones = [];
 
       exploracionesCompletas.forEach(exploracionCompleta => {
-        let coordenadasExploracion = exploracionCompleta.areaExploracion.locacion.coordinates[0];
+        let coordenadasExploracion = exploracionCompleta.areaExploracion ? exploracionCompleta.areaExploracion.locacion.coordinates[0] : [];
         coordenadasExploracion = coordenadasExploracion.map(c => ({ lat: c[0], lng: c[1] }));
         const poligonoExploracion = this.dibujarPoligonoArea(coordenadasExploracion);
 
@@ -159,18 +159,18 @@ export default class ObtenerExcavacion extends Component {
           };
           puntosGpsExcavaciones = [...puntosGpsExcavaciones, datosPuntoGps];
         });
-        
+
         const datosExploracion = {
-          nombre: exploracionCompleta.areaExploracion.nombre,
-          ciudad: 'Neuquen',
-          provincia: 'Neuquen',
-          pais: 'Argentina',
+          nombre: exploracionCompleta.areaExploracion ? exploracionCompleta.areaExploracion.nombre : '',
+          ciudad: exploracionCompleta.areaExploracion ? exploracionCompleta.areaExploracion.ciudad : 'Neuquen',
+          provincia: exploracionCompleta.areaExploracion ? exploracionCompleta.areaExploracion.provincia : 'Neuquen',
+          pais: exploracionCompleta.areaExploracion ? exploracionCompleta.areaExploracion.pais : 'Argentina',
           fecha: exploracionCompleta.fecha,
           coordenadas: coordenadasExploracion,
           poligonoArea: poligonoExploracion,
         };
         exploraciones = [...exploraciones, datosExploracion];
-        
+
         this.setState({
           excavaciones,
           exploraciones,
@@ -179,7 +179,7 @@ export default class ObtenerExcavacion extends Component {
       });
     }
   };
-  
+
   dibujarPoligonoArea = (coordenadasArea, color, datosArea) => {
     if (!datosArea) {
       return dibujarPoligono(coordenadasArea, color, this.state.map);
@@ -191,7 +191,7 @@ export default class ObtenerExcavacion extends Component {
     if (!puntoGPS.marcador) {
       const nuevoMarcador = new L.Marker([puntoGPS[0] || puntoGPS.lat, puntoGPS[1] || puntoGPS.lng], { draggable: 'true' });
       this.state.map.addLayer(nuevoMarcador);
-  
+
       return nuevoMarcador;
     } else {
       this.state.map.addLayer(puntoGPS.marcador);
@@ -246,7 +246,7 @@ export default class ObtenerExcavacion extends Component {
     this.setState({
       [campo]: !this.state[campo],
     });
-  }; 
+  };
 
   agregarDatosPuntoGps = puntoGps => {
     if (!puntoGps.popUpGps) {
@@ -256,8 +256,8 @@ export default class ObtenerExcavacion extends Component {
       <br />Pais: ${puntoGps.pais}</p>`;
 
       const nuevoPopUpGps = new L.popup({ elevation: 260.0 })
-      .setLatLng([puntoGps.coordenadas.lat + 0.001, puntoGps.coordenadas.lng])
-      .setContent(datosPuntoGps);
+        .setLatLng([puntoGps.coordenadas.lat + 0.001, puntoGps.coordenadas.lng])
+        .setContent(datosPuntoGps);
       this.state.map.addLayer(nuevoPopUpGps);
 
       puntoGps.popUpGps = nuevoPopUpGps;
@@ -265,10 +265,10 @@ export default class ObtenerExcavacion extends Component {
       this.state.map.addLayer(puntoGps.popUpGps);
     }
   }
- 
+
   removerCapa = (removerCapa, datosGeo) => {
     const capa = this.state[removerCapa];
-    
+
     if (capa) {
       capa.forEach(c => {
         this.state.map.removeLayer(c[datosGeo]);
