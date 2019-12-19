@@ -49,7 +49,7 @@ export default class CrearExcavacion extends Component {
   componentWillReceiveProps(nextProps){
    if(nextProps.idExploracion!==this.props.idExploracion){
   
-    this.setState({map: null});
+   // this.setState({map: null});
     this.obtenerExploracion(nextProps.idExploracion);
   }
   
