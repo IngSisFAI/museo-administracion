@@ -18,6 +18,9 @@ import AddExploracion from './components/exploraciones/addExploracion'
 import EditExploracion from './components/exploraciones/editExploracion'
 import DeleteExploracion from './components/exploraciones/deleteExploracion'
 
+import { BrowserRouter, Route } from 'react-router-dom'
+import Nav from "./components/Navbar"
+import './App.css';
 
 import Ejemplares from './pages/ejemplares'
 import AddEjemplar from './components/ejemplares/addEjemplar'
@@ -32,17 +35,12 @@ import EditBochon from './components/bochones/editBochon'
 import DeleteBochon from './components/bochones/deleteBochon'
 
 
-import { BrowserRouter, Route } from 'react-router-dom'
-import Nav from "./components/Navbar"
-import './App.css';
-
-
 class App extends Component {
 
   render() {
     return (
       <div className="App">
-       
+
         <BrowserRouter>
           <div>
             <Nav />

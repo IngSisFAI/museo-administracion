@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import Select from 'react-select';
 import Moment from 'moment';
+import ModificarExcavacion from '../../areaGeospatial/ModificarExcavacion';
 
 
 
@@ -10,7 +11,7 @@ function validate(nombre, codigo, fechaInicio,  selectedExploracion) {
    
   return {
     nombre: nombre.length === 0,
-    codigo: codigo.length === 0,
+    codigo: codigo ? codigo.length === 0 : false,
     fechaInicio: fechaInicio.length === 0,
     selectedExploracion:  selectedExploracion === null
   };
@@ -107,17 +108,10 @@ class EditExcavacion extends Component {
         .then((countries) => {
           this.setState({paises: countries.paises })
         });
-
-        
-
-       
-
   }
-
 
   //una vez cargado en el DOM
   componentDidMount() {
-    
     fetch('http://localhost:3001/api/excavacionId/'+this.props.match.params.id)
     .then((response) => {
         return response.json()
@@ -149,10 +143,6 @@ class EditExcavacion extends Component {
                           
                         })
       });
-
-     
-       
-
   }
 
 
@@ -225,7 +215,7 @@ class EditExcavacion extends Component {
   handleExploracionesChange = (selectedExploracion) => {
     this.setState({selectedExploracion});
     this.setState({exploracionId: selectedExploracion.value});
-    console.log(`Option selected:`, this.state.exploracionId );
+   // console.log(`Option selected:`, this.state.exploracionId );
    
   }
 
@@ -638,6 +628,9 @@ class EditExcavacion extends Component {
      let optProvincias = this.state.provincias.map((opt) => ({ label: opt.nombre, value: opt._id }) );
      let optCiudades = this.state.ciudades.map((opt) => ({ label: opt.nombre, value: opt._id }) );
 
+	 
+
+	 
      return (
         <div>
            
@@ -787,7 +780,7 @@ class EditExcavacion extends Component {
                             <fieldset>
                                 <legend >Datos Geográficos</legend>
                                 <hr/>
-                                  <h4>**ACA IRIA LO REFERENTE A AREA** </h4>
+                                <ModificarExcavacion excavacionId={this.props.match.params.id} />
 
                                   <div className="input-group">
 

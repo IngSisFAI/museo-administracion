@@ -2,7 +2,7 @@ import React, {Component} from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
 import Moment from 'moment';
-
+import ObtenerExploraciones from '../../areaGeospatial/ObtenerExploraciones';
 
 
 class listarExploraciones extends Component {
@@ -62,9 +62,8 @@ class listarExploraciones extends Component {
     
     
     // console.log("ARREGLO:",this.state.exploraciones);
-
-      let imprimir= this.state.exploraciones.map(function(exploracion, i){
-      return <tr key={i}><td >{exploracion.nombre}</td>
+    let imprimir= this.state.exploraciones.map(function(exploracion, i){
+      return <tr key={i}><td >{exploracion.nombre ? exploracion.nombre : 'nombreEjemplo'}</td>
                  <td >{(Moment(exploracion.fecha).add(1, 'days')).format('DD/MM/YYYY')}</td>
                  <td ></td>
                  <td>
@@ -81,24 +80,26 @@ class listarExploraciones extends Component {
                   </td> 
              </tr>});
      
-    return (<div>
-
-              <div className="table-responsive">
-                <table className="table table-bordered table-hover list">
-                   <thead className="thead-dark">
-                      <tr>               
-                            <th>Nombre</th>
-                            <th>Fecha</th>
-                            <th>Area</th> 
-                            <th>Acciones</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {imprimir}
-                    </tbody>
-                 </table>
-              </div>
-           </div>);
+    return (
+        <div>
+          <div className="table-responsive">
+            <table className="table table-bordered table-hover list">
+                <thead className="thead-dark">
+                  <tr>               
+                        <th>Nombre</th>
+                        <th>Fecha</th>
+                        <th>Area</th> 
+                        <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {imprimir}
+                </tbody>
+              </table>
+          </div>
+          <ObtenerExploraciones />
+        </div>
+    );
   }
 }
 export default listarExploraciones;

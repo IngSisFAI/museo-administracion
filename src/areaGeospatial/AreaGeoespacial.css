@@ -1,0 +1,58 @@
+.contenedorMapa {
+  height: 100vh;
+  border: 1px solid #007bff;
+  position: relative;
+  z-index: 0;
+}
+
+.button-container {
+  margin-top: 3rem;
+}
+
+.accion {
+  margin-bottom: 2rem;
+}
+
+.contenedorMenu {
+  position: absolute;
+  width: 330px;
+  height: 100vh;
+  z-index: 1;
+  right: 0;
+  top: 0;
+  padding: 30px;
+  background-color: white;
+  border: 1px solid #007bff;
+  color: #007bff;
+}
+
+.btn-outline-primary {
+  background-color: white !important;
+}
+
+input {
+  width: 20px;
+  height: 20px;
+  margin-right: 20px !important;
+}
+
+.descripciones {
+  margin-top: 40px;
+}
+
+.circulo {
+  border-radius: 20px;
+  width: 15px;
+  height: 15px;
+  display: inline-block;
+  margin-right: 15px;
+  vertical-align: initial;
+}
+
+.verde {
+  background-color: green;
+}
+
+.azul {
+  background-color: #3388FF;
+}

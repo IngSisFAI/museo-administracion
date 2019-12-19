@@ -1,13 +1,13 @@
 import React from 'react';
-import Select from 'react-select';
 import axios from 'axios';
 import Moment from 'moment';
+import ModificarExploracion from '../../areaGeospatial/ModificarExploracion';
 
 
 function validate(nombre, fecha) {
     // true means invalid, so our conditions got reversed
     return {
-      nombre: nombre.length === 0,
+      nombre: nombre ? nombre.length === 0 : 'nombreEjemplo',
       fecha: fecha.length === 0
     };
   }
@@ -124,7 +124,7 @@ function validate(nombre, fecha) {
                                          </div>
                                     </div>
                                     <br/>
-                                      <h4>******* Aca iria lo de area *************</h4>
+                                      <ModificarExploracion exploracionId={this.props.match.params.id}/>
                                     <br/>
                                     <br/>
                                     <div className="form-group">

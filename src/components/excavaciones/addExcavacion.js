@@ -1,5 +1,6 @@
 import React, {Component} from 'react';
 import Select from 'react-select';
+import CrearExcavacion from '../../areaGeospatial/CrearExcavacion';
 
 
 function validate(nombre, codigo, fechaInicio,  selectedExploracion) {
@@ -39,14 +40,15 @@ class AddExcavacion extends Component {
                      muestraHome: false,
                      bochones:[],
                      selectedBochones:null,
-                     selectedExploracion: null,
+                     selectedExploracion: "",
                      selectedColector: null,
                      selectedDirector: null,
                      selectedPaleontologo: null,
                      muestra: false,
                      puntoGPS: '',
                      idArea: '',
-                     bochonesId:''
+                     bochonesId:'',
+					 exploracionDefecto:''
                };
         
                
@@ -78,6 +80,9 @@ class AddExcavacion extends Component {
           })
           .then((explorations) => {
             this.setState({ exploraciones: explorations.exploraciones })
+			this.setState({exploracionDefecto:explorations.exploraciones[0]._id})
+			this.setState({selectedExploracion:{label:explorations.exploraciones[0].nombre, value:explorations.exploraciones[0]._id}})
+			
           });
 
           fetch('/api/pais')
@@ -153,8 +158,8 @@ class AddExcavacion extends Component {
 
       handleExploracionesChange = (selectedExploracion) => {
         this.setState({selectedExploracion});
-        console.log(`Option selected:`, selectedExploracion );
-       
+       // console.log(`Option selected:`, selectedExploracion );
+        //alert(this.state.selectedExploracion.value); 
       }
 
 
@@ -340,7 +345,7 @@ class AddExcavacion extends Component {
      let optProvincias = this.state.provincias.map((opt) => ({ label: opt.nombre, value: opt._id }) );
      let optCiudades = this.state.ciudades.map((opt) => ({ label: opt.nombre, value: opt._id }) );
       
-
+   
 
       return (
         <div>
@@ -474,7 +479,7 @@ class AddExcavacion extends Component {
                             <fieldset>
                                 <legend >Datos Geográficos</legend>
                                 <hr/>
-                                  <h4>**ACA IRIA LO REFERENTE A AREA** </h4>
+                                  
 
                                   <div className="input-group">
 
@@ -486,6 +491,7 @@ class AddExcavacion extends Component {
                                                     onChange={this.handleExploracionesChange} 
                                                     value={selectedExploracion}
                                                     className={errors.selectedExploracion ? "error" : ""}
+													 value={optExploraciones.filter(option => option.value === this.state.exploracionDefecto)} 
                                                     >
                                                 
                                             </Select>
@@ -540,10 +546,13 @@ class AddExcavacion extends Component {
                                         </div>
 
                                     </div>
+									
+									
                             </fieldset>
                             <br/>
    
- 
+                                <CrearExcavacion idExploracion={this.state.selectedExploracion.value} />
+								
                             <br/>
                             <div className="form-check">
                                 <input type="checkbox" 
