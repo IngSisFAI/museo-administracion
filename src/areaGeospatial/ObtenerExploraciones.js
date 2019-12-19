@@ -110,14 +110,12 @@ export default class ObtenerExcavacion extends Component {
         'Content-Type': 'application/json',
       },
     });
-
     if (response.status !== 200) {
       return toast.error('No existen areas de exploracion cargadas en el sistema');
     }
 
     const resultado = await response.json();
     const exploracionesCompletas = resultado.exploraciones;
-
     if (exploracionesCompletas.length) {
       let poligonosExcavaciones = [],
         coordenadasExcavaciones = [],
@@ -170,7 +168,6 @@ export default class ObtenerExcavacion extends Component {
           poligonoArea: poligonoExploracion,
         };
         exploraciones = [...exploraciones, datosExploracion];
-
         this.setState({
           excavaciones,
           exploraciones,
@@ -179,7 +176,6 @@ export default class ObtenerExcavacion extends Component {
       });
     }
   };
-
   dibujarPoligonoArea = (coordenadasArea, color, datosArea) => {
     if (!datosArea) {
       return dibujarPoligono(coordenadasArea, color, this.state.map);
@@ -191,7 +187,6 @@ export default class ObtenerExcavacion extends Component {
     if (!puntoGPS.marcador) {
       const nuevoMarcador = new L.Marker([puntoGPS[0] || puntoGPS.lat, puntoGPS[1] || puntoGPS.lng], { draggable: 'true' });
       this.state.map.addLayer(nuevoMarcador);
-
       return nuevoMarcador;
     } else {
       this.state.map.addLayer(puntoGPS.marcador);
