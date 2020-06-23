@@ -485,13 +485,14 @@ class AddExcavacion extends Component {
 
                                   <div className="col-sm-6">
                                             <label htmlFor="exploracion">Exploración (*):</label>
+                                            {/* TODO: cada vez que se hace click en el select, vaciar mapa */}
                                             <Select name="exploracion"     
                                                     placeholder={'Seleccione Exploración'}
                                                     options={optExploraciones} 
                                                     onChange={this.handleExploracionesChange} 
-                                                    value={selectedExploracion}
+                                                    value={this.state.selectedExploracion}
                                                     className={errors.selectedExploracion ? "error" : ""}
-													 value={optExploraciones.filter(option => option.value === this.state.exploracionDefecto)} 
+													//  value={optExploraciones.filter(option => option.value === this.state.exploracionDefecto)} 
                                                     >
                                                 
                                             </Select>
