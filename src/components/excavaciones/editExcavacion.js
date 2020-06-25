@@ -60,8 +60,8 @@ class EditExcavacion extends Component {
                  readyProv: false, //controla que cargue una vez al principio las provincias
                  readyCity: false,//controla que cargue una vez al principio las ciudades
                  readyPais: false,
-                 puntoGPS: '',
-                 idArea: '',
+                 puntoGpsExcavacion: '',
+                 idAreaExcavacion: '',
                  readyDirector: false,
                  readyColector: false,
                  readyPaleontologo: false,
@@ -74,7 +74,6 @@ class EditExcavacion extends Component {
  
   //antes de cargar el DOM      
   componentWillMount() {
-
     fetch('/api/persona')
     .then((response) => {
         return response.json()
@@ -112,6 +111,14 @@ class EditExcavacion extends Component {
 
   //una vez cargado en el DOM
   componentDidMount() {
+    this.traerProvincias()
+    this.traerCiudades()
+    this.traerPaises()
+    this.traerDirectores()
+    this.traerColectores()
+    this.traerPaleontologos()
+    this.traerExploraciones()
+
     fetch('http://localhost:3001/api/excavacionId/'+this.props.match.params.id)
     .then((response) => {
         return response.json()
@@ -259,7 +266,9 @@ class EditExcavacion extends Component {
     this.setState({selectedCiudad, idCiudad: selectedCiudad.value});
   }
 
+  setPuntoGpsExcavacion = puntoGps => this.setState({puntoGpsExcavacion: puntoGps})
 
+  setIdAreaExcavacion = idArea => this.setState({idAreaExcavacion: idArea});
 
   //SUBMIT para almacenar la info en la BD
   handleSubmit = evt => {
@@ -298,9 +307,6 @@ class EditExcavacion extends Component {
           if(this.state.selectedCiudad!==null)
           {idCity=this.state.selectedCiudad.value}
 
-
-
-
           var data = {
             "nombre": this.state.nombre,
             "descripcion": this.state.descripcion,
@@ -320,8 +326,6 @@ class EditExcavacion extends Component {
             "idPais":idCountry,
             "idProvincia": idProv,
             "idCiudad":  idCity
-           
-
          };
 
           fetch('http://localhost:3001/api/excavacion/'+this.props.match.params.id, {
@@ -599,25 +603,9 @@ class EditExcavacion extends Component {
     }
 
 
-
-
-
-
-    render() 
-    {
-      
-
+    render() {
      const errors = validate(this.state.nombre, this.state.codigo, this.state.fechaInicio, this.state.selectedExploracion);
      const isDisabled = Object.keys(errors).some(x => errors[x]);
-
-
-     this.traerProvincias()
-     this.traerCiudades()
-     this.traerPaises()
-     this.traerDirectores()
-     this.traerColectores()
-     this.traerPaleontologos()
-     this.traerExploraciones()
 
      let optColectores = this.state.colectores.map((opt) => ({ label: opt.nombres+" "+opt.apellidos, value: opt._id }) );
      let optDirectores = this.state.directores.map((opt) => ({ label: opt.nombres+" "+opt.apellidos, value: opt._id }) );
@@ -780,7 +768,11 @@ class EditExcavacion extends Component {
                             <fieldset>
                                 <legend >Datos Geográficos</legend>
                                 <hr/>
-                                <ModificarExcavacion excavacionId={this.props.match.params.id} />
+                                <ModificarExcavacion
+                                  excavacionId={this.props.match.params.id}
+                                  setPuntoGpsExcavacion={this.setPuntoGpsExcavacion}
+                                  setIdAreaExcavacion={this.setIdAreaExcavacion}
+                                />
 
                                   <div className="input-group">
 
@@ -862,10 +854,6 @@ class EditExcavacion extends Component {
 
                             <br/>
 
-                            
-
-
-
                             <br/>
                               <p>(*) Datos Obligatorios</p>
                             <br/>
@@ -880,9 +868,6 @@ class EditExcavacion extends Component {
                                                 href="/excavaciones"><span className="fa fa-level-up"></span> Cancelar</a>
                                     </div>
                             </div>
-
-                            
-                            
                             </form>
 
                             <br/>

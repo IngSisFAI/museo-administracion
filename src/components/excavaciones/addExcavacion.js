@@ -45,13 +45,11 @@ class AddExcavacion extends Component {
                      selectedDirector: null,
                      selectedPaleontologo: null,
                      muestra: false,
-                     puntoGPS: '',
-                     idArea: '',
                      bochonesId:'',
-					 exploracionDefecto:''
+                    exploracionDefecto:'',
+                    idAreaExcavacion: '',
+                    puntoGpsExcavacion: {},
                };
-        
-               
       }
 
      componentWillMount() {
@@ -81,8 +79,6 @@ class AddExcavacion extends Component {
           .then((explorations) => {
             this.setState({ exploraciones: explorations.exploraciones })
 			this.setState({exploracionDefecto:explorations.exploraciones[0]._id})
-			this.setState({selectedExploracion:{label:explorations.exploraciones[0].nombre, value:explorations.exploraciones[0]._id}})
-			
           });
 
           fetch('/api/pais')
@@ -96,6 +92,10 @@ class AddExcavacion extends Component {
 
       }
 
+      setIdAreaExcavacion = idArea => this.setState({idAreaExcavacion: idArea})
+
+      setPuntoGpsExcavacion = puntoGps => this.setState({puntoGpsExcavacion: puntoGps})
+
       handleMuestraChange(event) {
         const target = event.target;
         const value = target.type === 'checkbox' ? target.checked : target.value;
@@ -105,7 +105,6 @@ class AddExcavacion extends Component {
           [name]: value
         });
       }
-
 
       handleNombreChange = evt => {
         this.setState({ nombre: evt.target.value });
@@ -119,7 +118,6 @@ class AddExcavacion extends Component {
         this.setState({ codigo: evt.target.value });
       };
 
-
       handleFinicioChange = evt => {
         this.setState({ fechaInicio: evt.target.value });
       };
@@ -131,7 +129,6 @@ class AddExcavacion extends Component {
       handleMotivoChange = evt => {
         this.setState({ motivoBaja: evt.target.value });
       };
-
 
       handleColectorChange = (selectedColector) => {
         this.setState({selectedColector});
@@ -146,8 +143,6 @@ class AddExcavacion extends Component {
         this.setState({selectedPaleontologo});
       }
 
-
-
     /*  handleBochonesChange = (selectedBochones) => {
         let bochons = Array.from(selectedBochones, option => option.value);
         this.setState({selectedBochones});
@@ -158,13 +153,9 @@ class AddExcavacion extends Component {
 
       handleExploracionesChange = (selectedExploracion) => {
         this.setState({selectedExploracion});
-       // console.log(`Option selected:`, selectedExploracion );
-        //alert(this.state.selectedExploracion.value); 
       }
 
-
-       handlePaisChange= (selectedPais) => { 
-
+      handlePaisChange= (selectedPais) => { 
         this.setState(prevState => ({
             selectedProvincia: null
             }
@@ -179,7 +170,6 @@ class AddExcavacion extends Component {
 
           });
       }
-
 
       handleProvinciaChange= (selectedProvincia) => { 
 
@@ -201,7 +191,6 @@ class AddExcavacion extends Component {
       handleCiudadChange = (selectedCiudad) => {
         this.setState({selectedCiudad});
       }
-
 
       handleSubmit = evt => {
 			      
@@ -256,15 +245,13 @@ class AddExcavacion extends Component {
                 "colector": idColector,
                 "paleontologo": idPaleontologo,
                // "bochonesEncontrados": this.state.bochonesId,
-                "idArea": this.state.idArea,
-                "puntoGPS": this.state.puntoGPS,
+                "idArea": this.state.idAreaExcavacion,
+                "puntoGPS": this.state.puntoGpsExcavacion,
                 "muestraHome": this.state.muestra,
                 "idExploracion": idExploracion,
                 "idPais":idCountry,
                 "idProvincia": idProv,
                 "idCiudad":  idCity
-               
-    
              };
               
              fetch('api/excavacion', {
@@ -318,7 +305,6 @@ class AddExcavacion extends Component {
 
       };
 
-
     render() 
     {
       
@@ -361,13 +347,13 @@ class AddExcavacion extends Component {
                                 <div className="input-group">
                                     <div className="col-sm-12">
                                         
-                                            <label htmlFor="nombre" >Nombre (*):</label>
-                                            <input type="text" 
-                                                    className={errors.nombre ? "error" : ""}
-                                                    className="form-control" 
-                                                    name="nombre"
-                                                    value={this.state.nombre}
-                                                    onChange={this.handleNombreChange} />  
+                                      <label htmlFor="nombre" >Nombre (*):</label>
+                                      <input type="text" 
+                                              className={errors.nombre ? "error" : ""}
+                                              className="form-control" 
+                                              name="nombre"
+                                              value={this.state.nombre}
+                                              onChange={this.handleNombreChange} />  
                                     </div>
                                 </div>
 
@@ -485,18 +471,16 @@ class AddExcavacion extends Component {
 
                                   <div className="col-sm-6">
                                             <label htmlFor="exploracion">Exploración (*):</label>
-                                            {/* TODO: cada vez que se hace click en el select, vaciar mapa */}
                                             <Select name="exploracion"     
                                                     placeholder={'Seleccione Exploración'}
                                                     options={optExploraciones} 
                                                     onChange={this.handleExploracionesChange} 
-                                                    value={this.state.selectedExploracion}
+                                                    // defaultValue={''}
+                                                    value={selectedExploracion}
                                                     className={errors.selectedExploracion ? "error" : ""}
 													//  value={optExploraciones.filter(option => option.value === this.state.exploracionDefecto)} 
                                                     >
-                                                
                                             </Select>
-                                
                                   </div>
 
                                         <div className="col-sm-6">
@@ -547,13 +531,14 @@ class AddExcavacion extends Component {
                                         </div>
 
                                     </div>
-									
-									
                             </fieldset>
+
                             <br/>
-   
-                                <CrearExcavacion idExploracion={this.state.selectedExploracion.value} />
-								
+                              <CrearExcavacion
+                                idExploracion={this.state.selectedExploracion.value}
+                                setIdAreaExcavacion={this.setIdAreaExcavacion}
+                                setPuntoGpsExcavacion={this.setPuntoGpsExcavacion}
+                              />
                             <br/>
                             <div className="form-check">
                                 <input type="checkbox" 
