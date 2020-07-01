@@ -56,15 +56,8 @@ class DeleteExcavacion extends Component {
                  idProvincia:'',
                  idCiudad:'',
                  bochonesId:[],
-                 readyProv: false, //controla que cargue una vez al principio las provincias
-                 readyCity: false,//controla que cargue una vez al principio las ciudades
-                 readyPais: false,
                  puntoGPS: '',
-                 idArea: '',
-                 readyDirector: false,
-                 readyColector: false,
-                 readyPaleontologo: false,
-                 readyExploracion: false
+                 idArea: ''
            };
        
   }
@@ -129,7 +122,8 @@ class DeleteExcavacion extends Component {
              fb=(Moment(excavacions.excavacionId.fechaBaja).add(1, 'days')).format('YYYY-MM-DD')
           }
 
-          console.log(excavacions.excavacionId.bochonesEncontrados)
+          this.traerProvincias(excavacions.excavacionId.idPais)
+		  this.traerCiudades(excavacions.excavacionId.idProvincia)
 
           this.setState({ nombre: excavacions.excavacionId.nombre,
                           descripcion: excavacions.excavacionId.descripcion,
@@ -145,7 +139,14 @@ class DeleteExcavacion extends Component {
                           idPais: excavacions.excavacionId.idPais,
                           idCiudad: excavacions.excavacionId.idCiudad,
                           idProvincia: excavacions.excavacionId.idProvincia,
-                          bochonesId:excavacions.excavacionId.bochonesEncontrados
+                          bochonesId:excavacions.excavacionId.bochonesEncontrados,
+						  selectedPais: excavacions.excavacionId.idPais,
+                          selectedCiudad: excavacions.excavacionId.idCiudad,
+                          selectedProvincia: excavacions.excavacionId.idProvincia,
+						  selectedExploracion: excavacions.excavacionId.idExploracion,
+						  selectedDirector:excavacions.excavacionId.directorId,
+                          selectedColector:excavacions.excavacionId.colector,
+                          selectedPaleontologo: excavacions.excavacionId.paleontologo
                           
                         })
       });
@@ -276,248 +277,40 @@ class DeleteExcavacion extends Component {
 
 
   //**** FUNCIONES DE PRECARGA ***/
-
-
-  traerPaises()
-  { 
-    if(!this.state.readyPais)
-    {
-      if(this.state.idPais!=='')
-      {
-        this.setState({readyProv:true});
-        fetch('/api/provinciaIdPais/'+this.state.idPais)
+  
+  traerProvincias(idPais)
+  {
+    
+        fetch('/api/provinciaIdPais/'+idPais)
         .then((response) => {
             return response.json()
           })
           .then((estados) => {
-            this.setState({provincias: estados.provincias , idPais:this.state.idPais});
+            this.setState({provincias: estados.provincias});
     
           });
 
-          let optProvincias = this.state.provincias.map((opt) => ({ label: opt.nombre, value: opt._id }) );
-          var provinciaArr= optProvincias.filter(opt => opt.value===this.state.idProvincia)
-          if(provinciaArr.length>0)
-          {
-              this.setState({selectedProvincia:provinciaArr[0]}) 
-
-          }
-          else{
-
-            this.setState({selectedProvincia:''}) 
-          }
-
-      } 
-    }
-  }
-
-  traerProvincias()
-  { 
-    if(!this.state.readyProv)
-    {
-      if(this.state.idPais!=='')
-      {
-        this.setState({readyPais:true});
-        fetch('/api/pais')
-        .then((response) => {
-            return response.json()
-          })
-          .then((countries) => {
-            this.setState({paises: countries.paises , idPais:this.state.idPais});
+         
+	
     
-          });
-
-          let optPaises = this.state.paises.map((opt) => ({ label: opt.nombre, value: opt._id }) );
-          var paisArr= optPaises.filter(opt => opt.value===this.state.idPais)
-          if(paisArr.length>0)
-          {
-              this.setState({selectedPais:paisArr[0]}) 
-
-          }
-          else{
-
-            this.setState({selectedPais:''}) 
-          }
-
-      } 
-    }
   }
-
-    traerCiudades()
+  
+    traerCiudades(idProvincia)
     { 
-      if(!this.state.readyCity)
-      {
-        if(this.state.idProvincia!=='')
-        {
-          this.setState({readyCity:true});
-          
-          fetch('/api/ciudadIdProv/'+this.state.idProvincia)
+	     fetch('/api/ciudadIdProv/'+idProvincia)
           .then((response) => {
               return response.json()
             })
             .then((cities) => {
-              this.setState({ciudades: cities.ciudades ,  idProvincia:this.state.idProvincia});
+              this.setState({ciudades: cities.ciudades });
 
             });
-
-            let optCiudades = this.state.ciudades.map((opt) => ({ label: opt.nombre, value: opt._id }) );
-            var ciudadArr= optCiudades.filter(opt => opt.value===this.state.idCiudad)
-            if(ciudadArr.length>0)
-            {
-                this.setState({selectedCiudad:ciudadArr[0]}) 
-
-            }
-            else{
-
-              this.setState({selectedCiudad:''}) 
-            }
-
-
-        
-        } 
-      }
+  
     } 
 
-    traerDirectores()
-    { 
-      
-      if(!this.state.readyDirector)
-      {
-
-        if(this.state.directorId!=='')
-        { 
-          this.setState({readyDirector:true}); 
-          fetch('/api/persona')
-          .then((response) => {
-              return response.json()
-            })
-            .then((empleados) => {
-              this.setState({ directores: empleados.personas })
-
-            });
-            
-            
-            let optDirectores = this.state.directores.map((opt) => ({ label: opt.nombres+" "+opt.apellidos, value: opt._id }) );
-            var directorArr= optDirectores.filter(opt => opt.value===this.state.directorId)
-            if(directorArr.length>0)
-            {
-                this.setState({selectedDirector:directorArr[0]}) 
-
-            }
-            else{
-
-              this.setState({selectedDirector:''}) 
-            }
-        } 
-      }     
-
-    }
 
 
-    traerColectores()
-    { 
-      
-      if(!this.state.readyColector)
-      {
-
-        if(this.state.colectorId!=='')
-        { 
-          this.setState({readyColector:true}); 
-          fetch('/api/persona')
-          .then((response) => {
-              return response.json()
-            })
-            .then((empleados) => {
-              this.setState({ colectores: empleados.personas })
-
-            });
-            
-            
-            let optColectores = this.state.colectores.map((opt) => ({ label: opt.nombres+" "+opt.apellidos, value: opt._id }) );
-            var colectorArr= optColectores.filter(opt => opt.value===this.state.colectorId)
-            if(colectorArr.length>0)
-            {
-                this.setState({selectedColector:colectorArr[0]}) 
-
-            }
-            else{
-
-              this.setState({selectedColector:''}) 
-            }
-        } 
-      }     
-
-    }
-
-    traerPaleontologos()
-    { 
-      
-      if(!this.state.readyPaleontologo)
-      {
-
-        if(this.state.paleontologoId!=='')
-        { 
-          this.setState({readyPaleontologo:true}); 
-          fetch('/api/persona')
-          .then((response) => {
-              return response.json()
-            })
-            .then((empleados) => {
-              this.setState({ paleontologos: empleados.personas })
-
-            });
-            
-            
-            let optPaleontologo = this.state.paleontologos.map((opt) => ({ label: opt.nombres+" "+opt.apellidos, value: opt._id }) );
-            var paleontologoArr= optPaleontologo.filter(opt => opt.value===this.state.paleontologoId)
-            if(paleontologoArr.length>0)
-            {
-                this.setState({selectedPaleontologo:paleontologoArr[0]}) 
-
-            }
-            else{
-
-              this.setState({selectedPaleontologo:''}) 
-            }
-        } 
-      }     
-
-    }
-
-    traerExploraciones() 
-    { 
-      
-      if(!this.state.readyExploracion)
-      {
-
-        if(this.state.exploracionId!=='')
-        { 
-          this.setState({readyExploracion:true}); 
-          fetch('/api/exploracion')
-          .then((response) => {
-              return response.json()
-            })
-            .then((exploracions) => {
-              this.setState({ exploraciones: exploracions.exploraciones })
-
-            });
-            
-            
-            let optExploraciones = this.state.exploraciones.map((opt) => ({ label: opt.nombres+" "+opt.apellidos, value: opt._id }) );
-            var exploracionArr= optExploraciones.filter(opt => opt.value===this.state.exploracionId)
-            if(exploracionArr.length>0)
-            {
-                this.setState({selectedExploracion:exploracionArr[0]}) 
-
-            }
-            else{
-
-              this.setState({selectedExploracion:''}) 
-            }
-        } 
-      }     
-
-    }
-
+ 
     handleSubmit = evt => {
         if (window.confirm("¿Desea eliminar la excavación seleccionada?"))
         {
@@ -581,14 +374,6 @@ class DeleteExcavacion extends Component {
      const errors = validate(this.state.nombre, this.state.codigo, this.state.fechaInicio, this.state.selectedExploracion);
      const isDisabled = Object.keys(errors).some(x => errors[x]);
 
-
-     this.traerProvincias()
-     this.traerCiudades()
-     this.traerPaises()
-     this.traerDirectores()
-     this.traerColectores()
-     this.traerPaleontologos()
-     this.traerExploraciones()
 
      let optColectores = this.state.colectores.map((opt) => ({ label: opt.nombres+" "+opt.apellidos, value: opt._id }) );
      let optDirectores = this.state.directores.map((opt) => ({ label: opt.nombres+" "+opt.apellidos, value: opt._id }) );
@@ -753,7 +538,7 @@ class DeleteExcavacion extends Component {
                             <fieldset>
                                 <legend >Datos Geográficos</legend>
                                 <hr/>
-                                  <h4>**ACA IRIA LO REFERENTE A AREA** </h4>
+
 
                                   <div className="input-group">
 

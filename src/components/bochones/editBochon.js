@@ -6,11 +6,11 @@ function validate(nombre, selectedExcavacion, selectedEjemplar, selectedPieza) {
     return {
       nombre: nombre.length === 0,
       selectedExcavacion:  selectedExcavacion === null,
-      selectedEjemplar:  selectedEjemplar === null,
-      selectedPieza:  selectedPieza === null
+      selectedEjemplar:  selectedEjemplar === null
+      
     };
 }
-
+//selectedPieza:  selectedPieza === null
 class EditBochon extends Component {
 
     constructor(props) {
@@ -36,16 +36,10 @@ class EditBochon extends Component {
                 idPieza:'',
                 idPreparador:'',
                 idAcidos:[],
-                idTipoPreparacion:'',
-                readyExcavacion: false,
-                readyEjemplar: false,
-                readyAcidos: false,
-                readyTipoPreparacion: false,
-                readyPreparador: false,
-                readyPieza: false
+                idTipoPreparacion:''
 
         }        
-    }
+    } 
 
     //carga los select al iniciar el componente
     componentWillMount() {
@@ -97,13 +91,16 @@ class EditBochon extends Component {
     //una vez cargado en el DOM
  //*************************
   componentDidMount() {
+	  
+	 
+		
     fetch('http://localhost:3001/api/bochonId/'+this.props.match.params.id)
     .then((response) => {
         return response.json()
       })
       .then((bochons) => {
         
-
+          this.traerPiezas(bochons.bochonId.ejemplarAsociado) 
           this.setState({   nombre: bochons.bochonId.nombre,
                             nroCampo:bochons.bochonId.nroCampo,
                             acidosId:bochons.bochonId.acidosAplicados,
@@ -111,12 +108,32 @@ class EditBochon extends Component {
                             idEjemplar:bochons.bochonId.ejemplarAsociado,
                             idPieza:bochons.bochonId.piezaId,
                             idPreparador:bochons.bochonId.preparadorID,
-                            idTipoPreparacion:bochons.bochonId.tipoPreparacion
+                            idTipoPreparacion:bochons.bochonId.tipoPreparacion,
+							selectedExcavacion: bochons.bochonId.excavacionId,
+						    selectedPreparador: bochons.bochonId.preparadorID,
+						    selectedEjemplar: bochons.bochonId.ejemplarAsociado,
+						    selectedAcido: bochons.bochonId.acidosAplicados,
+						    selectedTipoPreparacion:bochons.bochonId.tipoPreparacion,
+							selectedPieza: bochons.bochonId.piezaId
                         })
       });
     
   }
 
+
+traerPiezas(idEjemplar) 
+{
+	
+	  fetch('/api/piezaEjemplar/'+idEjemplar)
+        .then((response) => {
+            return response.json()
+          })
+          .then((pieces) => {
+            this.setState({piezas: pieces.pieza});
+
+          });
+	
+}
 
 
     handleNombreChange = evt => {
@@ -257,182 +274,7 @@ class EditBochon extends Component {
         }
     } 
     
-    traerExcavaciones() 
-    { 
-      
-      if(!this.state.readyExcavacion)
-      {
-
-        if(this.state.idExcavacion!=='')
-        { 
-          this.setState({readyExcavacion:true}); 
-          fetch('/api/excavacion')
-          .then((response) => {
-              return response.json()
-            })
-            .then((excavacions) => {
-              this.setState({ excavaciones: excavacions.excavaciones })
-
-            });
-            
-            
-            let optExcavaciones = this.state.excavaciones.map((opt) => ({ label: opt.nombre, value: opt._id }) );
-            var excavacionArr= optExcavaciones.filter(opt => opt.value===this.state.eidExcavacion)
-            if(excavacionArr.length>0)
-            {
-                this.setState({selectedExcavacion:excavacionArr[0]}) 
-
-            }
-            else{
-
-              this.setState({selectedExcavacion:''}) 
-            }
-        } 
-      }     
-
-    }
-
-    traerEjemplares() 
-    { 
-      
-      if(!this.state.readyEjemplar)
-      {
-
-        if(this.state.idEjemplar!=='')
-        { 
-          this.setState({readyEjemplar:true}); 
-          fetch('/api/ejemplar')
-          .then((response) => {
-              return response.json()
-            })
-            .then((ejemplars) => {
-              this.setState({ ejemplares: ejemplars.ejemplares })
-
-            });
-            
-            
-            let optEjemplares= this.state.ejemplares.map((opt) => ({ label: opt.nombre, value: opt._id }) );
-            var ejemplarArr= optEjemplares.filter(opt => opt.value===this.state.idEjemplar)
-            if(ejemplarArr.length>0)
-            {
-                this.setState({selectedEjemplar:ejemplarArr[0]}) 
-
-            }
-            else{
-
-              this.setState({selectedEjemplar:''}) 
-            }
-        } 
-      }     
-
-    }
-
-
-    traerPreparadores() 
-    { 
-      
-      if(!this.state.readyPreparador)
-      {
-
-        if(this.state.idPreparador!=='')
-        { 
-          this.setState({readyPreparador:true}); 
-          fetch('/api/persona')
-          .then((response) => {
-              return response.json()
-            })
-            .then((persons) => {
-              this.setState({ preparadores: persons.personas})
-
-            });
-            
-            
-            let optPersonas= this.state.preparadores.map((opt) => ({ label: opt.nombre, value: opt._id }) );
-            var preparadorArr= optPersonas.filter(opt => opt.value===this.state.idPreparador)
-            if(preparadorArr.length>0)
-            {
-                this.setState({selectedPreparador:preparadorArr[0]}) 
-
-            }
-            else{
-
-              this.setState({selectedPreparador:''}) 
-            }
-        } 
-      }     
-
-    }
-
-    traerTiposPreparacion() 
-    { 
-      
-      if(!this.state.readyTipoPreparacion)
-      {
-
-        if(this.state.idTipoPreparacion!=='')
-        { 
-          this.setState({readyTipoPreparacion:true}); 
-          fetch('/api/tipoPreparacion')
-          .then((response) => {
-              return response.json()
-            })
-            .then((tipos) => {
-              this.setState({ tiposPreparacion: tipos.tiposPreparacion})
-
-            });
-            
-            
-            let optTiposPreparacion= this.state.tiposPreparacion.map((opt) => ({ label: opt.nombre, value: opt._id }) );
-            var tipoArr= optTiposPreparacion.filter(opt => opt.value===this.state.idTipoPreparacion)
-            if(tipoArr.length>0)
-            {
-                this.setState({selectedTipoPreparacion:tipoArr[0]}) 
-
-            }
-            else{
-
-              this.setState({selectedTipoPreparacion:''}) 
-            }
-        } 
-      }     
-
-    }
-
-
-    traerPiezas()
-    { 
-      if(!this.state.readyPieza)
-      {
-        if(this.state.idEjemplar!=='' &&  this.state.idPieza!=='')
-        {
-          this.setState({readyPieza:true});
-          
-          fetch('/api/piezaEjemplar/'+this.state.idEjemplar)
-          .then((response) => {
-              return response.json()
-            })
-            .then((pieces) => {
-              this.setState({piezas: pieces.pieza});
-
-            });
-
-            let optPiezas = this.state.piezas.map((opt) => ({ label: opt.identificador, value: opt._id }) );
-            var piezaArr= optPiezas.filter(opt => opt.value===this.state.idPieza)
-            if(piezaArr.length>0)
-            {
-                this.setState({selectedPieza:piezaArr[0]}) 
-
-            }
-            else{
-
-              this.setState({selectedPieza:''}) 
-            }
-
-
-        
-        } 
-      }
-    } 
+   
 
 
 
@@ -441,11 +283,7 @@ class EditBochon extends Component {
         const errors = validate(this.state.nombre, this.state.selectedExcavacion, this.state.selectedEjemplar, this.state.selectedPieza);
         const isDisabled = Object.keys(errors).some(x => errors[x]); 
 
-        this.traerExcavaciones()
-        this.traerEjemplares()
-        this.traerPreparadores()
-        this.traerTiposPreparacion() 
-        this.traerPiezas() 
+      
 
         let optExcavacion = this.state.excavaciones.map((opt) => ({ label: opt.nombre, value: opt._id }) );
         let optPreparador = this.state.preparadores.map((opt) => ({ label: opt.nombres+" "+opt.apellidos, value: opt._id }) );

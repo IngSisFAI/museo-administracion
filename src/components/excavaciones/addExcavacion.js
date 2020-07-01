@@ -3,13 +3,15 @@ import Select from 'react-select';
 import CrearExcavacion from '../../areaGeospatial/CrearExcavacion';
 
 
-function validate(nombre, codigo, fechaInicio,  selectedExploracion) {
+function validate(nombre, codigo, fechaInicio,  selectedExploracion, idAreaExcavacion,  puntoGpsExcavacion) {
   // true means invalid, so our conditions got reversed
   return {
     nombre: nombre.length === 0,
     codigo: codigo.length === 0,
     fechaInicio: fechaInicio.length === 0,
-    selectedExploracion:  selectedExploracion === null
+    selectedExploracion:  selectedExploracion === null,
+	idAreaExcavacion: idAreaExcavacion ==='',
+	puntoGpsExcavacion:  puntoGpsExcavacion === {}
   };
 }
 
@@ -279,7 +281,7 @@ class AddExcavacion extends Component {
       }      
 
       canBeSubmitted() {
-        const errors = validate(this.state.nombre, this.state.codigo, this.state.fechaInicio, this.state.selectedExploracion );
+        const errors = validate(this.state.nombre, this.state.codigo, this.state.fechaInicio, this.state.selectedExploracion, this.state.idAreaExcavacion,  this.state.puntoGpsExcavacion );
         const isDisabled = Object.keys(errors).some(x => errors[x]);
         return !isDisabled;
       }
@@ -308,7 +310,7 @@ class AddExcavacion extends Component {
     render() 
     {
       
-    const errors = validate(this.state.nombre, this.state.codigo, this.state.fechaInicio, this.state.selectedExploracion);
+    const errors = validate(this.state.nombre, this.state.codigo, this.state.fechaInicio, this.state.selectedExploracion, this.state.idAreaExcavacion,  this.state.puntoGpsExcavacion);
     const isDisabled = Object.keys(errors).some(x => errors[x]);
 
     const { selectedPais } = this.state; 

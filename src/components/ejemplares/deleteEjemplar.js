@@ -32,7 +32,7 @@ class DeleteEjemplar extends Component {
     constructor(props) {
         super(props);
         this.state = {
-                nombre:"",
+				nombre:"",
                 nroColeccion:"",
                 fechaColeccion:"",
                 dimensionAlto:"",
@@ -64,7 +64,7 @@ class DeleteEjemplar extends Component {
                 selectedProvincia:null ,
                 selectedCiudad:null,
                 muestraHome: false,
-                selectedArea: null,
+                selectedExcavacion: null,
                 selectedTipo: null,
                 fbaja:"",
                 motivo:"",
@@ -74,21 +74,15 @@ class DeleteEjemplar extends Component {
                 perteneceExca:"",
                 fotos:[],
                 videos:[],
-                readyProv: false, //controla que cargue una vez al principio las provincias
-                readyCity: false,//controla que cargue una vez al principio las ciudades
-                readyPais: false,
-                readyArea: false,
                 paises: [],
                 provincias: [],
                 ciudades: [],
-                areas: [],
-                idArea:"",
-                readyTipo: false,
+                excavaciones: [],
+                idExcavacion:"",
                 tipoEjemplar:null,
                 colecciones:[],
                 selectedColeccion:null ,
-                idColeccion:"",
-                 readyArea: false,
+                idColeccion:"" 
         }        
        
       }
@@ -106,12 +100,12 @@ class DeleteEjemplar extends Component {
               this.setState({paises: countries.paises })
             });
 
-         fetch('/api/area')
+         fetch('/api/excavacion')
         .then((response) => {
             return response.json()
           })
-          .then((areas2) => {
-            this.setState({ areas: areas2.areas })
+          .then((excavacions) => {
+            this.setState({ excavaciones: excavacions.excavaciones })
           });
 
           fetch('/api/coleccion')
@@ -149,7 +143,8 @@ class DeleteEjemplar extends Component {
           }
 
           
-
+          this.traerProvincias(ejemplars.ejemplarId.areaHallazgo.pais)
+		  this.traerCiudades(ejemplars.ejemplarId.areaHallazgo.provincia)
           this.setState({   tipoEjemplar: ejemplars.ejemplarId.tipoEjemplar,
                             reino:ejemplars.ejemplarId.taxonReino,
                             filo:ejemplars.ejemplarId.taxonFilo,
@@ -189,7 +184,14 @@ class DeleteEjemplar extends Component {
                             descripcion2:ejemplars.ejemplarId.descripcion2,
                             descripcion3: ejemplars.ejemplarId.descripcion3,  
                             perteneceExca: ejemplars.ejemplarId.perteneceExca,
-                            idColeccion:ejemplars.ejemplarId.nroColeccion
+                            idColeccion:ejemplars.ejemplarId.nroColeccion,
+							selectedPais:ejemplars.ejemplarId.areaHallazgo.pais ,
+							selectedProvincia:ejemplars.ejemplarId.areaHallazgo.provincia,
+							selectedCiudad:ejemplars.ejemplarId.areaHallazgo.ciudad,
+							selectedColeccion:ejemplars.ejemplarId.nroColeccion,
+							selectedTipo: ejemplars.ejemplarId.tipoEjemplar,
+							selectedExcavacion: ejemplars.ejemplarId.perteneceExca,
+							idExcavacion: ejemplars.ejemplarId.perteneceExca
                           
                         })
       });
@@ -316,10 +318,10 @@ class DeleteEjemplar extends Component {
         this.setState({ especie: evt.target.value });
       };
 
-      handleAreasChange = (selectedArea) => {
-        this.setState({selectedArea});
-        this.setState({idArea: selectedArea.value});
-        console.log(`Option selected:`, selectedArea );
+      handleExcavacionesChangeChange = (selectedExcavacion) => {
+        this.setState({selectedExcavacion});
+        this.setState({idArea: selectedExcavacion.value});
+        console.log(`Option selected:`, selectedExcavacion );
        
       }
 
@@ -388,7 +390,7 @@ handleCiudadChange = (selectedCiudad) => {
       //******************************************************
 
       canBeSubmitted() {
-        const errors = validate(this.state.nombre, this.state.selectedTipo, this.state.dimensionAlto, this.state.dimensionAncho, this.state.peso, this.state.selectedArea, this.state.selectedColeccion);
+        const errors = validate(this.state.nombre, this.state.selectedTipo, this.state.dimensionAlto, this.state.dimensionAncho, this.state.peso, this.state.selectedExcavacion, this.state.selectedColeccion);
         const isDisabled = Object.keys(errors).some(x => errors[x]);
         return !isDisabled;
       }
@@ -449,229 +451,50 @@ handleCiudadChange = (selectedCiudad) => {
     
     
   //**** FUNCIONES DE PRECARGA ***/
-
-  traerPais()
-  { 
-    if(!this.state.readyPais)
-    {
-      if(this.state.idPais!=='')
-      {
-        this.setState({readyPais:true});
-        fetch('/api/pais')
+  
+    traerProvincias(idPais)
+  {
+    
+        fetch('/api/provinciaIdPais/'+idPais)
         .then((response) => {
             return response.json()
           })
-          .then((countries) => {
-            this.setState({paises: countries.paises});
+          .then((estados) => {
+            this.setState({provincias: estados.provincias});
     
           });
 
-          let optPaises = this.state.paises.map((opt) => ({ label: opt.nombre, value: opt._id }) );
-          var paisArr= optPaises.filter(opt => opt.value===this.state.idPais)
-          if(paisArr.length>0)
-          {
-              this.setState({selectedPais:paisArr[0]}) 
-
-          }
-          else{
-
-            this.setState({selectedPais:''}) 
-          }
-
-      } 
-    }
-  }
-
-
-  traerProvincia()
-  { var prov=[]
-
-    if(!this.state.readyProv)
-    {  
-      if(this.state.idPais!=='' && this.state.idProvincia!=='')
-      {
-        console.log("Id PAis:",this.state.idPais)
-        console.log("Id Provincia:",this.state.idProvincia)
-        console.log('/api/provinciaIdPais/'+this.state.idPais)
-        this.setState({readyProv:true});
-        
-    
-          fetch('/api/provinciaIdPais/'+this.state.idPais)
-          .then((response) => {
-              return response.json()
-            })
-            .then((province) => {
-              this.setState({ provincias: province.provincias })
-            });
          
-          console.log("Provincias:",prov)
-          let optProvincias = this.state.provincias.map((opt) => ({ label: opt.nombre, value: opt._id }) );
-          var provinciaArr= optProvincias.filter(opt => opt.value===this.state.idProvincia)
-          console.log("Prov ARR:",provinciaArr)
-          if(provinciaArr.length>0)
-          {
-              this.setState({selectedProvincia:provinciaArr[0]}) 
-
-          }
-          else{
-
-            this.setState({selectedProvincia:''}) 
-          }
-
-      } 
-    }
+	
+    
   }
-
   
-
-    traerCiudades()
+    traerCiudades(idProvincia)
     { 
-      if(!this.state.readyCity)
-      {
-        if(this.state.idProvincia!=='' &&  this.state.idCiudad!=='')
-        {
-          this.setState({readyCity:true});
-          
-          fetch('/api/ciudadIdProv/'+this.state.idProvincia)
+	     fetch('/api/ciudadIdProv/'+idProvincia)
           .then((response) => {
               return response.json()
             })
             .then((cities) => {
-              this.setState({ciudades: cities.ciudades});
+              this.setState({ciudades: cities.ciudades });
 
             });
-
-            let optCiudades = this.state.ciudades.map((opt) => ({ label: opt.nombre, value: opt._id }) );
-            var ciudadArr= optCiudades.filter(opt => opt.value===this.state.idCiudad)
-            if(ciudadArr.length>0)
-            {
-                this.setState({selectedCiudad:ciudadArr[0]}) 
-
-            }
-            else{
-
-              this.setState({selectedCiudad:''}) 
-            }
-
-
-        
-        } 
-      }
+  
     } 
 
-
-
-    traerAreas() 
-    { 
-      
-      if(!this.state.readyArea)
-      {
-
-        if(this.state.idArea!=='')
-        { 
-          this.setState({readyArea:true}); 
-          fetch('/api/area')
-          .then((response) => {
-              return response.json()
-            })
-            .then((areas2) => {
-              this.setState({ areas: areas2.areas })
-            });
-            
-            let optAreas = this.state.areas.map((opt) => ({ label: opt.nombre, value: opt._id }) );
-            var areaArr= optAreas.filter(opt => opt.value===this.state.idArea)
-            if(areaArr.length>0)
-            {
-                this.setState({selectedArea:areaArr[0]}) 
-
-            }
-            else{
-
-              this.setState({selectedArea:''}) 
-            }
-           
-        } 
-      }     
-
-    }
-
-    traerTipo() 
-    {
-      if(!this.state.readyTipo)
-      { 
-        if(this.state.tipoEjemplar!==null)
-        {  
-           this.setState({readyTipo:true}); 
-           var tipoSelect=optTipos.filter(option => option.value === this.state.tipoEjemplar)
-           this.setState({selectedTipo:tipoSelect[0]})
-        }   
-      }
-    }
-
-    traerColecciones() 
-    { 
-      
-      if(!this.state.readyColeccion)
-      {
-
-        if(this.state.idColeccion!=='')
-        { 
-          this.setState({readyColeccion:true}); 
-          fetch('/api/coleccion')
-          .then((response) => {
-              return response.json()
-            })
-            .then((coleccion2) => {
-              this.setState({ colecciones: coleccion2.colecciones })
-            });
-            
-            let optColecciones = this.state.colecciones.map((opt) => ({ label: opt.nombre, value: opt._id }) );
-            var coleccionArr= optColecciones.filter(opt => opt.value===this.state.idColeccion)
-            if(coleccionArr.length>0)
-            {
-                this.setState({selectedColeccion:coleccionArr[0]}) 
-
-            }
-            else{
-
-              this.setState({selectedColeccion:''}) 
-            }
-           
-        } 
-      }     
-
-    }
-
-
-
-
-    
       render() 
       {
         
 
-        const errors = validate(this.state.nombre, this.state.selectedTipo, this.state.dimensionAlto, this.state.dimensionAncho, this.state.peso, this.state.selectedArea, this.state.selectedColeccion );
+        const errors = validate(this.state.nombre, this.state.selectedTipo, this.state.dimensionAlto, this.state.dimensionAncho, this.state.peso, this.state.selectedExcavacion, this.state.selectedColeccion );
         const isDisabled = Object.keys(errors).some(x => errors[x]);
 
-
-         this.traerProvincia()
-         this.traerCiudades()
-         this.traerPais()
-         this.traerAreas()
-         this.traerTipo()
-         this.traerColecciones()
-        
-     //  console.log("Area seleccionada:", this.state.selectedArea);
-        
-      /* console.log("Pais seleccionado:", this.state.selectedPais);
-        console.log("Provincia seleccionada:", this.state.selectedProvincia);
-        console.log("Ciudad seleccionada:", this.state.selectedCiudad);*/
         
 
         let optPaises = this.state.paises.map((opt) => ({ label: opt.nombre, value: opt._id }) );
         let optProvincias = this.state.provincias.map((opt) => ({ label: opt.nombre, value: opt._id }) );
         let optCiudades = this.state.ciudades.map((opt) => ({ label: opt.nombre, value: opt._id }) );
-        let optAreas = this.state.areas.map((opt) => ({ label: opt.nombre, value: opt._id }) );
+        let optExcavaciones = this.state.excavaciones.map((opt) => ({ label: opt.nombre, value: opt._id }) );
         let optColecciones = this.state.colecciones.map((opt) => ({ label: opt.nombre, value: opt._id }) );
    
         return (
@@ -1067,13 +890,13 @@ handleCiudadChange = (selectedCiudad) => {
                                 <div className="input-group">
 
                                   <div className="col-sm-6">
-                                            <label htmlFor="area">Área (*):</label>
-                                            <Select name="area"     
-                                                    placeholder={'Seleccione Area'}
-                                                    options={optAreas} 
+                                            <label htmlFor="excavacion">Excavación (*):</label>
+                                            <Select name="excavacion"     
+                                                    placeholder={'Seleccione Excavación'}
+                                                    options={optExcavaciones} 
                                                     isDisabled
-                                                    onChange={this.handleAreasChange} 
-                                                    value={optAreas.filter(option => option.value === this.state.idArea)}
+                                                    onChange={this.handleExcavacionesChange} 
+                                                    value={optExcavaciones.filter(option => option.value === this.state.idExcavacion)}
                                                     >
                                                 
                                             </Select>

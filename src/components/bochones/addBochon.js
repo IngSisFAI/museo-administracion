@@ -8,11 +8,11 @@ function validate(nombre, selectedExcavacion, selectedEjemplar, selectedPieza) {
     return {
       nombre: nombre.length === 0,
       selectedExcavacion:  selectedExcavacion === null,
-      selectedEjemplar:  selectedEjemplar === null,
-      selectedPieza:  selectedPieza === null
+      selectedEjemplar:  selectedEjemplar === null
+      
     };
 }
-
+//selectedPieza:  selectedPieza === null
 class AddBochon extends Component {
 
     constructor(props) {

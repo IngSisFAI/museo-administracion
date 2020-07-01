@@ -9,17 +9,17 @@ const optTipos = [
         
       ];
 
-function validate(nombre, selectedTipo, dimensionAlto, dimensionAncho, peso, selectedArea, selectedColeccion) {
+function validate(nombre, selectedTipo, dimensionAlto, dimensionAncho, peso, selectedExcavacion, selectedColeccion) {
         // true means invalid, so our conditions got reversed
-    //  alert("Nombre:"+nombre+" - Tipo:"+selectedTipo+' - dimensionAlto:'+dimensionAlto+' - dimensionAncho:'+dimensionAncho+' - Peso:'+peso+ ' - selectedArea:'+selectedArea);
+  
         return {
           nombre: nombre.length === 0,
           dimensionAlto: dimensionAlto.length === 0,
           dimensionAncho: dimensionAncho.length === 0,
           peso: peso.length === 0,
           selectedTipo:  selectedTipo === null,
-          selectedArea:  selectedArea === null,
           selectedColeccion:  selectedColeccion === null,
+		  selectedExcavacion: selectedExcavacion === null ,
 
         };
 }
@@ -63,7 +63,7 @@ class EditEjemplar extends Component {
                 selectedProvincia:null ,
                 selectedCiudad:null,
                 muestraHome: false,
-                selectedArea: null,
+                selectedExcavacion: null,
                 selectedTipo: null,
                 fbaja:"",
                 motivo:"",
@@ -73,21 +73,16 @@ class EditEjemplar extends Component {
                 perteneceExca:"",
                 fotos:[],
                 videos:[],
-                readyProv: false, //controla que cargue una vez al principio las provincias
-                readyCity: false,//controla que cargue una vez al principio las ciudades
-                readyPais: false,
-                readyArea: false,
                 paises: [],
                 provincias: [],
                 ciudades: [],
-                areas: [],
-                idArea:"",
-                readyTipo: false,
+                excavaciones: [],
+                idExcavacion:"",
                 tipoEjemplar:null,
                 colecciones:[],
                 selectedColeccion:null ,
                 idColeccion:"",
-                 readyArea: false,
+                 
         }        
        
       }
@@ -105,12 +100,12 @@ class EditEjemplar extends Component {
               this.setState({paises: countries.paises })
             });
 
-         fetch('/api/area')
+         fetch('/api/excavacion')
         .then((response) => {
             return response.json()
           })
-          .then((areas2) => {
-            this.setState({ areas: areas2.areas })
+          .then((excavacions) => {
+            this.setState({ excavaciones: excavacions.excavaciones })
           });
 
            fetch('/api/coleccion')
@@ -128,6 +123,10 @@ class EditEjemplar extends Component {
  //una vez cargado en el DOM
  //*************************
   componentDidMount() {
+	  
+		 
+		 
+		 
     fetch('http://localhost:3001/api/ejemplarId/'+this.props.match.params.id)
     .then((response) => {
         return response.json()
@@ -147,6 +146,8 @@ class EditEjemplar extends Component {
              fi=(Moment(ejemplars.ejemplarId.fechaIngresoColeccion).add(1, 'days')).format('YYYY-MM-DD')
           }
 
+            this.traerProvincias(ejemplars.ejemplarId.areaHallazgo.pais)
+		    this.traerCiudades(ejemplars.ejemplarId.areaHallazgo.provincia)
           
 
           this.setState({   tipoEjemplar: ejemplars.ejemplarId.tipoEjemplar,
@@ -165,7 +166,7 @@ class EditEjemplar extends Component {
                             era:ejemplars.ejemplarId.eraGeologica.era,
                             ilustracionCompleta:ejemplars.ejemplarId.ilustracionCompleta,
                             descripcionIC:ejemplars.ejemplarId.descripcionIC,
-                            idArea:ejemplars.ejemplarId.areaHallazgo.nombreArea,
+                            idExcavacion: ejemplars.ejemplarId.perteneceExca,
                             idPais:ejemplars.ejemplarId.areaHallazgo.pais,
                             idProvincia:ejemplars.ejemplarId.areaHallazgo.provincia,
                             idCiudad: ejemplars.ejemplarId.areaHallazgo.ciudad,
@@ -188,7 +189,14 @@ class EditEjemplar extends Component {
                             descripcion2:ejemplars.ejemplarId.descripcion2,
                             descripcion3: ejemplars.ejemplarId.descripcion3,  
                             perteneceExca: ejemplars.ejemplarId.perteneceExca,
-                            idColeccion:ejemplars.ejemplarId.nroColeccion
+                            idColeccion:ejemplars.ejemplarId.nroColeccion,
+							selectedPais:ejemplars.ejemplarId.areaHallazgo.pais ,
+							selectedProvincia:ejemplars.ejemplarId.areaHallazgo.provincia,
+							selectedCiudad:ejemplars.ejemplarId.areaHallazgo.ciudad,
+							selectedColeccion:ejemplars.ejemplarId.nroColeccion,
+							selectedTipo: ejemplars.ejemplarId.tipoEjemplar,
+							selectedExcavacion: ejemplars.ejemplarId.perteneceExca
+							
                           
                         })
       });
@@ -315,10 +323,10 @@ class EditEjemplar extends Component {
         this.setState({ especie: evt.target.value });
       };
 
-      handleAreasChange = (selectedArea) => {
-        this.setState({selectedArea});
-        this.setState({idArea: selectedArea.value});
-        console.log(`Option selected:`, selectedArea );
+      handleExcavacionesChange = (selectedExcavacion) => {
+        this.setState({selectedExcavacion});
+        this.setState({idExcavacion: selectedExcavacion.value});
+        console.log(`Option selected:`, selectedExcavacion );
        
       }
 
@@ -336,9 +344,10 @@ class EditEjemplar extends Component {
         return response.json()
       })
       .then((estados) => {
-        this.setState({provincias: estados.provincias , selectedPais, idPais:selectedPais.value});
+        this.setState({provincias: estados.provincias , selectedPais, idPais:selectedPais.value, ciudades:[], selectedCiudad:null});
 
       });
+	 
   }
 
 
@@ -387,7 +396,7 @@ handleCiudadChange = (selectedCiudad) => {
       //******************************************************
 
       canBeSubmitted() {
-        const errors = validate(this.state.nombre, this.state.selectedTipo, this.state.dimensionAlto, this.state.dimensionAncho, this.state.peso, this.state.selectedArea, this.state.selectedColeccion );
+        const errors = validate(this.state.nombre, this.state.selectedTipo, this.state.dimensionAlto, this.state.dimensionAncho, this.state.peso, this.state.selectedExcavacion, this.state.selectedColeccion );
         const isDisabled = Object.keys(errors).some(x => errors[x]);
         return !isDisabled;
       }
@@ -400,20 +409,56 @@ handleCiudadChange = (selectedCiudad) => {
         {
               evt.preventDefault();
 
+
               var idCountry=''
-              if(this.state.selectedPais!==null)
-              {idCountry=this.state.selectedPais.value}
+              if(this.state.selectedPais!==null && this.state.selectedPais.value!==undefined)
+              {
+				  idCountry=this.state.selectedPais.value
+			  }
+			  else
+			  {
+				 if(this.state.selectedPais!==null)
+				 {
+					idCountry=this.state.selectedPais 
+				 }	 
+				  
+			  }	  
+		    
               
-              var idProv=''
-              if(this.state.selectedProvincia!==null)
-              {idProv=this.state.selectedProvincia.value}
+             var idProv=''
+             if(this.state.selectedProvincia!==null && this.state.selectedProvincia.value!==undefined)
+              {
+				  idProv=this.state.selectedProvincia.value
+			  }
+			  else
+			  {
+				 if(this.state.selectedProvincia!==null)
+				 {
+					idProv=this.state.selectedProvincia
+				 }	 
+				  
+			  }	
     
               var idCity=''
-              if(this.state.selectedCiudad!==null)
-              {idCity=this.state.selectedCiudad.value}
+			  if(this.state.selectedCiudad!=null && this.state.selectedCiudad.value!==undefined)
+              {
+				  idCity=this.state.selectedCiudad.value
+			  }
+			  else
+			  {
+				 if(this.state.selectedCiudad!==null)
+				 {
+					idCity=this.state.selectedCiudad
+				 }	 
+				  
+			  }	
+		  
+		      var idExcav=''
+              if(this.state.selectedExcavacion!==null)
+              {idExcav=this.state.selectedExcavacion.value}
 
 
-              console.log("idCity:", idCity)
+            
 
               var eraGeo={
                 "formacion":this.state.formacion,
@@ -423,14 +468,14 @@ handleCiudadChange = (selectedCiudad) => {
                 "periodo":this.state.periodo,
                 "era":this.state.era
               };
+			  
 
-              var areaH={
-                "nombreArea":this.state.selectedArea.value,
+			  var areaH={
                 "pais":idCountry,
                 "ciudad":idCity,
                 "provincia":idProv
-              };
-
+                };
+		
               var data = {
                 "tipoEjemplar": this.state.selectedTipo.value,
                 "taxonReino":this.state.reino,
@@ -462,7 +507,7 @@ handleCiudadChange = (selectedCiudad) => {
                 "descripcion1A":this.state.descripcion1A,
                 "descripcion2":this.state.descripcion2,
                 "descripcion3": this.state.descripcion3,  
-                "perteneceExca":this.state.perteneceExca
+                "perteneceExca":idExcav
              };
 
                 fetch('http://localhost:3001/api/ejemplar/'+this.props.match.params.id, {
@@ -490,228 +535,50 @@ handleCiudadChange = (selectedCiudad) => {
     
     
   //**** FUNCIONES DE PRECARGA ***/
-
-  traerPais()
-  { 
-    if(!this.state.readyPais)
-    {
-      if(this.state.idPais!=='')
-      {
-        this.setState({readyPais:true});
-        fetch('/api/pais')
+  
+    traerProvincias(idPais)
+  {
+    
+        fetch('/api/provinciaIdPais/'+idPais)
         .then((response) => {
             return response.json()
           })
-          .then((countries) => {
-            this.setState({paises: countries.paises});
+          .then((estados) => {
+            this.setState({provincias: estados.provincias});
     
           });
 
-          let optPaises = this.state.paises.map((opt) => ({ label: opt.nombre, value: opt._id }) );
-          var paisArr= optPaises.filter(opt => opt.value===this.state.idPais)
-          if(paisArr.length>0)
-          {
-              this.setState({selectedPais:paisArr[0]}) 
-
-          }
-          else{
-
-            this.setState({selectedPais:''}) 
-          }
-
-      } 
-    }
-  }
-
-
-  traerProvincia()
-  { var prov=[]
-
-    if(!this.state.readyProv)
-    {  
-      if(this.state.idPais!=='' && this.state.idProvincia!=='')
-      {
-        console.log("Id PAis:",this.state.idPais)
-        console.log("Id Provincia:",this.state.idProvincia)
-        console.log('/api/provinciaIdPais/'+this.state.idPais)
-        this.setState({readyProv:true});
-        
-    
-          fetch('/api/provinciaIdPais/'+this.state.idPais)
-          .then((response) => {
-              return response.json()
-            })
-            .then((province) => {
-              this.setState({ provincias: province.provincias })
-            });
          
-          console.log("Provincias:",prov)
-          let optProvincias = this.state.provincias.map((opt) => ({ label: opt.nombre, value: opt._id }) );
-          var provinciaArr= optProvincias.filter(opt => opt.value===this.state.idProvincia)
-          console.log("Prov ARR:",provinciaArr)
-          if(provinciaArr.length>0)
-          {
-              this.setState({selectedProvincia:provinciaArr[0]}) 
-
-          }
-          else{
-
-            this.setState({selectedProvincia:''}) 
-          }
-
-      } 
-    }
+	
+    
   }
-
   
-
-    traerCiudades()
+    traerCiudades(idProvincia)
     { 
-      if(!this.state.readyCity)
-      {
-        if(this.state.idProvincia!=='' &&  this.state.idCiudad!=='')
-        {
-          this.setState({readyCity:true});
-          
-          fetch('/api/ciudadIdProv/'+this.state.idProvincia)
+	     fetch('/api/ciudadIdProv/'+idProvincia)
           .then((response) => {
               return response.json()
             })
             .then((cities) => {
-              this.setState({ciudades: cities.ciudades});
+              this.setState({ciudades: cities.ciudades });
 
             });
-
-            let optCiudades = this.state.ciudades.map((opt) => ({ label: opt.nombre, value: opt._id }) );
-            var ciudadArr= optCiudades.filter(opt => opt.value===this.state.idCiudad)
-            if(ciudadArr.length>0)
-            {
-                this.setState({selectedCiudad:ciudadArr[0]}) 
-
-            }
-            else{
-
-              this.setState({selectedCiudad:''}) 
-            }
-
-
-        
-        } 
-      }
+  
     } 
-
-
-
-    traerAreas() 
-    { 
-      
-      if(!this.state.readyArea)
-      {
-
-        if(this.state.idArea!=='')
-        { 
-          this.setState({readyArea:true}); 
-          fetch('/api/area')
-          .then((response) => {
-              return response.json()
-            })
-            .then((areas2) => {
-              this.setState({ areas: areas2.areas })
-            });
-            
-            let optAreas = this.state.areas.map((opt) => ({ label: opt.nombre, value: opt._id }) );
-            var areaArr= optAreas.filter(opt => opt.value===this.state.idArea)
-            if(areaArr.length>0)
-            {
-                this.setState({selectedArea:areaArr[0]}) 
-
-            }
-            else{
-
-              this.setState({selectedArea:''}) 
-            }
-           
-        } 
-      }     
-
-    }
-
-    traerTipo() 
-    {
-      if(!this.state.readyTipo)
-      { 
-        if(this.state.tipoEjemplar!==null)
-        {  
-           this.setState({readyTipo:true}); 
-           var tipoSelect=optTipos.filter(option => option.value === this.state.tipoEjemplar)
-           this.setState({selectedTipo:tipoSelect[0]})
-        }   
-      }
-    }
-
-    traerColecciones() 
-    { 
-      
-      if(!this.state.readyColeccion)
-      {
-
-        if(this.state.idColeccion!=='')
-        { 
-          this.setState({readyColeccion:true}); 
-          fetch('/api/coleccion')
-          .then((response) => {
-              return response.json()
-            })
-            .then((coleccion2) => {
-              this.setState({ colecciones: coleccion2.colecciones })
-            });
-            
-            let optColecciones = this.state.colecciones.map((opt) => ({ label: opt.nombre, value: opt._id }) );
-            var coleccionArr= optColecciones.filter(opt => opt.value===this.state.idColeccion)
-            if(coleccionArr.length>0)
-            {
-                this.setState({selectedColeccion:coleccionArr[0]}) 
-
-            }
-            else{
-
-              this.setState({selectedColeccion:''}) 
-            }
-           
-        } 
-      }     
-
-    }
-
-
-
+	
+	
     
       render() 
       {
         
 
-        const errors = validate(this.state.nombre, this.state.selectedTipo, this.state.dimensionAlto, this.state.dimensionAncho, this.state.peso, this.state.selectedArea, this.state.selectedColeccion );
+        const errors = validate(this.state.nombre, this.state.selectedTipo, this.state.dimensionAlto, this.state.dimensionAncho, this.state.peso, this.state.selectedExcavacion, this.state.selectedColeccion );
         const isDisabled = Object.keys(errors).some(x => errors[x]);
-
-
-         this.traerProvincia()
-         this.traerCiudades()
-         this.traerPais()
-         this.traerAreas()
-         this.traerTipo()
-         this.traerColecciones()
-        
-     //  console.log("Area seleccionada:", this.state.selectedArea);
-        
-      /* console.log("Pais seleccionado:", this.state.selectedPais);
-        console.log("Provincia seleccionada:", this.state.selectedProvincia);
-        console.log("Ciudad seleccionada:", this.state.selectedCiudad);*/
-        
 
         let optPaises = this.state.paises.map((opt) => ({ label: opt.nombre, value: opt._id }) );
         let optProvincias = this.state.provincias.map((opt) => ({ label: opt.nombre, value: opt._id }) );
         let optCiudades = this.state.ciudades.map((opt) => ({ label: opt.nombre, value: opt._id }) );
-        let optAreas = this.state.areas.map((opt) => ({ label: opt.nombre, value: opt._id }) );
+        let optExcavaciones = this.state.excavaciones.map((opt) => ({ label: opt.nombre, value: opt._id }) );
         let optColecciones = this.state.colecciones.map((opt) => ({ label: opt.nombre, value: opt._id }) );
    
         return (
@@ -1081,12 +948,12 @@ handleCiudadChange = (selectedCiudad) => {
                                 <div className="input-group">
 
                                   <div className="col-sm-6">
-                                            <label htmlFor="area">Área (*):</label>
-                                            <Select name="area"     
-                                                    placeholder={'Seleccione Area'}
-                                                    options={optAreas} 
-                                                    onChange={this.handleAreasChange} 
-                                                    value={optAreas.filter(option => option.value === this.state.idArea)}
+                                            <label htmlFor="excavacion">Excavación (*):</label>
+                                            <Select name="excavacion"     
+                                                    placeholder={'Seleccione Excavación'}
+                                                    options={optExcavaciones} 
+                                                    onChange={this.handleExcavacionesChange} 
+                                                    value={optExcavaciones.filter(option => option.value === this.state.idExcavacion)}
                                                     >
                                                 
                                             </Select>

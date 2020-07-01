@@ -8,7 +8,7 @@ const optTipos = [
         
       ];
 
-function validate(nombre, selectedTipo, dimensionAlto, dimensionAncho, peso, selectedArea, selectedColeccion) {
+function validate(nombre, selectedTipo, dimensionAlto, dimensionAncho, peso, selectedExcavacion, selectedColeccion) {
         // true means invalid, so our conditions got reversed
         return {
           nombre: nombre.length === 0,
@@ -16,7 +16,7 @@ function validate(nombre, selectedTipo, dimensionAlto, dimensionAncho, peso, sel
           dimensionAncho: dimensionAncho.length === 0,
           peso: peso.length === 0,
           selectedTipo:  selectedTipo === null,
-          selectedArea:  selectedArea === null,
+          selectedExcavacion:  selectedExcavacion === null,
           selectedColeccion:  selectedColeccion === null,
 
         };
@@ -61,8 +61,8 @@ class AddEjemplar extends Component {
                 ciudades:[],
                 selectedCiudad:null,
                 muestraHome: false,
-                areas: [],
-                selectedArea: null,
+                excavaciones: [],
+                selectedExcavacion: null,
                 selectedTipo: null,
                 fbaja:"",
                 motivo:"",
@@ -90,12 +90,12 @@ class AddEjemplar extends Component {
               this.setState({paises: countries.paises })
             });
 
-        fetch('/api/area')
+        fetch('/api/excavacion')
         .then((response) => {
             return response.json()
           })
-          .then((areas2) => {
-            this.setState({ areas: areas2.areas })
+          .then((excav) => {
+            this.setState({ excavaciones: excav.excavaciones })
           });
 
           fetch('/api/coleccion')
@@ -242,9 +242,9 @@ class AddEjemplar extends Component {
       }
 
 
-      handleAreasChange = (selectedArea) => {
-        this.setState({selectedArea});
-        console.log(`Option selected:`, selectedArea );
+      handleExcavacionesChange = (selectedExcavacion) => {
+        this.setState({selectedExcavacion});
+        console.log(`Option selected:`, selectedExcavacion );
        
       }
 
@@ -292,7 +292,7 @@ class AddEjemplar extends Component {
       // Funciones y manejadores para validar/almacenar datos
       
       canBeSubmitted() {
-        const errors = validate(this.state.nombre, this.state.selectedTipo, this.state.dimensionAlto, this.state.dimensionAncho, this.state.peso, this.state.selectedArea );
+        const errors = validate(this.state.nombre, this.state.selectedTipo, this.state.dimensionAlto, this.state.dimensionAncho, this.state.peso, this.state.selectedExcavacion );
         const isDisabled = Object.keys(errors).some(x => errors[x]);
         return !isDisabled;
       }
@@ -327,7 +327,7 @@ class AddEjemplar extends Component {
               };
 
               var areaH={
-                "nombreArea":this.state.selectedArea.value,
+                "nombreArea":"",
                 "pais":idCountry,
                 "ciudad":idCity,
                 "provincia":idProv
@@ -364,7 +364,7 @@ class AddEjemplar extends Component {
                 "descripcion1A":this.state.descripcion1A,
                 "descripcion2":this.state.descripcion2,
                 "descripcion3": this.state.descripcion3,  
-                "perteneceExca":this.state.perteneceExca
+                "perteneceExca":this.state.selectedExcavacion.value
              };
 
              fetch('api/ejemplar', {
@@ -396,20 +396,20 @@ class AddEjemplar extends Component {
       {
         
 
-        const errors = validate(this.state.nombre, this.state.selectedTipo, this.state.dimensionAlto, this.state.dimensionAncho, this.state.peso, this.state.selectedArea, this.state.selectedColeccion );
+        const errors = validate(this.state.nombre, this.state.selectedTipo, this.state.dimensionAlto, this.state.dimensionAncho, this.state.peso, this.state.selectedExcavacion, this.state.selectedColeccion );
         const isDisabled = Object.keys(errors).some(x => errors[x]);
 
         const { selectedPais } = this.state; 
         const { selectedProvincia } = this.state; 
         const { selectedCiudad } = this.state;
-        const { selectedArea } = this.state;
+        const { selectedExcavacion } = this.state;
         const { selectedTipo } = this.state;
         const { selectedColeccion} = this.state;
 
         let optPaises = this.state.paises.map((opt) => ({ label: opt.nombre, value: opt._id }) );
         let optProvincias = this.state.provincias.map((opt) => ({ label: opt.nombre, value: opt._id }) );
         let optCiudades = this.state.ciudades.map((opt) => ({ label: opt.nombre, value: opt._id }) );
-        let optAreas = this.state.areas.map((opt) => ({ label: opt.nombre, value: opt._id }) );
+        let optExcavaciones = this.state.excavaciones.map((opt) => ({ label: opt.nombre, value: opt._id }) );
         let optColecciones = this.state.colecciones.map((opt) => ({ label: opt.nombre, value: opt._id }) );
    
         return (
@@ -779,12 +779,12 @@ class AddEjemplar extends Component {
                                 <div className="input-group">
 
                                   <div className="col-sm-6">
-                                            <label htmlFor="area">Área (*):</label>
+                                            <label htmlFor="excavacion">Excavación (*):</label>
                                             <Select name="area"     
-                                                    placeholder={'Seleccione Area'}
-                                                    options={optAreas} 
-                                                    onChange={this.handleAreasChange} 
-                                                    value={selectedArea}
+                                                    placeholder={'Seleccione Excavación'}
+                                                    options={optExcavaciones} 
+                                                    onChange={this.handleExcavacionesChange} 
+                                                    value={selectedExcavacion}
                                                     >
                                                 
                                             </Select>
