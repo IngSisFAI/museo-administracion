@@ -59,20 +59,8 @@ class EditExcavacion extends Component {
                  idProvincia:'',
                  idCiudad:'',
                  bochonesId:[],
-<<<<<<< Updated upstream
-                 readyProv: false, //controla que cargue una vez al principio las provincias
-                 readyCity: false,//controla que cargue una vez al principio las ciudades
-                 readyPais: false,
-                 puntoGpsExcavacion: '',
-                 idAreaExcavacion: '',
-                 readyDirector: false,
-                 readyColector: false,
-                 readyPaleontologo: false,
-                 readyExploracion: false
-=======
                  puntoGpsExcavacion: '',
                  idAreaExcavacion: ''
->>>>>>> Stashed changes
            };
        
   }
@@ -118,17 +106,7 @@ class EditExcavacion extends Component {
 
   //una vez cargado en el DOM
   componentDidMount() {
-<<<<<<< Updated upstream
-    this.traerProvincias()
-    this.traerCiudades()
-    this.traerPaises()
-    this.traerDirectores()
-    this.traerColectores()
-    this.traerPaleontologos()
-    this.traerExploraciones()
-=======
 
->>>>>>> Stashed changes
 
     fetch('http://localhost:3001/api/excavacionId/'+this.props.match.params.id)
     .then((response) => {
@@ -318,19 +296,6 @@ class EditExcavacion extends Component {
           if(this.state.selectedExploracion!==null)
           {idExploracion=this.state.selectedExploracion.value}
 
-<<<<<<< Updated upstream
-          var idCountry=''
-          if(this.state.selectedPais!==null)
-          {idCountry=this.state.selectedPais.value}
-          
-          var idProv=''
-          if(this.state.selectedProvincia!==null)
-          {idProv=this.state.selectedProvincia.value}
-
-          var idCity=''
-          if(this.state.selectedCiudad!==null)
-          {idCity=this.state.selectedCiudad.value}
-=======
             var idCountry=''
               if(this.state.selectedPais!==null && this.state.selectedPais.value!==undefined)
               {
@@ -373,7 +338,6 @@ class EditExcavacion extends Component {
 				 }	 
 				  
 			  }	
->>>>>>> Stashed changes
 
           var data = {
             "nombre": this.state.nombre,
@@ -458,153 +422,6 @@ class EditExcavacion extends Component {
   
     } 
 
-<<<<<<< Updated upstream
-    traerDirectores()
-    { 
-      
-      if(!this.state.readyDirector)
-      {
-
-        if(this.state.directorId!=='')
-        { 
-          this.setState({readyDirector:true}); 
-          fetch('/api/persona')
-          .then((response) => {
-              return response.json()
-            })
-            .then((empleados) => {
-              this.setState({ directores: empleados.personas })
-
-            });
-            
-            
-            let optDirectores = this.state.directores.map((opt) => ({ label: opt.nombres+" "+opt.apellidos, value: opt._id }) );
-            var directorArr= optDirectores.filter(opt => opt.value===this.state.directorId)
-            if(directorArr.length>0)
-            {
-                this.setState({selectedDirector:directorArr[0]}) 
-
-            }
-            else{
-
-              this.setState({selectedDirector:''}) 
-            }
-        } 
-      }     
-
-    }
-
-
-    traerColectores()
-    { 
-      
-      if(!this.state.readyColector)
-      {
-
-        if(this.state.colectorId!=='')
-        { 
-          this.setState({readyColector:true}); 
-          fetch('/api/persona')
-          .then((response) => {
-              return response.json()
-            })
-            .then((empleados) => {
-              this.setState({ colectores: empleados.personas })
-
-            });
-            
-            
-            let optColectores = this.state.colectores.map((opt) => ({ label: opt.nombres+" "+opt.apellidos, value: opt._id }) );
-            var colectorArr= optColectores.filter(opt => opt.value===this.state.colectorId)
-            if(colectorArr.length>0)
-            {
-                this.setState({selectedColector:colectorArr[0]}) 
-
-            }
-            else{
-
-              this.setState({selectedColector:''}) 
-            }
-        } 
-      }     
-
-    }
-
-    traerPaleontologos()
-    { 
-      
-      if(!this.state.readyPaleontologo)
-      {
-
-        if(this.state.paleontologoId!=='')
-        { 
-          this.setState({readyPaleontologo:true}); 
-          fetch('/api/persona')
-          .then((response) => {
-              return response.json()
-            })
-            .then((empleados) => {
-              this.setState({ paleontologos: empleados.personas })
-
-            });
-            
-            
-            let optPaleontologo = this.state.paleontologos.map((opt) => ({ label: opt.nombres+" "+opt.apellidos, value: opt._id }) );
-            var paleontologoArr= optPaleontologo.filter(opt => opt.value===this.state.paleontologoId)
-            if(paleontologoArr.length>0)
-            {
-                this.setState({selectedPaleontologo:paleontologoArr[0]}) 
-
-            }
-            else{
-
-              this.setState({selectedPaleontologo:''}) 
-            }
-        } 
-      }     
-
-    }
-
-    traerExploraciones() 
-    { 
-      
-      if(!this.state.readyExploracion)
-      {
-
-        if(this.state.exploracionId!=='')
-        { 
-          this.setState({readyExploracion:true}); 
-          fetch('/api/exploracion')
-          .then((response) => {
-              return response.json()
-            })
-            .then((exploracions) => {
-              this.setState({ exploraciones: exploracions.exploraciones })
-
-            });
-            
-            
-            let optExploraciones = this.state.exploraciones.map((opt) => ({ label: opt.nombres+" "+opt.apellidos, value: opt._id }) );
-            var exploracionArr= optExploraciones.filter(opt => opt.value===this.state.exploracionId)
-            if(exploracionArr.length>0)
-            {
-                this.setState({selectedExploracion:exploracionArr[0]}) 
-
-            }
-            else{
-
-              this.setState({selectedExploracion:''}) 
-            }
-        } 
-      }     
-
-    }
-
-
-    render() {
-     const errors = validate(this.state.nombre, this.state.codigo, this.state.fechaInicio, this.state.selectedExploracion);
-     const isDisabled = Object.keys(errors).some(x => errors[x]);
-=======
  
 
 
@@ -612,7 +429,6 @@ class EditExcavacion extends Component {
      const errors = validate(this.state.nombre, this.state.codigo, this.state.fechaInicio, this.state.selectedExploracion , this.state.idAreaExcavacion,  this.state.puntoGpsExcavacion);
      const isDisabled = Object.keys(errors).some(x => errors[x]);
 	 
->>>>>>> Stashed changes
 
      let optColectores = this.state.colectores.map((opt) => ({ label: opt.nombres+" "+opt.apellidos, value: opt._id }) );
      let optDirectores = this.state.directores.map((opt) => ({ label: opt.nombres+" "+opt.apellidos, value: opt._id }) );
@@ -775,15 +591,7 @@ class EditExcavacion extends Component {
                             <fieldset>
                                 <legend >Datos Geográficos</legend>
                                 <hr/>
-<<<<<<< Updated upstream
-                                <ModificarExcavacion
-                                  excavacionId={this.props.match.params.id}
-                                  setPuntoGpsExcavacion={this.setPuntoGpsExcavacion}
-                                  setIdAreaExcavacion={this.setIdAreaExcavacion}
-                                />
-=======
                                
->>>>>>> Stashed changes
 
                                   <div className="input-group">
 
