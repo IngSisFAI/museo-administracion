@@ -6,14 +6,16 @@ import ModificarExcavacion from '../../areaGeospatial/ModificarExcavacion';
 
 
 
-function validate(nombre, codigo, fechaInicio,  selectedExploracion) {
+function validate(nombre, codigo, fechaInicio,  selectedExploracion, idAreaExcavacion,  puntoGpsExcavacion) {
   // true means invalid, so our conditions got reversed
    
   return {
     nombre: nombre.length === 0,
     codigo: codigo ? codigo.length === 0 : false,
     fechaInicio: fechaInicio.length === 0,
-    selectedExploracion:  selectedExploracion === null
+    selectedExploracion:  selectedExploracion === null,
+	idAreaExcavacion: idAreaExcavacion ==='',
+	puntoGpsExcavacion:  puntoGpsExcavacion === {}
   };
 }
 
