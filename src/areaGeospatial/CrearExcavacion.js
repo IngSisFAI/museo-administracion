@@ -27,7 +27,8 @@ export default class CrearExcavacion extends Component {
       areaExploracion: null,
       puntoGPSExcavacion: null,
       setAreaDisabled: true,
-      setPuntoGpsDisabled: true
+      setPuntoGpsDisabled: true,
+      poligonoExploracion: null
     };
   }
 
@@ -44,16 +45,9 @@ export default class CrearExcavacion extends Component {
 
   componentWillReceiveProps(nextProps) {
     if (nextProps.idExploracion !== this.props.idExploracion) {
-      console.log("*********** ");
-
-      // if (this.state.areaExploracion && this.state.areaExploracion.length > 0) {
-      //   const coordinates = this.state.areaExploracion.map(c => ({
-      //     lat: c.lat || c[0],
-      //     lng: c.lng || c[1]
-      //   }));
-      //   const nuevoPoligono = L.polygon(coordinates, {});
-      //   this.state.map.removeLayer(nuevoPoligono);
-      // }
+      if (this.state.poligonoExploracion) {
+        this.state.map.removeLayer(this.state.poligonoExploracion);
+      }
       this.obtenerExploracion(nextProps.idExploracion);
     }
   }
@@ -94,11 +88,13 @@ export default class CrearExcavacion extends Component {
       areasExcavaciones: exploracion.excavaciones
     });
 
-    dibujarPoligono(
+    const poligonoExploracion = dibujarPoligono(
       exploracion.areaExploracion.locacion.coordinates[0],
       "",
       this.state.map
     );
+
+    this.setState({ poligonoExploracion });
     exploracion.excavaciones.forEach(excavacion => {
       dibujarPoligono(
         excavacion.areaExcavacion.locacion.coordinates[0],
