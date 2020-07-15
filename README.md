@@ -12,4 +12,10 @@ Clonar el repo
 
 `cd admin`
 
-`yarn start` o `npm start`
+Correr front-end en diferentes consolas/terminales:
+
+`nodemon server.js`
+
+`nodemon serverFile.js`
+
+`npm start`
