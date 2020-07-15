@@ -603,6 +603,7 @@ class EditExcavacion extends Component {
                                                     onChange={this.handleExploracionesChange} 
                                                     value={optExploraciones.filter(option => option.value === this.state.exploracionId)}
                                                     className={errors.selectedExploracion ? "error" : ""}
+                                                    isDisabled
                                                     >
                                                 
                                             </Select>
@@ -617,6 +618,7 @@ class EditExcavacion extends Component {
                                                     options={optPaises}
                                                     onChange={this.handlePaisChange} 
                                                     value={optPaises.filter(option => option.value === this.state.idPais)}
+                                                    isDisabled
                                                     >
                                                 
                                             </Select>
@@ -636,7 +638,7 @@ class EditExcavacion extends Component {
                                                     onChange={this.handleProvinciaChange} 
                                                     options={optProvincias}
                                                     value={optProvincias.filter(option => option.value === this.state.idProvincia)}
-                                                    
+                                                    isDisabled
                                                     >
                                                 
                                             </Select>
@@ -649,7 +651,8 @@ class EditExcavacion extends Component {
                                                     placeholder={'Seleccione Ciudad'}
                                                     onChange={this.handleCiudadChange} 
                                                     options={optCiudades} 
-                                                    value={optCiudades.filter(option => option.value === this.state.idCiudad)}>
+                                                    value={optCiudades.filter(option => option.value === this.state.idCiudad)}
+                                                    isDisabled>
                                                
                                             </Select>
                                 

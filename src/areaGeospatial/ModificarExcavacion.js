@@ -166,7 +166,7 @@ export default class ModificarExcavacion extends Component {
 
     if (perteneceAExploracion) {
       const contienePuntoGps = puntoDentroDeArea(
-        this.state.coordenadasPuntoGps.getLatLng(),
+        this.state.coordenadasPuntoGps,
         this.state.coordenadasExcavacion
       );
 
