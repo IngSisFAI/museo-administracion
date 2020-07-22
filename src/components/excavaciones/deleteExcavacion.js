@@ -111,7 +111,7 @@ class DeleteExcavacion extends Component {
   //una vez cargado en el DOM
   componentDidMount() {
     
-    fetch('http://localhost:3001/api/excavacionId/'+this.props.match.params.id)
+    fetch('/api/excavacionId/'+this.props.match.params.id)
     .then((response) => {
         return response.json()
       })
@@ -317,7 +317,7 @@ class DeleteExcavacion extends Component {
 
               evt.preventDefault();
               var idExc=this.props.match.params.id
-              axios.delete('http://localhost:3001/api/excavacion/'+this.props.match.params.id)
+              axios.delete('/api/excavacion/'+this.props.match.params.id)
                   .then(function(response) {
                       
                            console.log("¡Se eliminó la Excavación con Éxito!");

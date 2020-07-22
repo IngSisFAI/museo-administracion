@@ -39,7 +39,7 @@ class MultimediaEjemplar extends Component {
   //una vez cargado en el DOM
 componentDidMount() {
     
-    fetch('http://localhost:3001/api/ejemplarId/'+this.props.match.params.id)
+    fetch('/api/ejemplarId/'+this.props.match.params.id)
     .then((response) => {
         return response.json()
       })
@@ -159,7 +159,7 @@ componentDidMount() {
                fotosEjemplar: imagenesList
         }
         
-        fetch('http://localhost:3001/api/ejemplar/'+this.props.match.params.id, {
+        fetch('/api/ejemplar/'+this.props.match.params.id, {
           method: 'put',
           body: JSON.stringify(data),
           headers:{
@@ -240,7 +240,7 @@ componentDidMount() {
               videosEjemplar: videosList
         }
         
-        fetch('http://localhost:3001/api/ejemplar/'+this.props.match.params.id, {
+        fetch('/api/ejemplar/'+this.props.match.params.id, {
           method: 'put',
           body: JSON.stringify(data),
           headers:{
@@ -517,7 +517,7 @@ componentDidMount() {
       var name=nombre.replace("\\","/")
 
 
-        axios.get("http://localhost:3001/api/ejemplarId/"+id)
+        axios.get("/api/ejemplarId/"+id)
         .then(response => {
 
                        videoLista=response.data.ejemplarId.videosEjemplar  
@@ -528,7 +528,7 @@ componentDidMount() {
                         "videosEjemplar": videosFinal
                       }
 
-                      axios.put("http://localhost:3001/api/ejemplar/"+idEjemplar, data1, {
+                      axios.put("/api/ejemplar/"+idEjemplar, data1, {
                         headers:{
                           'Content-Type': 'application/json'
                         }   
@@ -591,7 +591,7 @@ componentDidMount() {
         var idEjemplar=""
         name=name.replace("\\","/")
        
-        axios.get("http://localhost:3001/api/ejemplarPorFoto/"+cod)
+        axios.get("/api/ejemplarPorFoto/"+cod)
         .then(response => {
 
                        imageLista=response.data.ejemplar.fotosEjemplar   
@@ -602,7 +602,7 @@ componentDidMount() {
                         "fotosEjemplar": fotosFinal
                       }
 
-                      axios.put("http://localhost:3001/api/ejemplar/"+idEjemplar, data1, {
+                      axios.put("/api/ejemplar/"+idEjemplar, data1, {
                         headers:{
                           'Content-Type': 'application/json'
                         }   

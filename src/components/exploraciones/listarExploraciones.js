@@ -33,7 +33,7 @@ class listarExploraciones extends Component {
     
       if(keyNombre!="")
       {  
-          axios.get('http://localhost:3001/api/exploracionesFiltro/'+keyNombre)
+          axios.get('/api/exploracionesFiltro/'+keyNombre)
               .then(response => {
                 this.setState({ exploraciones: response.data.exploraciones}); 
                 

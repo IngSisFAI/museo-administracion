@@ -23,7 +23,7 @@ class DeleteExploracion extends React.Component {
   componentDidMount() {
     axios
       .get(
-        "http://localhost:3001/api/exploracionId/" + this.props.match.params.id
+        "/api/exploracionId/" + this.props.match.params.id
       )
       .then(response => {
         this.setState({
@@ -65,7 +65,7 @@ class DeleteExploracion extends React.Component {
         };
 
         fetch(
-          "http://localhost:3001/api/exploracion/" + this.props.match.params.id,
+          "/api/exploracion/" + this.props.match.params.id,
           {
             method: "delete",
             body: JSON.stringify(data),

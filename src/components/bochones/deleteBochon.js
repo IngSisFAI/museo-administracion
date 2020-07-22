@@ -89,14 +89,10 @@ class DeleteBochon extends Component {
               .then((tipos) => {
                  this.setState({tiposPreparacion: tipos.tiposPreparacion})
               });
-
-
     }
 
-    //una vez cargado en el DOM
- //*************************
   componentDidMount() {
-    fetch('http://localhost:3001/api/bochonId/'+this.props.match.params.id)
+    fetch('/api/bochonId/'+this.props.match.params.id)
     .then((response) => {
         return response.json()
       })
@@ -221,7 +217,7 @@ class DeleteBochon extends Component {
               //Para eliminar el bochon busco los bochones asociados a la excavacion, obtengo el array de los bochones
               //encontrados, elimino ese bochon de la lista, actualizo la excavacion y finalmente elimino el bochon.-
 
-              axios.get('http://localhost:3001/api/excavacionId/'+idExcavacion)
+              axios.get('/api/excavacionId/'+idExcavacion)
               .then(function(response) {
                       
                   bochones=response.data.excavacionId.bochonesEncontrados
@@ -232,13 +228,13 @@ class DeleteBochon extends Component {
                     "bochonesEncontrados": bochonesFinal
                    }
 
-                   axios.put("http://localhost:3001/api/excavacionBochon/"+idExcavacion, data1, {
+                   axios.put("/api/excavacionBochon/"+idExcavacion, data1, {
                     headers:{
                       'Content-Type': 'application/json'
                     }   
                    }).then(response => {
                      
-                    fetch('http://localhost:3001/api/bochon/'+item, {
+                    fetch('/api/bochon/'+item, {
                       method: 'delete',
                       headers:{
                                 'Content-Type': 'application/json'

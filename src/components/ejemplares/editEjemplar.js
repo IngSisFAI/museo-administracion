@@ -127,7 +127,7 @@ class EditEjemplar extends Component {
 		 
 		 
 		 
-    fetch('http://localhost:3001/api/ejemplarId/'+this.props.match.params.id)
+    fetch('/api/ejemplarId/'+this.props.match.params.id)
     .then((response) => {
         return response.json()
       })
@@ -510,7 +510,7 @@ handleCiudadChange = (selectedCiudad) => {
                 "perteneceExca":idExcav
              };
 
-                fetch('http://localhost:3001/api/ejemplar/'+this.props.match.params.id, {
+                fetch('/api/ejemplar/'+this.props.match.params.id, {
                 method: 'put',
                 body: JSON.stringify(data),
                 headers:{

@@ -48,7 +48,7 @@ class editPersona extends React.Component {
 
       componentDidMount() {
         var feBaja=null;
-        axios.get('http://localhost:3001/api/personaId/'+this.props.match.params.id)
+        axios.get('/api/personaId/'+this.props.match.params.id)
             .then(response => {
              
               feBaja=response.data.personaId.fechaBaja
@@ -179,7 +179,7 @@ class editPersona extends React.Component {
 
               //-----------------------------------------------------------------
 
-              fetch('http://localhost:3001/api/persona/'+this.props.match.params.id, {
+              fetch('/api/persona/'+this.props.match.params.id, {
                     method: 'put',
                     body: JSON.stringify(data),
                     headers:{

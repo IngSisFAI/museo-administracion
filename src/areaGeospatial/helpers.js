@@ -9,8 +9,8 @@ export const puntoDentroDeArea = (punto, puntosArea) => {
     xj,
     yj,
     intersect;
-  const x = punto.lat;
-  const y = punto.lng;
+  const x = punto.lat ? punto.lat : punto.getLatLng() && punto.getLatLng().lat;
+  const y = punto.lng ? punto.lng : punto.getLatLng() && punto.getLatLng().lng;
 
   for (i = 0, j = puntosArea.length - 1; i < puntosArea.length; j = i++) {
     xi = puntosArea[i].lat || puntosArea[i][0];

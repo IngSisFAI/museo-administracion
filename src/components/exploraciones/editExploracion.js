@@ -24,7 +24,7 @@ function validate(nombre, fecha) {
 
 
         componentDidMount() {
-            axios.get('http://localhost:3001/api/exploracionId/'+this.props.match.params.id)
+            axios.get('/api/exploracionId/'+this.props.match.params.id)
                 .then(response => {
                     this.setState({ 
                         nombre: response.data.exploracionId.nombre, 
@@ -67,7 +67,7 @@ function validate(nombre, fecha) {
                   
                      
     
-                  fetch('http://localhost:3001/api/exploracion/'+this.props.match.params.id, {
+                  fetch('/api/exploracion/'+this.props.match.params.id, {
                         method: 'put',
                         body: JSON.stringify(data),
                         headers:{

@@ -94,7 +94,7 @@ class EditBochon extends Component {
 	  
 	 
 		
-    fetch('http://localhost:3001/api/bochonId/'+this.props.match.params.id)
+    fetch('/api/bochonId/'+this.props.match.params.id)
     .then((response) => {
         return response.json()
       })
@@ -248,7 +248,7 @@ traerPiezas(idEjemplar)
                 "piezaId": idP
               };
 
-              fetch('http://localhost:3001/api/bochon/'+this.props.match.params.id, {
+              fetch('/api/bochon/'+this.props.match.params.id, {
                 method: 'put',
                 body: JSON.stringify(data),
                 headers:{

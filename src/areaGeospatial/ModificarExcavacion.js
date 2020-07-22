@@ -45,15 +45,12 @@ export default class ModificarExcavacion extends Component {
 
   obtenerExcavacion = async () => {
     const idExcavacion = this.props.excavacionId;
-    const response = await fetch(
-      `http://localhost:3001/api/areaExcavacion/${idExcavacion}`,
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json"
-        }
+    const response = await fetch(`/api/areaExcavacion/${idExcavacion}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json"
       }
-    );
+    });
 
     if (response.status !== 200) {
       return toast.error("La excavacion buscada no existe");
@@ -174,6 +171,7 @@ export default class ModificarExcavacion extends Component {
         const body = {
           areaExcavacion: this.state.coordenadasExcavacion
         };
+
         this.hacerRequest(
           "modificarAreaExcavacion",
           "poligonoExcavacion",
@@ -261,6 +259,7 @@ export default class ModificarExcavacion extends Component {
         body: JSON.stringify(body)
       }
     );
+
     if (response.status !== 200) {
       toast.error(msjError);
     } else {

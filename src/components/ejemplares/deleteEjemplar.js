@@ -123,7 +123,7 @@ class DeleteEjemplar extends Component {
  //una vez cargado en el DOM
  //*************************
   componentDidMount() {
-    fetch('http://localhost:3001/api/ejemplarId/'+this.props.match.params.id)
+    fetch('/api/ejemplarId/'+this.props.match.params.id)
     .then((response) => {
         return response.json()
       })
@@ -405,7 +405,7 @@ handleCiudadChange = (selectedCiudad) => {
 
               const idEj=this.props.match.params.id
 
-               axios.delete('http://localhost:3001/api/ejemplar/'+this.props.match.params.id)
+               axios.delete('/api/ejemplar/'+this.props.match.params.id)
                   .then(function(response) {
                   
 

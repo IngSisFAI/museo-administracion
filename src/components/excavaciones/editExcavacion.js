@@ -108,7 +108,7 @@ class EditExcavacion extends Component {
   componentDidMount() {
 
 
-    fetch('http://localhost:3001/api/excavacionId/'+this.props.match.params.id)
+    fetch('/api/excavacionId/'+this.props.match.params.id)
     .then((response) => {
         return response.json()
       })
@@ -359,7 +359,7 @@ class EditExcavacion extends Component {
             "idCiudad":  idCity
          };
 
-          fetch('http://localhost:3001/api/excavacion/'+this.props.match.params.id, {
+          fetch('/api/excavacion/'+this.props.match.params.id, {
           method: 'put',
           body: JSON.stringify(data),
           headers:{

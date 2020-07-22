@@ -40,7 +40,7 @@ class Multimedia extends Component {
   //una vez cargado en el DOM
 componentDidMount() {
     
-    fetch('http://localhost:3001/api/excavacionId/'+this.props.match.params.id)
+    fetch('/api/excavacionId/'+this.props.match.params.id)
     .then((response) => {
         return response.json()
       })
@@ -161,7 +161,7 @@ componentDidMount() {
                fotosExcavacion: imagenesList
         }
         
-        fetch('http://localhost:3001/api/excavacion/'+this.props.match.params.id, {
+        fetch('/api/excavacion/'+this.props.match.params.id, {
           method: 'put',
           body: JSON.stringify(data),
           headers:{
@@ -242,7 +242,7 @@ componentDidMount() {
               videosExcavacion: videosList
         }
         
-        fetch('http://localhost:3001/api/excavacion/'+this.props.match.params.id, {
+        fetch('/api/excavacion/'+this.props.match.params.id, {
           method: 'put',
           body: JSON.stringify(data),
           headers:{
@@ -518,7 +518,7 @@ componentDidMount() {
       var name=nombre.replace("\\","/")
 
 
-        axios.get("http://localhost:3001/api/excavacionId/"+id)
+        axios.get("/api/excavacionId/"+id)
         .then(response => {
 
                        videoLista=response.data.excavacionId.videosExcavacion   
@@ -529,7 +529,7 @@ componentDidMount() {
                         "videosExcavacion": videosFinal
                       }
 
-                      axios.put("http://localhost:3001/api/excavacion/"+idExcavacion, data1, {
+                      axios.put("/api/excavacion/"+idExcavacion, data1, {
                         headers:{
                           'Content-Type': 'application/json'
                         }   
@@ -593,7 +593,7 @@ componentDidMount() {
         var idExcavacion=""
         name=name.replace("\\","/")
        
-        axios.get("http://localhost:3001/api/excavacionPorFoto/"+cod)
+        axios.get("/api/excavacionPorFoto/"+cod)
         .then(response => {
                        
                        imageLista=response.data.excavacion.fotosExcavacion   
@@ -604,7 +604,7 @@ componentDidMount() {
                         "fotosExcavacion": fotosFinal
                       }
 
-                      axios.put("http://localhost:3001/api/excavacion/"+idExcavacion, data1, {
+                      axios.put("/api/excavacion/"+idExcavacion, data1, {
                         headers:{
                           'Content-Type': 'application/json'
                         }   

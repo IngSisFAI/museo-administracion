@@ -87,11 +87,9 @@ class AddExcavacion extends Component {
           .then((response) => {
               return response.json()
             })
-            .then((countries) => {
-              this.setState({paises: countries.paises })
-            });
-
-
+          .then((countries) => {
+            this.setState({paises: countries.paises })
+          })
       }
 
       setIdAreaExcavacion = idArea => this.setState({idAreaExcavacion: idArea})
@@ -287,8 +285,6 @@ class AddExcavacion extends Component {
       }
 
       handleBlur = evt => {
-        
-      
         fetch('/api/excavacionFiltroCode/'+evt.target.value)
         .then((response) => {
             return response.json()
@@ -301,10 +297,7 @@ class AddExcavacion extends Component {
                 this.setState({codigo:''});
                 document.getElementById('codigo').focus();
               }
-             
           });
-        
-
       };
 
     render() 
