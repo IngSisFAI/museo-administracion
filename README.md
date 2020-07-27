@@ -14,8 +14,10 @@ Clonar el repo
 
 Correr front-end en diferentes consolas/terminales:
 
-`nodemon server.js`
-
-`nodemon serverFile.js`
-
 `npm start`
+
+Rutas imagenes/videos para Personas, Excavaciones y Ejemplares
+
+Personas: '/public/images/personas'
+Excavaciones: '/public/images/Excavaciones'
+Ejemplares: '/public/images/Ejemplares'

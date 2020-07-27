@@ -316,40 +316,36 @@ class DeleteExcavacion extends Component {
         {
 
               evt.preventDefault();
-              var idExc=this.props.match.params.id
-              axios.delete('/api/excavacion/'+this.props.match.params.id)
+			  const destino="./../museo-administracion/public/images/excavaciones/"+this.props.match.params.id 
+             
+			 axios.delete('/api/excavacion/'+this.props.match.params.id)
                   .then(function(response) {
-                      
-                           console.log("¡Se eliminó la Excavación con Éxito!");
-                           //window.location.href="/excavaciones"; 
-                           var destinoImg="public/images/excavaciones/imagenes/"+idExc
-                           var destinoVideo="public/images/excavaciones/videos/"+idExc
-                           
-                            axios.get('http://localhost:9000/'+destinoImg)
-                            .then(response1 => {
-                              
-                                  console.log("Imagenes eliminadas.")
-                                
-                            })
-                            .catch(function(error) {
-                                alert("Error al eliminar. Intente nuevamente. (1)");
-                                console.log('Hubo un problema con la petición Fetch:' + error.message);
-                            });
-
-                           
-                            axios.get('http://localhost:9000/'+destinoVideo)
-                            .then(function(response)  {
-                                     console.log("Se elimino con exito")
-                              })
-                             .catch(function(error) {
-                                      alert("Error al eliminar. Intente nuevamente. (2)" );
-                                      console.log('Hubo un problema con la petición Fetch:' + error.message);
-                            });
-
-                            alert('¡Se eliminó la Excavación con Éxito!');
-                             window.location.href="/excavaciones"; 
-                       
+                          return response;
+  
                   })
+				  .then (function (resp){
+					    
+
+						fetch('/api/deleteDirectorio', {
+											method: 'get',
+											headers:{
+													  'Content-Type': undefined,
+													  'path': destino
+													}      
+											})
+						  .then(function(response) {
+							  if(response.ok) {
+								    console.log('Se eliminaron los archivos con exito.');
+								    alert('¡Se eliminó la Excavación con Éxito!');
+									window.location.href="/excavaciones"; 
+							  } 
+						  })
+						  .catch(function(error) {
+							  alert("Error al eliminar. Intente nuevamente.");
+							  console.log('Hubo un problema con la petición Fetch:' + error.message);
+						  });
+					  
+				  })
                   .catch(function(error) {
                       alert("Error al eliminar. Intente nuevamente.");
                       console.log('Hubo un problema con la petición Fetch:' + error.message);

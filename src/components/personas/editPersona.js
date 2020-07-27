@@ -5,12 +5,7 @@ import Moment from 'moment';
 //import Imagen from '../../images/personas';
 
 
-
-const opciones = [
-    { value: 'Geologo', label: 'Geologo' },
-    { value: 'Paleontologo', label: 'Paleontologo' },
-    { value: 'Ing. en Petroleo', label: 'Ing. en Petroleo' }
-  ]
+var Imagen=""
 
 function validate(nombre, apellido, nroDoc) {
     // true means invalid, so our conditions got reversed
@@ -40,9 +35,11 @@ class editPersona extends React.Component {
                           everFocusedApellido: false,
                           everFocusedNroDoc: false,
                           inFocus: "",
-                          selectedFile: null
+                          selectedFile: null, 
+						  oldFile: null
                };
        this.cambioNumero = this.cambioNumero.bind(this);
+	   this.reemplazar = this.reemplazar.bind(this);
 
       }
 
@@ -56,6 +53,9 @@ class editPersona extends React.Component {
               {
                   feBaja=(Moment(response.data.personaId.fechaBaja).add(1, 'days')).format('YYYY-MM-DD');
               }
+			  
+			  Imagen="/images/personas/"+this.props.match.params.id+"/"+response.data.personaId.foto;
+			  
              
                this.setState({ 
                     nombre: response.data.personaId.nombres, 
@@ -65,7 +65,8 @@ class editPersona extends React.Component {
                     fbaja:feBaja,
                     motivo: response.data.personaId.motivoBaja,
                     titulos: response.data.personaId.titulos,
-                    foto: response.data.personaId.foto});
+                    foto: response.data.personaId.foto,
+					oldFile: response.data.personaId.foto});
                           
                    
             })
@@ -74,21 +75,8 @@ class editPersona extends React.Component {
             })
       }
 
-      onClickHandler = () => {
-        const data = new FormData() 
-        data.append('file', this.state.selectedFile)
-        axios.post("http://localhost:8000/upload", data, {
-          onUploadProgress: ProgressEvent => {
-            this.setState({
-              loaded: (ProgressEvent.loaded / ProgressEvent.total*100),
-            })
-          },
-        })
-         
-    }
+     
        
-
-    
     
       handleNombreChange = evt => {
         this.setState({ nombre: evt.target.value });
@@ -129,14 +117,6 @@ class editPersona extends React.Component {
       };
 
 
-     /* handleChange = (selectedOption) => {
-        let titulos = Array.from(selectedOption, option => option.value);
-        this.setState({selectedOption});
-        this.setState({titulos});
-        console.log(`Option selected:`, titulos );
-       
-      }*/
-
 
     
       handleSubmit = evt => {
@@ -146,52 +126,100 @@ class editPersona extends React.Component {
              
           evt.preventDefault();
              
-             
+             var photo = this.state.foto.replace("C:\\fakepath\\", "\\");
+			 photo= photo.replace(/\s+/g, "_");
+			 photo= this.reemplazar(photo);
               var data = {
                     "nombres": this.state.nombre,
                     "apellidos": this.state.apellido,
                     "dni": this.state.nroDoc,
                     "fechaInicio": this.state.finicio,
                     "titulos": this.state.titulos, 
-                    "foto": this.state.foto.replace("C:\\fakepath\\", "\\"),
+                    "foto": photo,
                     "fechaBaja": this.state.fbaja, 
                     "motivoBaja": this.state.motivo
                  };
               
-                 //Codigo para subir el archivo al server
-                 //-----------------------------------------------------------------
-                const destino= 'public/images/personas/'+this.props.match.params.id
-
-   
-                const data1 = new FormData() 
-                data1.append('file',this.state.selectedFile)
- 
-                axios.post("http://localhost:8000/upload", data1, {
-                       onUploadProgress: ProgressEvent => {
-                         this.setState({
-                           loaded: (ProgressEvent.loaded / ProgressEvent.total*100),
-                         })
-                       }, headers: { 
-                        'Content-Type': undefined,
-                        'path': destino
-                      }
-                     }); 
-
-              //-----------------------------------------------------------------
-
-              fetch('/api/persona/'+this.props.match.params.id, {
+			  
+                //Guardo la info en BD
+				fetch('/api/persona/'+this.props.match.params.id, {
                     method: 'put',
                     body: JSON.stringify(data),
                     headers:{
                               'Content-Type': 'application/json'
                             }      
                     })
-                    .then(function(response) {
-                      if(response.ok) {
-                        alert("¡Se guardó la Persona con Éxito!");
-                        window.location.href="/personas"; 
-                      } 
-                    })
+					.then(function(response) {
+					  if (response.ok) {
+						console.log("¡Se guardó la Persona con Éxito!");
+						return response.json();
+					  }
+					})
+                    .then(function(data) {
+						
+							if(this.state.selectedFile!==null)
+				            {   
+						        //subo archivo si se selecciono uno
+							    const destino= "../museo-administracion/public/images/personas/"+this.props.match.params.id
+								const data1 = new FormData() 
+								data1.append('file',this.state.selectedFile)
+								
+								axios.post("/api/uploadArchivo", data1, {
+								  headers: {
+									"Content-Type": undefined,
+									path: destino
+								  }
+								})
+								.then(response => {
+									return response;
+								})
+								.then (resp => {
+									//borro foto anterior
+									var oldFile=(this.state.oldFile).replace('\\','')
+									if (this.state.selectedFile.name!==oldFile && oldFile!=='')
+									{	
+									  const destino="./../museo-administracion/public/images/personas/"+this.props.match.params.id+"/"+oldFile
+									 
+                               		  fetch('/api/deleteArchivo', {
+											method: 'get',
+											headers:{
+													  'Content-Type': undefined,
+													  'path': destino
+													}      
+											})
+									  .then(function(response) {
+										  if(response.ok) {
+											  console.log('Se eliminaron los archivos con exito.');
+											  alert("¡Se guardó la Persona con Éxito!");
+											  window.location.href = "/personas";
+										  } 
+									  })
+									  .catch(function(error) {
+										  alert("Error al eliminar. Intente nuevamente.");
+										  console.log('Hubo un problema con la petición Fetch:' + error.message);
+									  });
+									}  
+									else
+									{
+										 alert("¡Se guardó la Persona con Éxito!");
+								         window.location.href = "/personas";
+										 
+									}
+									
+								})
+								.catch(error => {
+								  console.log(error);
+								});
+							}
+							else
+							{
+								alert("¡Se guardó la Persona con Éxito!");
+								window.location.href="/personas"; 
+							}
+								
+						
+                    
+                    }.bind(this))
                     .catch(function(error) {
                       alert("Error al guardar. Intente nuevamente.");
                       console.log('Hubo un problema con la petición Fetch:' + error.message);
@@ -215,7 +243,7 @@ class editPersona extends React.Component {
         const isDisabled = Object.keys(errors).some(x => errors[x]);
         
        
-       const Imagen="http://localhost:3000/images/personas/"+this.props.match.params.id+'/'+this.state.foto;
+       
 
          
         return (  <div> 
@@ -365,6 +393,31 @@ class editPersona extends React.Component {
             nroDoc: entrada
           })
       }
+	  
+reemplazar(cadena)
+{
+
+	var chars={
+
+		"á":"a", "é":"e", "í":"i", "ó":"o", "ú":"u",
+
+		"à":"a", "è":"e", "ì":"i", "ò":"o", "ù":"u", "ñ":"n",
+
+		"Á":"A", "É":"E", "Í":"I", "Ó":"O", "Ú":"U",
+
+		"À":"A", "È":"E", "Ì":"I", "Ò":"O", "Ù":"U", "Ñ":"N", 
+		
+		"ä": "a", "ë": "e", "ï": "i", "ö": "o", "ü": "u", 
+        
+		"Ä": "A", "Ä": "A", "Ë": "E","Ï":"I","Ö": "O", "Ü": "U" }
+
+	var expr=/[áàéèíìóòúùñäëïöü]/ig;
+
+	var res=cadena.replace(expr,function(e){return chars[e]});
+
+	return res;
+
+}
 
 }
 

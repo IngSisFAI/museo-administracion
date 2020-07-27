@@ -5,11 +5,7 @@ import Moment from 'moment';
 
 
 
-const opciones = [
-    { value: 'Geologo', label: 'Geologo' },
-    { value: 'Paleontologo', label: 'Paleontologo' },
-    { value: 'Ing. en Petroleo', label: 'Ing. en Petroleo' }
-  ]
+var Imagen=""
 
 function validate(nombre, apellido, nroDoc) {
     // true means invalid, so our conditions got reversed
@@ -54,6 +50,7 @@ class DeletePersona extends React.Component {
               {
                   feBaja=(Moment(response.data.personaId.fechaBaja).add(1, 'days')).format('YYYY-MM-DD');
               }
+			  Imagen="/images/personas/"+this.props.match.params.id+"/"+response.data.personaId.foto;
              
                this.setState({ 
                     nombre: response.data.personaId.nombres, 
@@ -72,18 +69,6 @@ class DeletePersona extends React.Component {
             })
       }
 
-      onClickHandler = () => {
-        const data = new FormData() 
-        data.append('file', this.state.selectedFile)
-        axios.post("http://localhost:8000/upload", data, {
-          onUploadProgress: ProgressEvent => {
-            this.setState({
-              loaded: (ProgressEvent.loaded / ProgressEvent.total*100),
-            })
-          },
-        })
-         
-    }
        
 
     
@@ -122,14 +107,6 @@ class DeletePersona extends React.Component {
       };
 
 
-   /*   handleChange = (selectedOption) => {
-        let titulos = Array.from(selectedOption, option => option.value);
-        this.setState({selectedOption});
-        this.setState({titulos});
-        console.log(`Option selected:`, titulos );
-       
-      }
-*/
 
       handleTituloChange = evt => {
         this.setState({titulos: evt.target.value });
@@ -142,36 +119,37 @@ class DeletePersona extends React.Component {
           {
 
                 evt.preventDefault();
-                const destino="public/images/personas/"+this.props.match.params.id   
-                //const archivo= "public/images/persona/"+this.props.match.params.id+"/"+this.state.foto
-                const data1 = new FormData() 
-               
-              
-                fetch('http://localhost:9000/'+destino)
-                  .then(function(response) {
-                      if(response.ok) {
-                     
-                          console.log('Se eliminaron los archivos con exito.');
-                      } 
-                  })
-                  .catch(function(error) {
-                      alert("Error al eliminar. Intente nuevamente.");
-                      console.log('Hubo un problema con la petición Fetch:' + error.message);
-                  });
-
-
-                
+                const destino="./../museo-administracion/public/images/personas/"+this.props.match.params.id   
 
                 fetch('/api/persona/'+this.props.match.params.id, {
                     method: 'delete'
                     })
                     .then(function(response) {
                         if(response.ok) {
-                       
-                        alert("¡Se eliminó la Exploración con Éxito!");
-                        window.location.href="/personas"; 
+                            console.log("¡Se eliminó la Persona con Éxito!");
+                            return response;
                         } 
                     })
+					.then( function(res) {
+					       fetch('/api/deleteDirectorio', {
+											method: 'get',
+											headers:{
+													  'Content-Type': undefined,
+													  'path': destino
+													}      
+											})
+						  .then(function(response) {
+							  if(response.ok) {
+								   console.log('Se eliminaron los archivos con exito.');
+								    alert("¡Se eliminó la Persona con Éxito!");
+									window.location.href="/personas"; 
+							  } 
+						  })
+						  .catch(function(error) {
+							  alert("Error al eliminar. Intente nuevamente.");
+							  console.log('Hubo un problema con la petición Fetch:' + error.message);
+						  });
+					})
                     .catch(function(error) {
                         alert("Error al eliminar. Intente nuevamente.");
                         console.log('Hubo un problema con la petición Fetch:' + error.message);
@@ -199,9 +177,6 @@ class DeletePersona extends React.Component {
         const errors = validate(this.state.nombre, this.state.apellido, this.state.nroDoc);
         const isDisabled = Object.keys(errors).some(x => errors[x]);
         
-        const Imagen="http://localhost:3000/images/personas/"+this.props.match.params.id+'/'+this.state.foto;
-  
-
          
         return (  <div> 
                   <div className="row">

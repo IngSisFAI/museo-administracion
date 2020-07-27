@@ -2,11 +2,7 @@ import React from "react";
 import Select from "react-select";
 import axios from "axios";
 
-const opciones = [
-  { value: "Geologo", label: "Geologo" },
-  { value: "Paleontologo", label: "Paleontologo" },
-  { value: "Ing. en Petroleo", label: "Ing. en Petroleo" }
-];
+
 
 function validate(nombre, apellido, nroDoc) {
   // true means invalid, so our conditions got reversed
@@ -38,22 +34,11 @@ class addPersona extends React.Component {
       id: ""
     };
     this.cambioNumero = this.cambioNumero.bind(this);
+	this.reemplazar = this.reemplazar.bind(this);
+	
   }
 
-  onClickHandler = () => {
-    console.log(this.state.selectedFile);
-    const data = new FormData();
-    data.append("file", this.state.selectedFile);
 
-    axios.post("http://localhost:8000/upload", data, {
-      // '/api/uploadArchivo....'
-      onUploadProgress: ProgressEvent => {
-        this.setState({
-          loaded: (ProgressEvent.loaded / ProgressEvent.total) * 100
-        });
-      }
-    });
-  };
 
   handleNombreChange = evt => {
     this.setState({ nombre: evt.target.value });
@@ -88,13 +73,7 @@ class addPersona extends React.Component {
     });
   };
 
-  /*  handleChange = (selectedOption) => {
-            let titulos = Array.from(selectedOption, option => option.value);
-            this.setState({selectedOption});
-            this.setState({titulos});
-            console.log(`Option selected:`, titulos );
-           
-          }*/
+
 
   handleTituloChange = evt => {
     this.setState({ titulos: evt.target.value });
@@ -104,13 +83,16 @@ class addPersona extends React.Component {
     if (this.canBeSubmitted()) {
       evt.preventDefault();
 
+     var photo = this.state.foto.replace("C:\\fakepath\\", "\\");
+	 photo= photo.replace(/\s+/g, "_");
+	 photo= this.reemplazar(photo);
       var data = {
         nombres: this.state.nombre,
         apellidos: this.state.apellido,
         dni: this.state.nroDoc,
         fechaInicio: this.state.finicio,
         titulos: this.state.titulos,
-        foto: this.state.foto.replace("C:\\fakepath\\", "\\"),
+        foto: photo,
         fechaBaja: this.state.fbaja,
         motivoBaja: this.state.motivo
       };
@@ -127,51 +109,50 @@ class addPersona extends React.Component {
         .then(function(response) {
           if (response.ok) {
             console.log("¡Se guardó la Persona con Éxito!");
+			return response.json();
           }
         })
+		.then(function(data) {
+			  if(this.state.selectedFile!==null)
+			  { 
+		  
+		         const archivo = this.state.selectedFile;
+				 const id = data.persona._id;
+				 const destino = "../museo-administracion/public/images/personas/" + id;
+				 
+				 const data1 = new FormData();
+				 data1.append("file", archivo);
+				 
+				 axios.post("api/uploadArchivo", data1, {
+						  headers: {
+							"Content-Type": undefined,
+							path: destino
+						  }
+						})
+						.then(response => {
+						  alert("¡Se guardó la Persona con Éxito!");
+						  window.location.href = "/personas";
+						})
+						.catch(error => {
+						  console.log(error);
+						});
+		      }
+			  else
+			  {
+				  alert("¡Se guardó la Persona con Éxito!");
+				  window.location.href = "/personas";
+				  
+			  }
+				 
+		  
+        }.bind(this))
         .catch(function(error) {
           alert("Error al guardar. Intente nuevamente.");
-          console.log(
-            "Hubo un problema con la petición Fetch:" + error.message
+          console.log("Hubo un problema con la petición Fetch:" + error.message
           );
         });
 
-      const archivo = this.state.selectedFile;
-      var destino = "";
-      //------------------------------------------------------------------
-      //Busco el id de la persona recientemente cargada
-      //   console.log('API: ', 'api/personaDni/'+this.state.nroDoc)
-      var id = "";
-      axios
-        .get("api/personaDni/" + this.state.nroDoc)
-        .then(function(response) {
-          console.log("ID Persona:", response.data.persona._id);
-          id = response.data.persona._id;
 
-          destino = "public/images/personas/" + id;
-          console.log("DESTINO:" + destino);
-
-          const data1 = new FormData();
-          data1.append("file", archivo);
-
-          axios
-            .post("http://localhost:8000/upload", data1, {
-              headers: {
-                "Content-Type": undefined,
-                path: destino
-              }
-            })
-            .then(response => {
-              alert("¡Se guardó la Persona con Éxito!");
-              window.location.href = "/personas";
-            })
-            .catch(error => {
-              console.log(error);
-            });
-        })
-        .catch(function(error) {
-          console.log(error);
-        });
 
       return;
     }
@@ -228,7 +209,7 @@ class addPersona extends React.Component {
               <form className="form-horizontal" onSubmit={this.handleSubmit}>
                 <div className="input-group">
                   <div className="col-sm-4">
-                    <label htmlFor="apellido">Apellidos:</label>
+                    <label htmlFor="apellido">Apellidos (*):</label>
                     <input
                       name="apellido"
                       type="text"
@@ -240,7 +221,7 @@ class addPersona extends React.Component {
                   </div>
 
                   <div className="col-sm-4">
-                    <label htmlFor="nombre">Nombres:</label>
+                    <label htmlFor="nombre">Nombres (*):</label>
                     <input
                       name="nombre"
                       className={errors.nombre ? "error" : ""}
@@ -252,7 +233,7 @@ class addPersona extends React.Component {
                   </div>
 
                   <div className="col-sm-4">
-                    <label htmlFor="nroDoc">Nro. Doc.:</label>
+                    <label htmlFor="nroDoc">Nro. Doc. (*):</label>
                     <input
                       name="nroDoc"
                       className={errors.nroDoc ? "error" : ""}
@@ -327,7 +308,13 @@ class addPersona extends React.Component {
                     />
                   </div>
                 </div>
-
+				
+				 <br />
+				   <div className="input-group">
+					  <div className="col-sm-12">
+						<p>(*) Datos Obligatorios</p>
+					  </div>
+                    </div>
                 <br />
 
                 <div className="form-group">
@@ -378,6 +365,32 @@ class addPersona extends React.Component {
         nroDoc: entrada
       });
   }
+  
+  reemplazar(cadena)
+{
+
+	var chars={
+
+		"á":"a", "é":"e", "í":"i", "ó":"o", "ú":"u",
+
+		"à":"a", "è":"e", "ì":"i", "ò":"o", "ù":"u", "ñ":"n",
+
+		"Á":"A", "É":"E", "Í":"I", "Ó":"O", "Ú":"U",
+
+		"À":"A", "È":"E", "Ì":"I", "Ò":"O", "Ù":"U", "Ñ":"N", 
+		
+		"ä": "a", "ë": "e", "ï": "i", "ö": "o", "ü": "u", 
+        
+		"Ä": "A", "Ä": "A", "Ë": "E","Ï":"I","Ö": "O", "Ü": "U" }
+
+	var expr=/[áàéèíìóòúùñäëïöü]/ig;
+
+	var res=cadena.replace(expr,function(e){return chars[e]});
+
+	return res;
+
+}
+
 }
 
 export default addPersona;

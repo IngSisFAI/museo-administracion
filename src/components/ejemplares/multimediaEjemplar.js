@@ -2,6 +2,9 @@ import React, { Component } from 'react';
 import axios from 'axios';
 
 
+var rutaFile='';
+var idEj= ''
+
 var removeItemFromArr = ( arr, item ) => {
 
   return arr.filter( e => e._id !== item);
@@ -31,8 +34,9 @@ class MultimediaEjemplar extends Component {
                  foto:"",
                  video:""
         }
-        this.borrar = this.borrar.bind(this);
+        this.deleteFile = this.deleteFile.bind(this);
         this.deleteVideo = this.deleteVideo.bind(this);
+		this.reemplazar = this.reemplazar.bind(this);
       
       }
 
@@ -44,6 +48,8 @@ componentDidMount() {
         return response.json()
       })
       .then((ejemplars) => {
+		  rutaFile='/images/ejemplares/'+this.props.match.params.id;
+          idEj= this.props.match.params.id
         
 
           this.setState({ nombreE: ejemplars.ejemplarId.nombre,   
@@ -117,40 +123,41 @@ componentDidMount() {
         descripcion: ''
       });
 
-      //subir archivo al server 
+      //subir archivo(IMAGEN) al server 
+      //------------------------------------------------------------------------------------------------
+        const destino= "../museo-administracion/public/images/ejemplares/"+this.props.match.params.id
+		const data1 = new FormData() 
+		data1.append('file',this.state.selectedFile)
+								
+		axios.post("/api/uploadArchivo", data1, {
+				    headers: {
+									"Content-Type": undefined,
+									path: destino
+							}
+					})
+			 .then(response => {
+									return response;
+						})
+			.catch(error => {
+								  console.log(error);
+								});		
 
       //------------------------------------------------------------------------------------------------
-               const destino= 'public/images/ejemplares/imagenes/'+this.props.match.params.id
-               console.log("Selected File: ", this.state.selectedFile) 
-   
-               const data1 = new FormData() 
-                data1.append('file',this.state.selectedFile)
- 
-                axios.post("http://localhost:8000/upload", data1, {
-                       onUploadProgress: ProgressEvent => {
-                         this.setState({
-                           loaded: (ProgressEvent.loaded / ProgressEvent.total*100),
-                         })
-                       }, headers: { 
-                        'Content-Type': undefined,
-                        'path': destino
-                      }
-                     }); 
+        //ACTUALIZO TABLA EJEMPLARES (ARRAY FOTOS)
+		
+		var imagenesList= this.state.imagenes
+		var imageURL="/images/ejemplares/"+this.props.match.params.id;
 
-      //------------------------------------------------------------------------------------------------
-        //ACTUALIZO TABLA EXCAVACIONES (ARRAY FOTOS)
-
-        var imagenesList= this.state.imagenes
-       // var ruta="http:\\\\localhost:3000\\images\\excavaciones\\imagenes\\"
-        var ruta="http://localhost:3000/images/ejemplares/imagenes/"
-
-
-        var imageURL=ruta+this.props.match.params.id;
+        var imagenUp1= this.state.nombre.replace("C:\\fakepath\\", "\\").replace(/\s+/g,"_")
+		imagenUp1= this.reemplazar(imagenUp1);
+		
+		var imagenUp2=this.state.nombre.replace("C:\\fakepath\\", "/").replace(/\s+/g,"_")
+		imagenUp2= this.reemplazar(imagenUp2)
 
         var datosImg= {
-                    nombre:this.state.nombre.replace("C:\\fakepath\\", "\\").replace(/\s+/g,"_"),
+                    nombre:imagenUp1,
                     descripcion: this.state.descripcion, 
-                    url:imageURL+this.state.nombre.replace("C:\\fakepath\\", "/").replace(/\s+/g,"_")  
+                    url:imageURL+imagenUp2
                }
          
         imagenesList.push(datosImg)
@@ -169,6 +176,7 @@ componentDidMount() {
           .then(function(response) {
             if(response.ok) {
               console.log("¡Se actualizó el Ejemplar con Éxito!");
+			  window.location.reload()
             } 
           })
           .catch(function(error) {
@@ -206,35 +214,39 @@ componentDidMount() {
         nombreVideo: ''
       });
 
-      //subir archivo al server 
+      //subir archivo al server (Video)
 
       //------------------------------------------------------------------------------------------------
-               const destino= 'public/images/ejemplares/videos/'+this.props.match.params.id
-               console.log("Selected File: ", this.state.selectedFileVideo) 
+            const destino= "../museo-administracion/public/images/ejemplares/"+this.props.match.params.id  
    
-               const data1 = new FormData() 
-                data1.append('file',this.state.selectedFileVideo)
+            const data1 = new FormData() 
+            data1.append('file',this.state.selectedFileVideo)
  
-                axios.post("http://localhost:8000/upload", data1, {
-                       onUploadProgress: ProgressEvent => {
-                         this.setState({
-                           loaded: (ProgressEvent.loaded / ProgressEvent.total*100),
-                         })
-                       }, headers: { 
-                        'Content-Type': undefined,
-                        'path': destino
-                      }
-                     }); 
+            axios.post("/api/uploadArchivo", data1, {
+				    headers: {
+									"Content-Type": undefined,
+									path: destino
+							}
+					})
+				.then(response => {
+									return response;
+						})
+				.catch(error => {
+								  console.log(error);
+								});	 
+					 
 
       //------------------------------------------------------------------------------------------------
         //ACTUALIZO TABLA EXCAVACIONES (ARRAY FOTOS)
 
-        var videosList= this.state.videos
+		var videosList= this.state.videos
        
 
-        var videoSubir=this.state.nombreVideo.replace("C:\\fakepath\\", "\\").replace(/\s+/g,"_")       
+        var videoSubir=this.state.nombreVideo.replace("C:\\fakepath\\", "\\").replace(/\s+/g,"_")    
+        videoSubir= this.reemplazar(videoSubir)		
          
         videosList.push(videoSubir)
+		
 
         var data = {
               videosEjemplar: videosList
@@ -250,6 +262,7 @@ componentDidMount() {
           .then(function(response) {
             if(response.ok) {
               console.log("¡Se actualizó el Ejemplar con Éxito!");
+			   window.location.reload()
             } 
           })
           .catch(function(error) {
@@ -277,9 +290,7 @@ componentDidMount() {
      const { nombre,descripcion, listImagen } = this.state;
      const { nombreVideo, listVideo } = this.state;
 
-     const ruta='http://localhost:3000/images/ejemplares/videos/'+this.props.match.params.id;
-     const rutaImg='http://localhost:3000/images/ejemplares/imagenes/'+this.props.match.params.id;
-     const idExc= this.props.match.params.id
+    
 
 
 
@@ -355,7 +366,7 @@ componentDidMount() {
                                       <td>{item.nombre.replace("C:\\fakepath\\", "\\").replace(/\s+/g,"_")}</td>
                                       <td>{item.descripcion}</td>
                                       <td>
-                                        <button id="elimImagen" onClick={()=>this.borrar(item._id, item.nombre)} title="Eliminar Imagen" className="btn btn-outline-danger my-2 my-sm-0"><span className="fa fa-trash" title="Eliminar"></span></button>
+                                        <button id="elimImagen" type="button" onClick={()=>this.deleteFile(item._id, item.nombre)} title="Eliminar Imagen" className="btn btn-outline-danger my-2 my-sm-0"><span className="fa fa-trash" title="Eliminar"></span></button>
                                         &nbsp;&nbsp;
                                         <a href={"#myModal"+i} role="button" title="Ver Imagen" className="btn btn-outline-warning my-2 my-sm-0" 
                                                    data-toggle="modal"><span className="fa fa-eye"></span></a>
@@ -367,7 +378,7 @@ componentDidMount() {
                                                             
                                                       <h4 className="modal-title">Foto</h4>      
                                                   </div>      
-                                                  <div className="modal-body"><img src={rutaImg+item.nombre.replace("C:\\fakepath\\", "\\").replace(/\s+/g,"_")} className="img-rounded" alt="Foto" width="400" height="400" />   </div>      
+                                                  <div className="modal-body"><img src={rutaFile+item.nombre} className="img-rounded" alt="Foto" width="400" height="400" />   </div>      
                                                   <div className="modal-footer">        
                                                       <button type="button" className="btn btn-default" data-dismiss="modal">Cerrar</button>     
                                                   </div>  
@@ -445,8 +456,8 @@ componentDidMount() {
                                         <td> {j=j+1} </td>
                                         <td>{item.replace("C:\\fakepath\\", "\\").replace(/\s+/g,"_")}</td>
                                         <td>
-                                        <button  id="elimVideo" type="button" onClick={()=>this.deleteVideo(idExc,item.replace("C:\\fakepath\\", "\\").replace(/\s+/g,"_"))} title="Eliminar Video" className="btn btn-outline-danger my-2 my-sm-0"><span className="fa fa-trash" title="Eliminar"></span></button>
-                                        &nbsp;&nbsp;
+                                        <button  id="elimVideo" type="button" onClick={()=>this.deleteVideo(idEj,item.replace("C:\\fakepath\\", "\\").replace(/\s+/g,"_"))} title="Eliminar Video" className="btn btn-outline-danger my-2 my-sm-0"><span className="fa fa-trash" title="Eliminar"></span></button>
+											{/* &nbsp;&nbsp;
                                         <a href={"#myModalv"+j} role="button" title="Ver Video" className="btn btn-outline-warning my-2 my-sm-0" 
                                                    data-toggle="modal"><span className="fa fa-eye"></span></a>
 
@@ -459,7 +470,7 @@ componentDidMount() {
                                                     </div>      
                                                     <div className="modal-body">
                                                       
-                                                      <video id={"myVideo"+j} src={ruta+item} width="640" height="360" controls preload="auto"> </video>  
+                                                      <video id={"myVideo"+j} src={rutaFile+item} width="640" height="360" controls preload="auto"> </video>  
                               
                                                     </div>      
                                                     <div className="modal-footer">        
@@ -468,7 +479,7 @@ componentDidMount() {
                                                 </div>  
                                             </div>
                                             </div>  
-                                        
+											*/}
                                         </td>
                                       </tr>
 
@@ -534,20 +545,25 @@ componentDidMount() {
                         }   
                       }).then(response => {
     
-                            var destino="public/images/ejemplares/videos/"+idEjemplar+name
-                            //console.log("DESTINO:", destino) 
-                             fetch('http://localhost:9000/'+destino)
-                            .then(function(response) {
-                                if(response.ok) {
-                              
-                                    alert('Se elimino el archivo con exito.');
-                                } 
-                            })
-                            .catch(function(error) {
-                                alert("Error al eliminar. Intente nuevamente.");
-                                console.log('Hubo un problema con la petición Fetch:' + error.message);
-                            });
-                           // alert("Se elimino con Exito.");
+                             const destino="./../museo-administracion/public/images/ejemplares/"+idEjemplar+name
+									 
+                               		  fetch('/api/deleteArchivo', {
+											method: 'get',
+											headers:{
+													  'Content-Type': undefined,
+													  'path': destino
+													}      
+											})
+									  .then(function(response) {
+										  if(response.ok) {
+											  alert('Se elimino el archivo con exito.');
+										  } 
+									  })
+									  .catch(function(error) {
+										  alert("Error al eliminar. Intente nuevamente.");
+										  console.log('Hubo un problema con la petición Fetch:' + error.message);
+									  });  
+						   
                         })
                       .catch(function(error) {
                         alert("Error al guardar. Intente nuevamente.");
@@ -585,7 +601,7 @@ componentDidMount() {
 
    }
 
-   borrar(cod, name) {
+   deleteFile(cod, name) {
        
         var imageLista=[]
         var idEjemplar=""
@@ -601,6 +617,7 @@ componentDidMount() {
                       var data1 = {
                         "fotosEjemplar": fotosFinal
                       }
+					 
 
                       axios.put("/api/ejemplar/"+idEjemplar, data1, {
                         headers:{
@@ -608,20 +625,25 @@ componentDidMount() {
                         }   
                       }).then(response => {
     
-                            var destino="public/images/ejemplares/imagenes/"+idEjemplar+name
-                            //console.log("DESTINO:", destino) 
-                             fetch('http://localhost:9000/'+destino)
-                            .then(function(response) {
-                                if(response.ok) {
-                              
-                                    alert('Se elimino el archivo con exito.');
-                                } 
-                            })
-                            .catch(function(error) {
-                                alert("Error al eliminar. Intente nuevamente.");
-                                console.log('Hubo un problema con la petición Fetch:' + error.message);
-                            });
-                           // alert("Se elimino con Exito.");
+                                      const destino="./../museo-administracion/public/images/ejemplares/"+idEjemplar+name
+									 
+                               		  fetch('/api/deleteArchivo', {
+											method: 'get',
+											headers:{
+													  'Content-Type': undefined,
+													  'path': destino
+													}      
+											})
+									  .then(function(response) {
+										  if(response.ok) {
+											  alert('Se elimino el archivo con exito.');
+										  } 
+									  })
+									  .catch(function(error) {
+										  alert("Error al eliminar. Intente nuevamente.");
+										  console.log('Hubo un problema con la petición Fetch:' + error.message);
+									  });   
+						   
                         })
                       .catch(function(error) {
                         alert("Error al guardar. Intente nuevamente.");
@@ -640,6 +662,31 @@ componentDidMount() {
           listImagen: temp
         })
     }  
+	
+reemplazar(cadena)
+{
+
+	var chars={
+
+		"á":"a", "é":"e", "í":"i", "ó":"o", "ú":"u",
+
+		"à":"a", "è":"e", "ì":"i", "ò":"o", "ù":"u", "ñ":"n",
+
+		"Á":"A", "É":"E", "Í":"I", "Ó":"O", "Ú":"U",
+
+		"À":"A", "È":"E", "Ì":"I", "Ò":"O", "Ù":"U", "Ñ":"N", 
+		
+		"ä": "a", "ë": "e", "ï": "i", "ö": "o", "ü": "u", 
+        
+		"Ä": "A", "Ä": "A", "Ë": "E","Ï":"I","Ö": "O", "Ü": "U" }
+
+	var expr=/[áàéèíìóòúùñäëïöü]/ig;
+
+	var res=cadena.replace(expr,function(e){return chars[e]});
+
+	return res;
+
+}
 
 
 }

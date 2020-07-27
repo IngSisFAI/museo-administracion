@@ -403,38 +403,30 @@ handleCiudadChange = (selectedCiudad) => {
 
               evt.preventDefault();
 
-              const idEj=this.props.match.params.id
+              const destino="./../museo-administracion/public/images/ejemplares/"+this.props.match.params.id 
 
                axios.delete('/api/ejemplar/'+this.props.match.params.id)
                   .then(function(response) {
+					  
+				   fetch('/api/deleteDirectorio', {
+											method: 'get',
+											headers:{
+													  'Content-Type': undefined,
+													  'path': destino
+													}      
+											})
+						  .then(function(response) {
+							  if(response.ok) {
+								    console.log('Se eliminaron los archivos con exito.');
+								    alert('¡Se eliminó el Ejemplar con Éxito!');
+									window.location.href="/ejemplares"; 
+							  } 
+						  })
+						  .catch(function(error) {
+							  alert("Error al eliminar. Intente nuevamente.");
+							  console.log('Hubo un problema con la petición Fetch:' + error.message);
+						  });	  
                   
-
-                    var destinoImg="public/images/ejemplares/imagenes/"+idEj
-                    var destinoVideo="public/images/ejemplares/videos/"+idEj
-                    
-                     axios.get('http://localhost:9000/'+destinoImg)
-                     .then(response1 => {
-                       
-                           console.log("Imagenes eliminadas.")
-                         
-                     })
-                     .catch(function(error) {
-                         alert("Error al eliminar. Intente nuevamente. (1)");
-                         console.log('Hubo un problema con la petición Fetch:' + error.message);
-                     });
-
-                    
-                     axios.get('http://localhost:9000/'+destinoVideo)
-                     .then(function(response)  {
-                              console.log("Se elimino con exito")
-                       })
-                      .catch(function(error) {
-                               alert("Error al eliminar. Intente nuevamente. (2)" );
-                               console.log('Hubo un problema con la petición Fetch:' + error.message);
-                     });
-
-                     alert('¡Se eliminó el Ejemplar con Éxito!');
-                      window.location.href="/ejemplares";   
 
                   })
                   .catch(function(error) {
