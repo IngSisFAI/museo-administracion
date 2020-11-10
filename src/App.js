@@ -1,83 +1,81 @@
 import React, { Component } from 'react';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import { BrowserRouter, Route, Switch } from 'react-router-dom'
 
-import Home from './pages/home'
+import Menu from "./components/Menu"
 
-import Personas from './pages/personas'
-import AddPersona from './components/personas/addPersona'
-import EditPersona from './components/personas/editPersona'
-import DeletePersona from './components/personas/deletePersona'
+import Home from './components/home'
 
-import Excavaciones from './pages/excavaciones'
-import AddExcavacion from './components/excavaciones/addExcavacion'
-import EditExcavacion from './components/excavaciones/editExcavacion'
-import DeleteExcavacion from './components/excavaciones/deleteExcavacion'
-import Multimedia from './components/excavaciones/multimedia'
+//Personas
+import Personas from './components/personas/MainPersonas'
+import AddPersona from './components/personas/AddPersona'
+import EditPersona from './components/personas/EditPersona'
 
-import Exploraciones from './pages/exploraciones'
-import AddExploracion from './components/exploraciones/addExploracion'
-import EditExploracion from './components/exploraciones/editExploracion'
-import DeleteExploracion from './components/exploraciones/deleteExploracion'
+//Exploraciones
+import Exploraciones from './components/exploraciones/MainExploraciones'
+import AddExploracion from './components/exploraciones/AddExploracion'
+import EditExploracion from './components/exploraciones/EditExploracion'
 
-import { BrowserRouter, Route } from 'react-router-dom'
-import Nav from "./components/Navbar"
-import './App.css';
+//Excavaciones
+import Excavaciones from './components/excavaciones/MainExcavaciones'
+import AddExcavacion from './components/excavaciones/AddExcavacion'
+import EditExcavacion from './components/excavaciones/EditExcavacion'
+import Multimedia from './components/excavaciones/MultimediaExcavacion'
 
-import Ejemplares from './pages/ejemplares'
-import AddEjemplar from './components/ejemplares/addEjemplar'
-import EditEjemplar from './components/ejemplares/editEjemplar'
-import DeleteEjemplar from './components/ejemplares/deleteEjemplar'
-import MultimediaEjemplar from './components/ejemplares/multimediaEjemplar'
+//Ejemplares
+import Ejemplares from './components/ejemplares/MainEjemplares'
+import AddEjemplar from './components/ejemplares/AddEjemplar'
+import EditEjemplar from './components/ejemplares/EditEjemplar'
+import MultimediaEjemplar from './components/ejemplares/MultimediaEjemplar'
 
+//Bochones
+import Bochones from './components/bochones/MainBochones'
+import AddBochon from './components/bochones/AddBochon'
+import EditBochon from './components/bochones/EditBochon'
 
-import Bochones from './pages/bochones'
-import AddBochon from './components/bochones/addBochon'
-import EditBochon from './components/bochones/editBochon'
-import DeleteBochon from './components/bochones/deleteBochon'
 
 
 class App extends Component {
 
   render() {
     return (
-      <div className="App">
+    
 
         <BrowserRouter>
-          <div>
-            <Nav />
+		   <Menu />
+           <Switch>
             <Route exact path="/" component={Home} />
 
             <Route path="/personas" component={Personas} />
             <Route path="/addPersona" component={AddPersona} />
-            <Route path="/editPersona/:id" component={EditPersona} />
-            <Route path="/deletePersona/:id" component={DeletePersona} />
-            <Route path="/multimedia/:id" component={Multimedia} />
+            <Route path="/editPersona/:id" component={EditPersona} /> 
 
+           
             <Route path="/exploraciones" component={Exploraciones} />
             <Route path="/addExploracion" component={AddExploracion} />
             <Route path="/editExploracion/:id" component={EditExploracion} />
-            <Route path="/deleteExploracion/:id" component={DeleteExploracion} />
 
             <Route path="/excavaciones" component={Excavaciones} />
             <Route path="/addExcavacion" component={AddExcavacion} />
             <Route path="/editExcavacion/:id" component={EditExcavacion} />
-            <Route path="/deleteExcavacion/:id" component={DeleteExcavacion} />
+            <Route path="/multimedia/:id" component={Multimedia} />
 
 
             <Route path="/ejemplares" component={Ejemplares} />
             <Route path="/addEjemplar" component={AddEjemplar} />
             <Route path="/editEjemplar/:id" component={EditEjemplar} />
-            <Route path="/deleteEjemplar/:id" component={DeleteEjemplar} />
             <Route path="/multimediaEjemplar/:id" component={MultimediaEjemplar} />
 
             <Route path="/bochones" component={Bochones} />
             <Route path="/addBochon" component={AddBochon} />
             <Route path="/editBochon/:id" component={EditBochon} />
-            <Route path="/deleteBochon/:id" component={DeleteBochon} />
-
-
-          </div>
+			
+			
+			<Route component={Home} />
+  
+            </Switch>
         </BrowserRouter>
-      </div>
+   
     );
   }
 }

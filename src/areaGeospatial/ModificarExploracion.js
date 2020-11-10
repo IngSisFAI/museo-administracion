@@ -48,7 +48,7 @@ export default class ModificarExploracion extends Component {
   obtenerExploracion = async () => {
     const idExploracion = this.props.exploracionId;
 
-    const response = await fetch(`/api/areaExploracion/${idExploracion}`, {
+    const response = await fetch(`http://museo.fi.uncoma.edu.ar:3006/api/areaExploracion/${idExploracion}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json"
@@ -182,7 +182,7 @@ export default class ModificarExploracion extends Component {
 
   hacerRequest = async body => {
     const response = await fetch(
-      `/api/areaExploracion/${this.state.idExploracion}`,
+      `http://museo.fi.uncoma.edu.ar:3006/api/areaExploracion/${this.state.idExploracion}`,
       {
         method: "PUT",
         headers: {

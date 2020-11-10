@@ -70,7 +70,7 @@ export default class CrearExcavacion extends Component {
   obtenerExploracion = async idExploracion => {
     const exploracionId = idExploracion;
 
-    const response = await fetch(`api/areaExploracion/${exploracionId}`, {
+    const response = await fetch(`http://museo.fi.uncoma.edu.ar:3006/api/areaExploracion/${exploracionId}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json"
@@ -210,7 +210,7 @@ export default class CrearExcavacion extends Component {
       exploracionId: "5cfe8d0c385be24fc56da297"
     };
 
-    const response = await fetch("/api/areaExcavacion", {
+    const response = await fetch("http://museo.fi.uncoma.edu.ar:3006/api/areaExcavacion", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"

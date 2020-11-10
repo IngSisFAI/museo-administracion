@@ -45,7 +45,7 @@ export default class ModificarExcavacion extends Component {
 
   obtenerExcavacion = async () => {
     const idExcavacion = this.props.excavacionId;
-    const response = await fetch(`/api/areaExcavacion/${idExcavacion}`, {
+    const response = await fetch(`http://museo.fi.uncoma.edu.ar:3006/api/areaExcavacion/${idExcavacion}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json"
@@ -250,7 +250,7 @@ export default class ModificarExcavacion extends Component {
     marcadoresPoligono
   ) => {
     const response = await fetch(
-      `/api/areaExcavacion/${this.state.idExcavacion}`,
+      `http://museo.fi.uncoma.edu.ar:3006/api/areaExcavacion/${this.state.idExcavacion}`,
       {
         method: "PUT",
         headers: {

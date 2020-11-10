@@ -75,7 +75,7 @@ export default class CrearExploracion extends Component {
       areaExploracion: poligonoExploracion.getLatLngs()[0]
     };
 
-    const response = await fetch("/api/areaExploracion", {
+    const response = await fetch("http://museo.fi.uncoma.edu.ar:3006/api/areaExploracion", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -94,6 +94,7 @@ export default class CrearExploracion extends Component {
 
   render() {
     return (
+      <div className="container">
       <div style={{ position: "relative" }}>
         <ToastContainer
           position="top-right"
@@ -121,6 +122,7 @@ export default class CrearExploracion extends Component {
           </div>
         </div>
       </div>
+      </div>    
     );
   }
 }
