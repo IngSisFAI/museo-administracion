@@ -105,7 +105,7 @@ export default class ObtenerExcavacion extends Component {
   };
 
   obtenerTodasExcavaciones = async () => {
-    const response = await fetch(`api/areasExcavaciones`, {
+    const response = await fetch(`http://museo.fi.uncoma.edu.ar:3006/api/areasExcavaciones`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',

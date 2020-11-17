@@ -7,6 +7,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import {  Form, Button } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import Moment from 'moment';
+import ObtenerExploraciones from '../../areaGeospatial/ObtenerExploraciones';
 
 class MainExploraciones extends React.Component {
 
@@ -145,7 +146,7 @@ class MainExploraciones extends React.Component {
                     />
 					
 
-
+                     <ObtenerExploraciones />
                  </div>    
             </Form.Row>             
 
