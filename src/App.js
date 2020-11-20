@@ -2,7 +2,8 @@ import React, { Component } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { BrowserRouter, Route, Switch } from 'react-router-dom'
 
-import Menu from "./components/Menu"
+//import Menu from "./components/Menu"
+import Login from "./components/Login"
 
 import Home from './components/home'
 
@@ -33,19 +34,25 @@ import Bochones from './components/bochones/MainBochones'
 import AddBochon from './components/bochones/AddBochon'
 import EditBochon from './components/bochones/EditBochon'
 
-
+//Usuarios
+import Usuarios from './components/usuarios/MainUsuarios'
+import AddUsuario from './components/usuarios/AddUsuario'
+import EditUsuario from './components/usuarios/EditUsuario'
+import ChangePassword from './components/usuarios/ChangePassword'
 
 class App extends Component {
+
 
   render() {
     return (
     
 
         <BrowserRouter>
-		   <Menu />
+		  
            <Switch>
-            <Route exact path="/" component={Home} />
+            <Route exact path="/" component={Login} />
 
+            <Route exact path="/home" component={Home} />
             <Route path="/personas" component={Personas} />
             <Route path="/addPersona" component={AddPersona} />
             <Route path="/editPersona/:id" component={EditPersona} /> 
@@ -69,9 +76,14 @@ class App extends Component {
             <Route path="/bochones" component={Bochones} />
             <Route path="/addBochon" component={AddBochon} />
             <Route path="/editBochon/:id" component={EditBochon} />
+
+            <Route path="/usuarios" component={Usuarios} />
+            <Route path="/addUsuario" component={AddUsuario} />
+            <Route path="/editUsuario/:id" component={EditUsuario} />
+            <Route path="/changePassword" component={ChangePassword} />
 			
 			
-			<Route component={Home} />
+			      <Route component={Login} />
   
             </Switch>
         </BrowserRouter>

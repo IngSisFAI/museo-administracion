@@ -8,6 +8,10 @@ import {  Form, Button } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import Moment from 'moment';
 import ObtenerExploraciones from '../../areaGeospatial/ObtenerExploraciones';
+import Menu from "./../Menu"
+import Cookies from 'universal-cookie';
+
+const cookies = new Cookies();
 
 class MainExploraciones extends React.Component {
 
@@ -18,17 +22,24 @@ class MainExploraciones extends React.Component {
     }
 
     componentDidMount(){
-        fetch('http://museo.fi.uncoma.edu.ar:3006/api/exploracion')
-        .then(res => res.json())
-      .then(
-        (result) => {
-           
-            this.setState({
-              exploraciones: result.exploraciones          
-            });
-        }).catch(error=>{
-             console.log("Error")
-         });
+      if(!cookies.get('username') && !cookies.get('password'))
+      {
+          window.location.href='/';
+      }
+      else
+      {
+          fetch('http://museo.fi.uncoma.edu.ar:3006/api/exploracion')
+          .then(res => res.json())
+        .then(
+          (result) => {
+            
+              this.setState({
+                exploraciones: result.exploraciones          
+              });
+          }).catch(error=>{
+              console.log("Error")
+          });
+        } 
 
     }
 
@@ -62,7 +73,7 @@ class MainExploraciones extends React.Component {
 
          return( 
              <>
-                        
+            <Menu />            
             <Form>
             <ToastContainer
                         position="top-right"

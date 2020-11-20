@@ -7,6 +7,10 @@ import { faSave, faReply, faCompass} from '@fortawesome/free-solid-svg-icons'
 import { Link} from 'react-router-dom';
 import Select from 'react-select';
 import CrearExcavacion from '../../areaGeospatial/CrearExcavacion';
+import Menu from "./../Menu"
+import Cookies from 'universal-cookie';
+
+const cookies = new Cookies();
 
 
 class AddExcavacion extends React.Component {
@@ -44,32 +48,39 @@ class AddExcavacion extends React.Component {
 
       componentDidMount() {
 
-        fetch('http://museo.fi.uncoma.edu.ar:3006/api/persona')
-        .then((response) => {
-            return response.json()
-          })
-          .then((empleados) => {
-            this.setState({ colectores: empleados.personas, 
-                            directores: empleados.personas, 
-                            paleontologos: empleados.personas })
-          });
-		  
-		 fetch('http://museo.fi.uncoma.edu.ar:3006/api/exploracion')
-        .then((response) => {
-            return response.json()
-          })
-          .then((explorations) => {
-            this.setState({ exploraciones: explorations.exploraciones })
-          });
+        if(!cookies.get('username') && !cookies.get('password'))
+        {
+            window.location.href='/';
+        }
+        else
+        {
 
-          fetch('http://museo.fi.uncoma.edu.ar:3006/api/pais')
-          .then((response) => {
-              return response.json()
-            })
-          .then((countries) => {
-            this.setState({paises: countries.paises })
-          })
-		  
+              fetch('http://museo.fi.uncoma.edu.ar:3006/api/persona')
+              .then((response) => {
+                  return response.json()
+                })
+                .then((empleados) => {
+                  this.setState({ colectores: empleados.personas, 
+                                  directores: empleados.personas, 
+                                  paleontologos: empleados.personas })
+                });
+            
+          fetch('http://museo.fi.uncoma.edu.ar:3006/api/exploracion')
+              .then((response) => {
+                  return response.json()
+                })
+                .then((explorations) => {
+                  this.setState({ exploraciones: explorations.exploraciones })
+                });
+
+                fetch('http://museo.fi.uncoma.edu.ar:3006/api/pais')
+                .then((response) => {
+                    return response.json()
+                  })
+                .then((countries) => {
+                  this.setState({paises: countries.paises })
+                })
+         }
         } 
 
       setIdAreaExcavacion = idArea => this.setState({idAreaExcavacion: idArea})
@@ -342,6 +353,7 @@ class AddExcavacion extends React.Component {
 		
          return(
              <>
+               <Menu />
                <div className="row">
                <div className="col-md-12">
                 <div id="contenido" align="left" className="container">

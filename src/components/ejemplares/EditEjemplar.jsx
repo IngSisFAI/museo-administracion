@@ -8,6 +8,10 @@ import { Link} from 'react-router-dom';
 import Select from 'react-select';
 import ModificarExcavacion from '../../areaGeospatial/ModificarExcavacion';
 import Moment from 'moment';
+import Menu from "./../Menu"
+import Cookies from 'universal-cookie';
+
+const cookies = new Cookies();
 
 
 const optTipos = [
@@ -113,6 +117,13 @@ class EditEjemplar extends React.Component {
 	  //una vez cargado en el DOM
  //*************************
   componentDidMount() {
+
+    if(!cookies.get('username') && !cookies.get('password'))
+    {
+        window.location.href='/';
+    }
+    else
+    {
 	  
 		 
 		 
@@ -242,8 +253,9 @@ class EditEjemplar extends React.Component {
 							
                           
                         })
-		},3000)	
+		},2000)	
       });
+    } 
   }
   
    //**** FUNCIONES DE PRECARGA ***/
@@ -739,6 +751,7 @@ render()
 	
 	 return(
 	         <>
+           <Menu />
 			 <div className="row">
                <div className="col-md-12">
                 <div id="contenido" align="left" className="container">

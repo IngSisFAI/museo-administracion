@@ -3,13 +3,30 @@ import Nav from 'react-bootstrap/Nav';
 import Navbar from 'react-bootstrap/Navbar';
 import NavDropdown from 'react-bootstrap/NavDropdown';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faHome, faUsers, faMapMarked, faCompass, faPaw, faHandLizard } from '@fortawesome/free-solid-svg-icons'
+import { faHome, faUsers, faMapMarked, faCompass, faPaw, faHandLizard, faSignOutAlt, faKey, faUserEdit } from '@fortawesome/free-solid-svg-icons'
 import { Link } from 'react-router-dom';
+import Cookies from 'universal-cookie';
 
-const Menu = () => {
-     return   <>
+const cookies = new Cookies();
+
+class Menu extends React.Component {
+
+	cerrarSesion= () => {
+	   cookies.remove('id',{path:"/"});
+	   cookies.remove('nombre',{path:"/"});
+	   cookies.remove('apellido',{path:"/"});
+	   cookies.remove('user',{path:"/"});
+	   cookies.remove('password',{path:"/"});
+	   cookies.remove('permiso',{path:"/"});
+	   window.location.href="/";
+	}
+ render()
+ {
+
+	
+     return  ( <>
 					<Navbar bg="dark" variant="dark" expand="lg">
-						<Navbar.Brand as={Link} to={"/"}><FontAwesomeIcon icon={faHome} /></Navbar.Brand>
+						<Navbar.Brand as={Link} to={"/home"}><FontAwesomeIcon icon={faHome} /></Navbar.Brand>
 						<Navbar.Toggle aria-controls="basic-navbar-nav" />
 						<Navbar.Collapse id="basic-navbar-nav">
 							<Nav className="mr-auto">
@@ -21,11 +38,25 @@ const Menu = () => {
 									<NavDropdown.Item as={Link} to={"/ejemplares"} ><FontAwesomeIcon icon={faPaw} /> Ejemplares</NavDropdown.Item>
 									<NavDropdown.Item as={Link} to={"/bochones"} ><FontAwesomeIcon icon={faHandLizard} /> Bochones</NavDropdown.Item>
 								</NavDropdown>
+
+								<NavDropdown title="Sistema" id="basic-nav-dropdown">
+									{ cookies.get('permiso')==1? <NavDropdown.Item as={Link} to={"/usuarios"} ><FontAwesomeIcon icon={faUserEdit} /> Usuarios</NavDropdown.Item>: ''}
+									<NavDropdown.Item as={Link} to={"/changePassword"} ><FontAwesomeIcon icon={faKey} /> Cambiar Contraseña</NavDropdown.Item>
+									<NavDropdown.Item onClick={()=>this.cerrarSesion()}><FontAwesomeIcon icon={faSignOutAlt} /> Cerrar Sesión</NavDropdown.Item>
+								</NavDropdown>
+                                
 							</Nav> 
+						</Navbar.Collapse>
+						<Navbar.Collapse className="justify-content-end">
+									<Navbar.Text>
+									     Bienvenid@ { cookies.get('nombre') + ' ' +cookies.get('apellido')}!
+									</Navbar.Text>
 						</Navbar.Collapse>
 					</Navbar>
  
-             </> 
+			 </> 
+	 )
+ }	 
 
 }
 

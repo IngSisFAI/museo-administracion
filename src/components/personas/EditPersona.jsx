@@ -8,6 +8,11 @@ import { Link, withRouter} from 'react-router-dom';
 import Moment from 'moment';
 import axios from 'axios';
 import Image from 'react-bootstrap/Image'
+import Menu from "./../Menu"
+import Cookies from 'universal-cookie';
+
+const cookies = new Cookies();
+
 
 var Imagen=""
 var urlImagen="http://museoconsulta.fi.uncoma.edu.ar"
@@ -44,6 +49,13 @@ class EditPersona extends React.Component {
     
     componentDidMount(){
 
+      if(!cookies.get('username') && !cookies.get('password'))
+      {
+          window.location.href='/';
+      }
+      else
+      {
+
        var feBaja=null;
        fetch('http://museo.fi.uncoma.edu.ar:3006/api/personaId/'+this.props.match.params.id)
 	   .then(res => res.json())
@@ -77,8 +89,8 @@ class EditPersona extends React.Component {
              console.log("Error:",  error.message)
          });
 
-     
-      } 
+      }
+    } 
 
       handleNombreChange = evt => {
         this.setState({ nombre: evt.target.value });
@@ -308,6 +320,7 @@ class EditPersona extends React.Component {
       const {validated} = this.state;   
       return(
           <>
+              <Menu />
               <div className="row">
                <div className="col-md-12">
                 <div id="contenido" align="left" className="container">

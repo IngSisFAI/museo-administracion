@@ -8,6 +8,10 @@ import { Link} from 'react-router-dom';
 import ModificarExploracion from '../../areaGeospatial/ModificarExploracion';
 import axios from 'axios';
 import Moment from 'moment';
+import Menu from "./../Menu"
+import Cookies from 'universal-cookie';
+
+const cookies = new Cookies();
 
 class EditExploracion extends React.Component {
 
@@ -21,6 +25,12 @@ class EditExploracion extends React.Component {
         }
 
     componentDidMount() {
+      if(!cookies.get('username') && !cookies.get('password'))
+      {
+          window.location.href='/';
+      }
+      else
+      {
             axios.get('http://museo.fi.uncoma.edu.ar:3006/api/exploracionId/'+this.props.match.params.id)
                 .then(response => {
                     this.setState({ 
@@ -33,6 +43,7 @@ class EditExploracion extends React.Component {
                 .catch(function (error) {
                     console.log(error);
                 })
+      }        
     }
           
 
@@ -94,7 +105,7 @@ class EditExploracion extends React.Component {
 
      return(
          <>
-
+<Menu />
 <div className="row">
                <div className="col-md-12">
                 <div id="contenido" align="left" className="container">

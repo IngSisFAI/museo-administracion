@@ -1,7 +1,10 @@
 import React, { Component } from 'react';
 import axios from 'axios';
 import { ToastContainer, toast, Slide } from 'react-toastify';
+import Menu from "./../Menu"
+import Cookies from 'universal-cookie';
 
+const cookies = new Cookies();
 
 var rutaVideo="";
 var idExc= "";
@@ -45,32 +48,34 @@ class MultimediaExcavacion extends Component {
 
   //una vez cargado en el DOM
 componentDidMount() {
+  if(!cookies.get('username') && !cookies.get('password'))
+  {
+            window.location.href='/';
+  }
+  else
+    {
     
-    fetch('http://museo.fi.uncoma.edu.ar:3006/api/excavacionId/'+this.props.match.params.id)
-    .then((response) => {
-        return response.json()
-      })
-      .then((excavacions) => {
-		  
-		    rutaVideo='/images/excavaciones/'+this.props.match.params.id;
-            idExc= this.props.match.params.id
+      fetch('http://museo.fi.uncoma.edu.ar:3006/api/excavacionId/'+this.props.match.params.id)
+      .then((response) => {
+          return response.json()
+        })
+        .then((excavacions) => {
         
+          rutaVideo='/images/excavaciones/'+this.props.match.params.id;
+              idExc= this.props.match.params.id
+          
 
-          this.setState({ nombreE: excavacions.excavacionId.nombre,
-                          codigo:excavacions.excavacionId.codigo,
-                          imagenes: excavacions.excavacionId.fotosExcavacion,
-                          listImagen:excavacions.excavacionId.fotosExcavacion,
-                          videos: excavacions.excavacionId.videosExcavacion,
-                          listVideo:excavacions.excavacionId.videosExcavacion
-                          
-                        })
-             //console.log("Imagenes:",this.state.listImagen)
-      });
-
-      
-
-      
-
+            this.setState({ nombreE: excavacions.excavacionId.nombre,
+                            codigo:excavacions.excavacionId.codigo,
+                            imagenes: excavacions.excavacionId.fotosExcavacion,
+                            listImagen:excavacions.excavacionId.fotosExcavacion,
+                            videos: excavacions.excavacionId.videosExcavacion,
+                            listVideo:excavacions.excavacionId.videosExcavacion
+                            
+                          })
+              //console.log("Imagenes:",this.state.listImagen)
+        });
+    }
   }
 
    // Función que captura el valor de los inputs
@@ -305,6 +310,7 @@ componentDidMount() {
 
         return(
            <>
+           <Menu />
             <div>
 			<br/>
 			<ToastContainer

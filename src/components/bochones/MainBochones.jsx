@@ -7,6 +7,10 @@ import 'react-toastify/dist/ReactToastify.css';
 import {  Form, Button } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
+import Menu from "./../Menu"
+import Cookies from 'universal-cookie';
+
+const cookies = new Cookies();
 
 var removeItemFromArr = ( arr, item ) => {
   return arr.filter( e => e !== item );
@@ -22,6 +26,13 @@ class MainBochones extends React.Component {
 
  componentDidMount()
  {
+    if(!cookies.get('username') && !cookies.get('password'))
+    {
+        window.location.href='/';
+    }
+    else
+    {
+   
       
         fetch('http://museo.fi.uncoma.edu.ar:3006/api/bochon')
          .then((response) => {
@@ -32,7 +43,8 @@ class MainBochones extends React.Component {
               }).catch(function(error) {
                  toast.error("Error al consultar. Intente nuevamente.");
                  console.log("Hubo un problema con la petición Fetch:" , error.message);
-			  });
+        });
+      }    
 
   }		
 
@@ -95,6 +107,7 @@ render()
    {
         return (
              <>
+             <Menu />
             <Form>
 			<br/>
             <ToastContainer

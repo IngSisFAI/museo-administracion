@@ -1,6 +1,10 @@
 import React, { Component } from 'react';
 import axios from 'axios';
 import { ToastContainer, toast, Slide } from 'react-toastify';
+import Menu from "./../Menu"
+import Cookies from 'universal-cookie';
+
+const cookies = new Cookies();
 
 
 var rutaFile='';
@@ -44,6 +48,13 @@ class MultimediaEjemplar extends Component {
   //una vez cargado en el DOM
 componentDidMount() {
     
+  if(!cookies.get('username') && !cookies.get('password'))
+  {
+            window.location.href='/';
+  }
+  else
+  {
+
     fetch('http://museo.fi.uncoma.edu.ar:3006/api/ejemplarId/'+this.props.match.params.id)
     .then((response) => {
         return response.json()
@@ -64,7 +75,7 @@ componentDidMount() {
       });
 
       
-
+    }
       
 
   }
@@ -302,6 +313,7 @@ componentDidMount() {
 
         return(
            <>
+           <Menu />
             <div>
 			<ToastContainer
                         position="top-right"

@@ -6,6 +6,10 @@ import {  Form, Button } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faUsers, faPlus} from '@fortawesome/free-solid-svg-icons'
 import { withRouter, Link } from 'react-router-dom';
+import Menu from "./../Menu"
+import Cookies from 'universal-cookie';
+
+const cookies = new Cookies();
 
 
 
@@ -48,16 +52,26 @@ class MainPersonas extends React.Component {
 
 	
 	componentDidMount(){
-        fetch('http://museo.fi.uncoma.edu.ar:3006/api/persona')
-        .then(res => res.json())
-      .then(
-        (result) => {
-            this.setState({
-           personas: result.personas          
-        });
-        }).catch(error=>{
-             console.log("Error")
-         });
+    
+      if(!cookies.get('username') && !cookies.get('password'))
+      {
+          window.location.href='/';
+      }
+      else
+      {
+
+    
+          fetch('http://museo.fi.uncoma.edu.ar:3006/api/persona')
+          .then(res => res.json())
+        .then(
+          (result) => {
+              this.setState({
+            personas: result.personas          
+          });
+          }).catch(error=>{
+              console.log("Error")
+          });
+      } 
 
     }
 
@@ -129,6 +143,7 @@ class MainPersonas extends React.Component {
          return(
 
             <>
+            <Menu />
             <Form>
             <ToastContainer
                         position="top-right"

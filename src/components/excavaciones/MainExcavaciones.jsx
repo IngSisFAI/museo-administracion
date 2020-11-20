@@ -7,6 +7,10 @@ import 'react-toastify/dist/ReactToastify.css';
 import {  Form, Button } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import Moment from 'moment';
+import Menu from "./../Menu"
+import Cookies from 'universal-cookie';
+
+const cookies = new Cookies();
 
 class MainExcavaciones extends React.Component {
 
@@ -17,17 +21,24 @@ class MainExcavaciones extends React.Component {
     }
 
     componentDidMount(){
-        fetch('http://museo.fi.uncoma.edu.ar:3006/api/excavacion')
-        .then(res => res.json())
-      .then(
-        (result) => {
-           
-            this.setState({
-              excavaciones: result.excavaciones          
+      if(!cookies.get('username') && !cookies.get('password'))
+        {
+            window.location.href='/';
+        }
+        else
+        {
+            fetch('http://museo.fi.uncoma.edu.ar:3006/api/excavacion')
+            .then(res => res.json())
+          .then(
+            (result) => {
+              
+                this.setState({
+                  excavaciones: result.excavaciones          
+                });
+            }).catch(error=>{
+                console.log("Error")
             });
-        }).catch(error=>{
-             console.log("Error")
-         });
+          }    
 
     }
 
@@ -82,6 +93,7 @@ class MainExcavaciones extends React.Component {
    {
         return (
              <>
+             <Menu />
             <Form>
 			<br/>
             <ToastContainer

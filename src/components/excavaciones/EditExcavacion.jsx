@@ -8,6 +8,10 @@ import { Link} from 'react-router-dom';
 import Select from 'react-select';
 import ModificarExcavacion from '../../areaGeospatial/ModificarExcavacion';
 import Moment from 'moment';
+import Menu from "./../Menu"
+import Cookies from 'universal-cookie';
+
+const cookies = new Cookies();
 
 class EditExcavacion extends React.Component {
 	
@@ -96,132 +100,140 @@ class EditExcavacion extends React.Component {
   //una vez cargado en el DOM
   componentDidMount() {
 
+    if(!cookies.get('username') && !cookies.get('password'))
+    {
+            window.location.href='/';
+    }
+    else
+    {
 
-    fetch('http://museo.fi.uncoma.edu.ar:3006/api/excavacionId/'+this.props.match.params.id)
-    .then((response) => {
-        return response.json()
-      })
-      .then((excavacions) => {
-          var fb= excavacions.excavacionId.fechaBaja;
-          if(fb!==null)
-          {
-             fb=(Moment(excavacions.excavacionId.fechaBaja).add(1, 'days')).format('YYYY-MM-DD')
-          }
-		  
-		 
-          this.traerProvincias(excavacions.excavacionId.idPais)
-		  this.traerCiudades(excavacions.excavacionId.idProvincia)
+
+      fetch('http://museo.fi.uncoma.edu.ar:3006/api/excavacionId/'+this.props.match.params.id)
+      .then((response) => {
+          return response.json()
+        })
+        .then((excavacions) => {
+            var fb= excavacions.excavacionId.fechaBaja;
+            if(fb!==null)
+            {
+              fb=(Moment(excavacions.excavacionId.fechaBaja).add(1, 'days')).format('YYYY-MM-DD')
+            }
         
-	  
-		  var colectorSelect=[]
-		  var directorSelect=[]
-		  var paleontologoSelect=[]
-		  var exploracionSelect=[]
-		  var paisSelect=[]
-		  var provinciaSelect=[]
-          var ciudadSelect=[]		  
-		 
-	      					 
-
-		 //setTimeout ya que las funciones de provincias y ciudad se ejecutan antes que se seteen los estados
-        setTimeout(() => {
-		 if(excavacions.excavacionId.colector!==null && excavacions.excavacionId.colector!=='')
-		  {
-	
-			 colectorSelect= this.state.colectores.filter(option => option.value === excavacions.excavacionId.colector)
-		     colectorSelect=colectorSelect[0];
-			
-								 
-		  }	 
-
+      
+            this.traerProvincias(excavacions.excavacionId.idPais)
+        this.traerCiudades(excavacions.excavacionId.idProvincia)
           
-	      if(excavacions.excavacionId.directorId!==null && excavacions.excavacionId.directorId!=='')
-		  {
-	
-			 directorSelect= this.state.directores.filter(option => option.value === excavacions.excavacionId.directorId)
-		     directorSelect=directorSelect[0];
-			
-								 
-		  }	
+      
+        var colectorSelect=[]
+        var directorSelect=[]
+        var paleontologoSelect=[]
+        var exploracionSelect=[]
+        var paisSelect=[]
+        var provinciaSelect=[]
+            var ciudadSelect=[]		  
+      
+                    
 
-          
-	      if(excavacions.excavacionId.paleontologo!==null && excavacions.excavacionId.paleontologo!=='')
-		  {
-	
-			 paleontologoSelect= this.state.paleontologos.filter(option => option.value === excavacions.excavacionId.paleontologo)
-		     paleontologoSelect=paleontologoSelect[0];
-			
-								 
-		  }	
-          
-         
-	      if(excavacions.excavacionId.idExploracion!==null && excavacions.excavacionId.idExploracion!=='')
-		  {
-	
-			 exploracionSelect= this.state.exploraciones.filter(option => option.value === excavacions.excavacionId.idExploracion)
-		     exploracionSelect=exploracionSelect[0];
-			
-								 
-		  }	
-
-         
-	      if(excavacions.excavacionId.idPais!==null && excavacions.excavacionId.idPais!=='')
-		  {
-	
-			 paisSelect= this.state.paises.filter(option => option.value === excavacions.excavacionId.idPais)
-		     paisSelect=paisSelect[0];
-			
-								 
-		  }	
-		  else
-		  { paisSelect=null} 
-			
-			
-          if(excavacions.excavacionId.idProvincia!==null && excavacions.excavacionId.idProvincia!=='')
-		  {
-	        
-			 provinciaSelect= this.state.provincias.filter(option => option.value === excavacions.excavacionId.idProvincia)
-		     provinciaSelect=provinciaSelect[0];
-		  }	
-		  else
-		  {
-			 provinciaSelect=null 
-		  }
-		  
-		  if(excavacions.excavacionId.idCiudad!==null && excavacions.excavacionId.idCiudad!=='')
-		  {
-	        
-			 ciudadSelect= this.state.ciudades.filter(option => option.value === excavacions.excavacionId.idCiudad)
-		     ciudadSelect=ciudadSelect[0];
-		  }	
-		  else{
-			  ciudadSelect=null
-		  }
-		  
-			    this.setState({ nombre: excavacions.excavacionId.nombre,
-                          descripcion: excavacions.excavacionId.descripcion,
-                          codigo:excavacions.excavacionId.codigo,
-                          fechaInicio: (Moment(excavacions.excavacionId.fechaInicio).add(1, 'days')).format('YYYY-MM-DD'),
-                          fbaja:fb,
-                          motivoBaja: excavacions.excavacionId.motivoBaja, 
-                          muestraHome: excavacions.excavacionId.muestraHome,
-                          bochonesId:excavacions.excavacionId.bochonesEncontrados,
-						  selectedPais: paisSelect,
-                          selectedCiudad: ciudadSelect,
-                          selectedProvincia: provinciaSelect,
-						  selectedExploracion: exploracionSelect,
-						  selectedDirector:directorSelect,
-                          selectedColector:colectorSelect,
-                          selectedPaleontologo: paleontologoSelect,
-						  idAreaExcavacion: excavacions.excavacionId.idArea,
-						  puntoGpsExcavacion: excavacions.excavacionId.puntoGps
-
-                        })
+      //setTimeout ya que las funciones de provincias y ciudad se ejecutan antes que se seteen los estados
+          setTimeout(() => {
+      if(excavacions.excavacionId.colector!==null && excavacions.excavacionId.colector!=='')
+        {
     
-        }, 3000); 	  
+        colectorSelect= this.state.colectores.filter(option => option.value === excavacions.excavacionId.colector)
+          colectorSelect=colectorSelect[0];
+        
+                  
+        }	 
 
-       
-      });
+            
+          if(excavacions.excavacionId.directorId!==null && excavacions.excavacionId.directorId!=='')
+        {
+    
+        directorSelect= this.state.directores.filter(option => option.value === excavacions.excavacionId.directorId)
+          directorSelect=directorSelect[0];
+        
+                  
+        }	
+
+            
+          if(excavacions.excavacionId.paleontologo!==null && excavacions.excavacionId.paleontologo!=='')
+        {
+    
+        paleontologoSelect= this.state.paleontologos.filter(option => option.value === excavacions.excavacionId.paleontologo)
+          paleontologoSelect=paleontologoSelect[0];
+        
+                  
+        }	
+            
+          
+          if(excavacions.excavacionId.idExploracion!==null && excavacions.excavacionId.idExploracion!=='')
+        {
+    
+        exploracionSelect= this.state.exploraciones.filter(option => option.value === excavacions.excavacionId.idExploracion)
+          exploracionSelect=exploracionSelect[0];
+        
+                  
+        }	
+
+          
+          if(excavacions.excavacionId.idPais!==null && excavacions.excavacionId.idPais!=='')
+        {
+    
+        paisSelect= this.state.paises.filter(option => option.value === excavacions.excavacionId.idPais)
+          paisSelect=paisSelect[0];
+        
+                  
+        }	
+        else
+        { paisSelect=null} 
+        
+        
+            if(excavacions.excavacionId.idProvincia!==null && excavacions.excavacionId.idProvincia!=='')
+        {
+            
+        provinciaSelect= this.state.provincias.filter(option => option.value === excavacions.excavacionId.idProvincia)
+          provinciaSelect=provinciaSelect[0];
+        }	
+        else
+        {
+        provinciaSelect=null 
+        }
+        
+        if(excavacions.excavacionId.idCiudad!==null && excavacions.excavacionId.idCiudad!=='')
+        {
+            
+        ciudadSelect= this.state.ciudades.filter(option => option.value === excavacions.excavacionId.idCiudad)
+          ciudadSelect=ciudadSelect[0];
+        }	
+        else{
+          ciudadSelect=null
+        }
+        
+            this.setState({ nombre: excavacions.excavacionId.nombre,
+                            descripcion: excavacions.excavacionId.descripcion,
+                            codigo:excavacions.excavacionId.codigo,
+                            fechaInicio: (Moment(excavacions.excavacionId.fechaInicio).add(1, 'days')).format('YYYY-MM-DD'),
+                            fbaja:fb,
+                            motivoBaja: excavacions.excavacionId.motivoBaja, 
+                            muestraHome: excavacions.excavacionId.muestraHome,
+                            bochonesId:excavacions.excavacionId.bochonesEncontrados,
+                selectedPais: paisSelect,
+                            selectedCiudad: ciudadSelect,
+                            selectedProvincia: provinciaSelect,
+                selectedExploracion: exploracionSelect,
+                selectedDirector:directorSelect,
+                            selectedColector:colectorSelect,
+                            selectedPaleontologo: paleontologoSelect,
+                idAreaExcavacion: excavacions.excavacionId.idArea,
+                puntoGpsExcavacion: excavacions.excavacionId.puntoGps
+
+                          })
+      
+          }, 2000); 	  
+
+        
+        });
+    }    
   }
   
     //**** FUNCIONES DE PRECARGA ***/
@@ -540,6 +552,7 @@ class EditExcavacion extends React.Component {
 		
 	  return (
 	        <>
+          <Menu />
 			<div className="row">
                <div className="col-md-12">
                 <div id="contenido" align="left" className="container">

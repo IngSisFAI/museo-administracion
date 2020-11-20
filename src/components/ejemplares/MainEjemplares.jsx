@@ -6,6 +6,10 @@ import { ToastContainer, toast, Slide } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import {  Form, Button } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
+import Menu from "./../Menu"
+import Cookies from 'universal-cookie';
+
+const cookies = new Cookies();
 
 
 class MainEjemplares extends React.Component {
@@ -18,17 +22,24 @@ class MainEjemplares extends React.Component {
 
      componentDidMount()
      {
-      
-        fetch('http://museo.fi.uncoma.edu.ar:3006/api/ejemplar')
-         .then((response) => {
-                return response.json()
-              })
-              .then((ejemplars) => {
-                this.setState({ ejemplares: ejemplars.ejemplares})
-              }).catch(function(error) {
-                 toast.error("Error al consultar. Intente nuevamente.");
-                 console.log("Hubo un problema con la petición Fetch:" , error.message);
-			  });
+        if(!cookies.get('username') && !cookies.get('password'))
+        {
+            window.location.href='/';
+        }
+        else
+        {
+        
+          fetch('http://museo.fi.uncoma.edu.ar:3006/api/ejemplar')
+          .then((response) => {
+                  return response.json()
+                })
+                .then((ejemplars) => {
+                  this.setState({ ejemplares: ejemplars.ejemplares})
+                }).catch(function(error) {
+                  toast.error("Error al consultar. Intente nuevamente.");
+                  console.log("Hubo un problema con la petición Fetch:" , error.message);
+          });
+        } 
 
      }	
 
@@ -82,6 +93,7 @@ render()
    {
         return (
              <>
+             <Menu />
             <Form>
 			<br/>
             <ToastContainer

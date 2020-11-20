@@ -6,6 +6,10 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faSave, faReply, faMapMarked} from '@fortawesome/free-solid-svg-icons'
 import { Link} from 'react-router-dom';
 import CrearExploracion from "../../areaGeospatial/CrearExploracion";
+import Menu from "./../Menu"
+import Cookies from 'universal-cookie';
+
+const cookies = new Cookies();
 
 class AddExploracion extends React.Component {
 
@@ -21,6 +25,13 @@ class AddExploracion extends React.Component {
  
 
 setAreaId = areaId => this.setState({ areaId });
+
+componentDidMount() {
+  if(!cookies.get('username') && !cookies.get('password'))
+  {
+      window.location.href='/';
+  }
+} 
 
 handleNombreChange = evt => {
     this.setState({ nombre: evt.target.value });
@@ -79,6 +90,7 @@ render()
 
     return(
          <>
+             <Menu />
               <div className="row">
                <div className="col-md-12">
                 <div id="contenido" align="left" className="container">

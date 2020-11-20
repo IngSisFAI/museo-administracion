@@ -6,7 +6,10 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faSave, faReply, faHandLizard} from '@fortawesome/free-solid-svg-icons'
 import { Link} from 'react-router-dom';
 import Select from 'react-select';
-import axios from 'axios';
+import Menu from "./../Menu"
+import Cookies from 'universal-cookie';
+
+const cookies = new Cookies();
 
 
 class EditBochon extends React.Component {
@@ -95,110 +98,117 @@ class EditBochon extends React.Component {
 	  //una vez cargado en el DOM
  //*************************
   componentDidMount() {
-	  
+	
+	if(!cookies.get('username') && !cookies.get('password'))
+    {
+        window.location.href='/';
+    }
+    else
+    {
 	 
 		
-    fetch('http://museo.fi.uncoma.edu.ar:3006/api/bochonId/'+this.props.match.params.id)
-    .then((response) => {
-        return response.json()
-      })
-      .then((bochons) => {
-        
-		this.traerPiezas(bochons.bochonId.ejemplarAsociado) 
-		var excavacionSelect=[]
-		var preparadorSelect=[]
-		var ejemplarSelect=[]
-		var acidoSelect=[]
-		var tipoPreparacionSelect=[]
-		var piezaSelect=[]
-		
-		 setTimeout(() => {
-			 
-		 if(bochons.bochonId.excavacionId!==null && bochons.bochonId.excavacionId!=='')
-		 {
-			 excavacionSelect= this.state.excavaciones.filter(option => option.value === bochons.bochonId.excavacionId)
-		     excavacionSelect=excavacionSelect[0];					 
-		 }
-		 else
-		 {
-		     excavacionSelect=null	 
-			 
-		 }
-
-         if(bochons.bochonId.preparadorID!==null && bochons.bochonId.preparadorID!=='')
-		 {
-			 preparadorSelect= this.state.preparadores.filter(option => option.value === bochons.bochonId.preparadorID)
-		     preparadorSelect=preparadorSelect[0];					 
-         }
-         else
-		 {
-			preparadorSelect=null 
-			 
-		 }
-
-         if(bochons.bochonId.ejemplarAsociado!==null && bochons.bochonId.ejemplarAsociado!=='')
-		 {
-			 ejemplarSelect= this.state.ejemplares.filter(option => option.value === bochons.bochonId.ejemplarAsociado)
-		     ejemplarSelect=ejemplarSelect[0];					 
-         }
-         else
-		 {
-			ejemplarSelect=null 
-			 
-		 }	
-
-         if(bochons.bochonId.acidosAplicados!==null && bochons.bochonId.acidosAplicados!=='')
-		 {
-			 acidoSelect= this.state.acidos.filter(({label}) =>  bochons.bochonId.acidosAplicados.includes(label))
-
-         }
-         else
-		 {
-			acidoSelect=null
-			 
-		 }
-
-		if(bochons.bochonId.tipoPreparacion!==null && bochons.bochonId.tipoPreparacion!=='')
-		 {
-			 tipoPreparacionSelect= this.state.tiposPreparacion.filter(option => option.label === bochons.bochonId.tipoPreparacion)
-             tipoPreparacionSelect=tipoPreparacionSelect[0];
+		fetch('http://museo.fi.uncoma.edu.ar:3006/api/bochonId/'+this.props.match.params.id)
+		.then((response) => {
+			return response.json()
+		})
+		.then((bochons) => {
 			
-         }
-         else
-		 {
-			tipoPreparacionSelect=null
-			 
-		 }
+			this.traerPiezas(bochons.bochonId.ejemplarAsociado) 
+			var excavacionSelect=[]
+			var preparadorSelect=[]
+			var ejemplarSelect=[]
+			var acidoSelect=[]
+			var tipoPreparacionSelect=[]
+			var piezaSelect=[]
+			
+			setTimeout(() => {
+				
+			if(bochons.bochonId.excavacionId!==null && bochons.bochonId.excavacionId!=='')
+			{
+				excavacionSelect= this.state.excavaciones.filter(option => option.value === bochons.bochonId.excavacionId)
+				excavacionSelect=excavacionSelect[0];					 
+			}
+			else
+			{
+				excavacionSelect=null	 
+				
+			}
 
-         if(bochons.bochonId.piezaId!==null && bochons.bochonId.piezaId!=='')
-		 {
-			 piezaSelect= this.state.piezas.filter(option => option.value === bochons.bochonId.piezaId)
-             piezaSelect=piezaSelect[0];
-         }
-         else
-		 {
-			piezaSelect=null 
-			 
-		 }		 
-          
-			 
-          
-          this.setState({   nombre: bochons.bochonId.nombre,
-                            nroCampo:bochons.bochonId.nroCampo,
-                            acidosId:bochons.bochonId.acidosAplicados,
-                            idExcavacion:bochons.bochonId.excavacionId,
-                            idEjemplar:bochons.bochonId.ejemplarAsociado,
-                            idPieza:bochons.bochonId.piezaId,
-                            idPreparador:bochons.bochonId.preparadorID,
-                            idTipoPreparacion:bochons.bochonId.tipoPreparacion,
-							selectedExcavacion: excavacionSelect,
-						    selectedPreparador: preparadorSelect,
-						    selectedEjemplar: ejemplarSelect,
-						    selectedAcido: acidoSelect,
-						    selectedTipoPreparacion:tipoPreparacionSelect,
-							selectedPieza: piezaSelect
-                        })
-		 }, 2500) });
+			if(bochons.bochonId.preparadorID!==null && bochons.bochonId.preparadorID!=='')
+			{
+				preparadorSelect= this.state.preparadores.filter(option => option.value === bochons.bochonId.preparadorID)
+				preparadorSelect=preparadorSelect[0];					 
+			}
+			else
+			{
+				preparadorSelect=null 
+				
+			}
+
+			if(bochons.bochonId.ejemplarAsociado!==null && bochons.bochonId.ejemplarAsociado!=='')
+			{
+				ejemplarSelect= this.state.ejemplares.filter(option => option.value === bochons.bochonId.ejemplarAsociado)
+				ejemplarSelect=ejemplarSelect[0];					 
+			}
+			else
+			{
+				ejemplarSelect=null 
+				
+			}	
+
+			if(bochons.bochonId.acidosAplicados!==null && bochons.bochonId.acidosAplicados!=='')
+			{
+				acidoSelect= this.state.acidos.filter(({label}) =>  bochons.bochonId.acidosAplicados.includes(label))
+
+			}
+			else
+			{
+				acidoSelect=null
+				
+			}
+
+			if(bochons.bochonId.tipoPreparacion!==null && bochons.bochonId.tipoPreparacion!=='')
+			{
+				tipoPreparacionSelect= this.state.tiposPreparacion.filter(option => option.label === bochons.bochonId.tipoPreparacion)
+				tipoPreparacionSelect=tipoPreparacionSelect[0];
+				
+			}
+			else
+			{
+				tipoPreparacionSelect=null
+				
+			}
+
+			if(bochons.bochonId.piezaId!==null && bochons.bochonId.piezaId!=='')
+			{
+				piezaSelect= this.state.piezas.filter(option => option.value === bochons.bochonId.piezaId)
+				piezaSelect=piezaSelect[0];
+			}
+			else
+			{
+				piezaSelect=null 
+				
+			}		 
+			
+				
+			
+			this.setState({   nombre: bochons.bochonId.nombre,
+								nroCampo:bochons.bochonId.nroCampo,
+								acidosId:bochons.bochonId.acidosAplicados,
+								idExcavacion:bochons.bochonId.excavacionId,
+								idEjemplar:bochons.bochonId.ejemplarAsociado,
+								idPieza:bochons.bochonId.piezaId,
+								idPreparador:bochons.bochonId.preparadorID,
+								idTipoPreparacion:bochons.bochonId.tipoPreparacion,
+								selectedExcavacion: excavacionSelect,
+								selectedPreparador: preparadorSelect,
+								selectedEjemplar: ejemplarSelect,
+								selectedAcido: acidoSelect,
+								selectedTipoPreparacion:tipoPreparacionSelect,
+								selectedPieza: piezaSelect
+							})
+			}, 2500) });
+	}		
     
   }
 
@@ -428,6 +438,7 @@ render()
 		const {validated} = this.state;
 		
 	  return(<>
+	           <Menu />
 	           <div className="row">
                <div className="col-md-12">
                  <div id="contenido" align="left" className="container">

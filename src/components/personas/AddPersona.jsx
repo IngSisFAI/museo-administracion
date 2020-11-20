@@ -6,6 +6,10 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faSave, faReply, faUser} from '@fortawesome/free-solid-svg-icons'
 import { Link, withRouter} from 'react-router-dom';
 import axios from "axios";
+import Menu from "./../Menu"
+import Cookies from 'universal-cookie';
+
+const cookies = new Cookies();
 
 class AddPersona extends React.Component {
 
@@ -31,6 +35,15 @@ class AddPersona extends React.Component {
 			extFoto: ''
           };
          this.reemplazar = this.reemplazar.bind(this);
+    }
+
+    componentDidMount()
+    {
+      if(!cookies.get('username') && !cookies.get('password'))
+      {
+          window.location.href='/';
+      }
+
     }
 
     handleNombreChange = evt => {
@@ -227,6 +240,7 @@ class AddPersona extends React.Component {
 
        return(
             <>
+            <Menu />
             <div className="row">
                <div className="col-md-12">
                 <div id="contenido" align="left" className="container">

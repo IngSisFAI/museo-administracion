@@ -7,6 +7,11 @@ import { faSave, faReply, faHandLizard} from '@fortawesome/free-solid-svg-icons'
 import { Link} from 'react-router-dom';
 import Select from 'react-select';
 import axios from 'axios';
+import Menu from "./../Menu"
+import Cookies from 'universal-cookie';
+
+const cookies = new Cookies();
+
 
 
 class AddBochon extends React.Component {
@@ -37,46 +42,54 @@ class AddBochon extends React.Component {
  //carga los select al iniciar el componente
      componentDidMount() {
 
-        fetch('http://museo.fi.uncoma.edu.ar:3006/api/excavacion')
-        .then((response) => {
-            return response.json()
-          })
-          .then((excavacions) => {
-            this.setState({excavaciones: excavacions.excavaciones})
-          });
+		if(!cookies.get('username') && !cookies.get('password'))
+		{
+			window.location.href='/';
+		}
+		else
+		{
 
-          fetch('http://museo.fi.uncoma.edu.ar:3006/api/persona')
-          .then((response) => {
-              return response.json()
-            })
-            .then((persons) => {
-               this.setState({preparadores: persons.personas})
-            });
+			fetch('http://museo.fi.uncoma.edu.ar:3006/api/excavacion')
+			.then((response) => {
+				return response.json()
+			})
+			.then((excavacions) => {
+				this.setState({excavaciones: excavacions.excavaciones})
+			});
 
-            fetch('http://museo.fi.uncoma.edu.ar:3006/api/ejemplar')
-            .then((response) => {
-                return response.json()
-              })
-              .then((ejemplars) => {
-                 this.setState({ejemplares: ejemplars.ejemplares})
-              });
+			fetch('http://museo.fi.uncoma.edu.ar:3006/api/persona')
+			.then((response) => {
+				return response.json()
+				})
+				.then((persons) => {
+				this.setState({preparadores: persons.personas})
+				});
 
-            fetch('http://museo.fi.uncoma.edu.ar:3006/api/acido')
-            .then((response) => {
-                return response.json()
-              })
-              .then((acids) => {
-                 this.setState({acidos: acids.acidos})
-              });
+				fetch('http://museo.fi.uncoma.edu.ar:3006/api/ejemplar')
+				.then((response) => {
+					return response.json()
+				})
+				.then((ejemplars) => {
+					this.setState({ejemplares: ejemplars.ejemplares})
+				});
+
+				fetch('http://museo.fi.uncoma.edu.ar:3006/api/acido')
+				.then((response) => {
+					return response.json()
+				})
+				.then((acids) => {
+					this.setState({acidos: acids.acidos})
+				});
 
 
-            fetch('http://museo.fi.uncoma.edu.ar:3006/api/tipoPreparacion')
-            .then((response) => {
-                return response.json()
-              })
-              .then((tipos) => {
-                 this.setState({tiposPreparacion: tipos.tiposPreparacion})
-              });
+				fetch('http://museo.fi.uncoma.edu.ar:3006/api/tipoPreparacion')
+				.then((response) => {
+					return response.json()
+				})
+				.then((tipos) => {
+					this.setState({tiposPreparacion: tipos.tiposPreparacion})
+				});
+		}		
 
 
     }
@@ -349,6 +362,7 @@ render(){
 	
 	return(
 	         <>
+			 <Menu />
 			  <div className="row">
                <div className="col-md-12">
                  <div id="contenido" align="left" className="container">

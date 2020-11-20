@@ -6,6 +6,10 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faSave, faReply, faPaw} from '@fortawesome/free-solid-svg-icons'
 import { Link} from 'react-router-dom';
 import Select from 'react-select';
+import Menu from "./../Menu"
+import Cookies from 'universal-cookie';
+
+const cookies = new Cookies();
 
 const optTipos = [
         { value: 'Encontrado', label: 'Encontrado' },
@@ -67,6 +71,14 @@ class AddEjemplar extends React.Component {
 				paisesArray:[]
         }        
        
+      }
+
+      componentDidMount() {
+
+        if(!cookies.get('username') && !cookies.get('password'))
+        {
+            window.location.href='/';
+        }
       }
 
 
@@ -531,6 +543,7 @@ class AddEjemplar extends React.Component {
 
 	 return(
 	     <>
+        <Menu />
 		     <div className="row">
                <div className="col-md-12">
                 <div id="contenido" align="left" className="container">
