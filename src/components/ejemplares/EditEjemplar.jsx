@@ -83,14 +83,14 @@ class EditEjemplar extends React.Component {
       //*********************** 
       componentWillMount() {
 
-          fetch('http://museo.fi.uncoma.edu.ar:3006/api/pais')
+        /*  fetch('http://museo.fi.uncoma.edu.ar:3006/api/pais')
           .then((response) => {
               return response.json()
             })
             .then((countries) => {
 			  var paises=  countries.paises.map((opt) => ({ label: opt.nombre, value: opt._id }) ); 	
               this.setState({paises: paises, paisesArray: paises })
-            });
+            });*/
 
          fetch('http://museo.fi.uncoma.edu.ar:3006/api/excavacion')
         .then((response) => {
@@ -148,14 +148,14 @@ class EditEjemplar extends React.Component {
              fi=(Moment(ejemplars.ejemplarId.fechaIngresoColeccion).add(1, 'days')).format('YYYY-MM-DD')
           }
 
-            this.traerProvincias(ejemplars.ejemplarId.areaHallazgo.pais)
-		    this.traerCiudades(ejemplars.ejemplarId.areaHallazgo.provincia)
+      //  this.traerProvincias(ejemplars.ejemplarId.areaHallazgo.pais)
+		  //  this.traerCiudades(ejemplars.ejemplarId.areaHallazgo.provincia)
 			
-			var coleccionSelect=[]
+			  var coleccionSelect=[]
 		    var excavacionSelect=[]
-		    var paisSelect=[]
+		  /*  var paisSelect=[]
 		    var provinciaSelect=[]
-            var ciudadSelect=[]		  
+        var ciudadSelect=[]		 */ 
 		 
 		 
 		  //setTimeout ya que las funciones de provincias y ciudad se ejecutan antes que se seteen los estados
@@ -182,7 +182,7 @@ class EditEjemplar extends React.Component {
 		  }	
 
          
-	      if(ejemplars.ejemplarId.areaHallazgo.pais!==null && ejemplars.ejemplarId.areaHallazgo.pais!=='')
+	   /*   if(ejemplars.ejemplarId.areaHallazgo.pais!==null && ejemplars.ejemplarId.areaHallazgo.pais!=='')
 		  {
 	
 			 paisSelect= this.state.paises.filter(option => option.value === ejemplars.ejemplarId.areaHallazgo.pais)
@@ -206,7 +206,7 @@ class EditEjemplar extends React.Component {
 	        
 			 ciudadSelect= this.state.ciudades.filter(option => option.value === ejemplars.ejemplarId.areaHallazgo.ciudad)
 		     ciudadSelect=ciudadSelect[0];
-		  }	
+		  }	*/
           
 
           this.setState({   tipoEjemplar: ejemplars.ejemplarId.tipoEjemplar,
@@ -244,12 +244,9 @@ class EditEjemplar extends React.Component {
                             descripcion2:ejemplars.ejemplarId.descripcion2,
                             descripcion3: ejemplars.ejemplarId.descripcion3,  
                             perteneceExca: ejemplars.ejemplarId.perteneceExca,
-							selectedPais:paisSelect,
-							selectedProvincia:provinciaSelect,
-							selectedCiudad:ciudadSelect,
-							selectedColeccion:coleccionSelect,
-							selectedTipo: ejemplars.ejemplarId.tipoEjemplar,
-							selectedExcavacion: excavacionSelect
+							              selectedColeccion:coleccionSelect,
+							              selectedTipo: ejemplars.ejemplarId.tipoEjemplar,
+							              selectedExcavacion: excavacionSelect
 							
                           
                         })
@@ -260,7 +257,7 @@ class EditEjemplar extends React.Component {
   
    //**** FUNCIONES DE PRECARGA ***/
 
-  traerProvincias(idPais)
+  /*traerProvincias(idPais)
   {
     
         fetch('http://museo.fi.uncoma.edu.ar:3006/api/provinciaIdPais/'+idPais)
@@ -291,7 +288,7 @@ class EditEjemplar extends React.Component {
 
             });
   
-    } 
+    } */
 	
   
    //Manejadores de cada campo 
@@ -417,7 +414,7 @@ class EditEjemplar extends React.Component {
         this.setState({selectedExcavacion});
         
 		
-		if(selectedExcavacion!==null)
+	/*	if(selectedExcavacion!==null)
 		{
 			 fetch('http://museo.fi.uncoma.edu.ar:3006/api/excavacionId/'+selectedExcavacion.value)
 			 .then((response) => {
@@ -496,11 +493,11 @@ class EditEjemplar extends React.Component {
 			this.setState({selectedPais: null, selectedProvincia: null,selectedCiudad: null, provincias: [], ciudades:[]}) 
 
 		}			
-       
+       */
       }
 
 
-      handlePaisChange= (selectedPais) => { 
+     /* handlePaisChange= (selectedPais) => { 
 	  
 	  
 		  if(selectedPais!=null)
@@ -559,7 +556,7 @@ class EditEjemplar extends React.Component {
       handleCiudadChange = (selectedCiudad) => {
 		 
         this.setState({selectedCiudad});
-      }
+      }*/
 
       handleMuestraChange(evt) {
 		  console.log(evt.target.checked)
@@ -744,9 +741,9 @@ render()
 	   const {selectedColeccion} = this.state;
        const {selectedTipo} = this.state;
        const {selectedExcavacion}= this.state;
-	   const {selectedPais}= this.state;
+	  /* const {selectedPais}= this.state;
 	   const {selectedProvincia}= this.state;
-	   const {selectedCiudad}= this.state;
+	   const {selectedCiudad}= this.state;*/
 	   
 	
 	 return(
@@ -997,6 +994,8 @@ render()
 											isClearable
 									  />
 								</Form.Group>  
+                </Form.Row>
+     {/*
 							    <Form.Group className="col-sm-6" controlId="pais">
 									<Form.Label>País:</Form.Label>
 									<Select 
@@ -1038,7 +1037,7 @@ render()
 										/>
                                 
                             </Form.Group>
-                            </Form.Row>
+     </Form.Row> */}
 							 <Form.Row >
 							 <Form.Group controlId="muestraHome">
 									<Form.Check inline 

@@ -135,7 +135,7 @@ class AddExcavacion extends React.Component {
         this.setState({selectedExploracion});
       }
 
-      handlePaisChange= (selectedPais) => { 
+    /*  handlePaisChange= (selectedPais) => { 
 	  
 	  
 		  if(selectedPais!=null)
@@ -194,7 +194,7 @@ class AddExcavacion extends React.Component {
       handleCiudadChange = (selectedCiudad) => {
 		 
         this.setState({selectedCiudad});
-      }
+      }*/
 	  
 	 handleSubmit = (event) => {
 		 
@@ -341,14 +341,14 @@ class AddExcavacion extends React.Component {
 		const { selectedExploracion } = this.state;
 		let optExploraciones = this.state.exploraciones.map((opt) => ({ label: opt.nombre, value: opt._id }) );
 		
-		const { selectedPais } = this.state; 
+		/*const { selectedPais } = this.state; 
         let optPaises = this.state.paises.map((opt) => ({ label: opt.nombre, value: opt._id }) );
 		
 		const { selectedProvincia } = this.state;
 		let optProvincias = this.state.provincias.map((opt) => ({ label: opt.nombre, value: opt._id }) );
 		
 		const { selectedCiudad } = this.state;
-		let optCiudades = this.state.ciudades.map((opt) => ({ label: opt.nombre, value: opt._id }) );
+		let optCiudades = this.state.ciudades.map((opt) => ({ label: opt.nombre, value: opt._id }) );*/
 		
 		
          return(
@@ -459,7 +459,7 @@ class AddExcavacion extends React.Component {
                          <legend >Datos Geográficos</legend>
                          <hr/>
 						   <Form.Row >
-                              <Form.Group className="col-sm-6" controlId="exploracion">
+                              <Form.Group className="col-sm-12" controlId="exploracion">
                                 <Form.Label>Exploración Asociada:</Form.Label>
                                 <Select 
                                         placeholder={'Seleccione Exploración'} 
@@ -468,7 +468,8 @@ class AddExcavacion extends React.Component {
                                         value={selectedExploracion} 
 										required />
                             </Form.Group>
-                            <Form.Group className="col-sm-6" controlId="pais">
+                            </Form.Row>       
+                        {/*   <Form.Group className="col-sm-6" controlId="pais"> 
                                 <Form.Label>País:</Form.Label>
                                 <Select 
                                         placeholder={'Seleccione País'} 
@@ -476,10 +477,10 @@ class AddExcavacion extends React.Component {
                                         onChange={this.handlePaisChange} 
                                         value={selectedPais} isClearable />
                                 
-                            </Form.Group>
+                            </Form.Group> /*}
                             </Form.Row>
 							
-							 <Form.Row >
+							{/* <Form.Row >
                               <Form.Group className="col-sm-6" controlId="provincia">
                                 <Form.Label>Provincia:</Form.Label>
                                 <Select 
@@ -498,7 +499,7 @@ class AddExcavacion extends React.Component {
                                         value={selectedCiudad} isClearable />
                                 
                             </Form.Group>
-                            </Form.Row>
+              </Form.Row> */}
 							<br/>
 							
                               <CrearExcavacion

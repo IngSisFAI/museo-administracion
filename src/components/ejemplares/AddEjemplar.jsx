@@ -85,14 +85,14 @@ class AddEjemplar extends React.Component {
       //carga los select al iniciar el componente
       componentWillMount() {
 
-          fetch('http://museo.fi.uncoma.edu.ar:3006/api/pais')
+          /*fetch('http://museo.fi.uncoma.edu.ar:3006/api/pais')
           .then((response) => {
               return response.json()
             })
             .then((countries) => {
 			  var paisesA=  countries.paises.map((opt) => ({ label: opt.nombre, value: opt._id }) );	
               this.setState({paises: countries.paises, paisesArray: paisesA })
-            });
+            });*/
 
         fetch('http://museo.fi.uncoma.edu.ar:3006/api/excavacion')
         .then((response) => {
@@ -235,7 +235,7 @@ class AddEjemplar extends React.Component {
         this.setState({selectedExcavacion});
         
 		
-		if(selectedExcavacion!==null)
+	/*	if(selectedExcavacion!==null)
 		{
 			 fetch('http://museo.fi.uncoma.edu.ar:3006/api/excavacionId/'+selectedExcavacion.value)
 			 .then((response) => {
@@ -309,12 +309,12 @@ class AddEjemplar extends React.Component {
 		{
 			this.setState({selectedPais: null, selectedProvincia: null,selectedCiudad: null, provincias: [], ciudades:[]}) 
 
-		}			
+		}		*/	
        
       }
 
 
-      handlePaisChange= (selectedPais) => { 
+   /*   handlePaisChange= (selectedPais) => { 
 	  
 	  
 		  if(selectedPais!=null)
@@ -373,7 +373,7 @@ class AddEjemplar extends React.Component {
       handleCiudadChange = (selectedCiudad) => {
 		 
         this.setState({selectedCiudad});
-      }
+      }*/
 
       handleMuestraChange(evt) {
         this.setState({ muestraHome: evt.target.checked });
@@ -454,8 +454,7 @@ class AddEjemplar extends React.Component {
 					"ciudad":idCity,
 					"provincia":idProv
 				  };
-                 console.log("City:",this.state.selectedCiudad.value)
-                 console.log(areaH)
+                
 				 
 		
 				  var data = {
@@ -526,17 +525,17 @@ class AddEjemplar extends React.Component {
 	
  render()
  {
-	    const { selectedPais } = this.state; 
+	   /* const { selectedPais } = this.state; 
         const { selectedProvincia } = this.state; 
-        const { selectedCiudad } = this.state;
+        const { selectedCiudad } = this.state;*/
         const { selectedExcavacion } = this.state;
         const { selectedTipo } = this.state;
         const { selectedColeccion} = this.state;
 		const {validated} = this.state;
 
-        let optPaises = this.state.paises.map((opt) => ({ label: opt.nombre, value: opt._id }) );
+       /* let optPaises = this.state.paises.map((opt) => ({ label: opt.nombre, value: opt._id }) );
         let optProvincias = this.state.provincias.map((opt) => ({ label: opt.nombre, value: opt._id }) );
-        let optCiudades = this.state.ciudades.map((opt) => ({ label: opt.nombre, value: opt._id }) );
+        let optCiudades = this.state.ciudades.map((opt) => ({ label: opt.nombre, value: opt._id }) );*/
         let optExcavaciones = this.state.excavaciones.map((opt) => ({ label: opt.nombre, value: opt._id }) );
         let optColecciones = this.state.colecciones.map((opt) => ({ label: opt.nombre, value: opt._id }) );
 		
@@ -779,7 +778,7 @@ class AddEjemplar extends React.Component {
                              <hr/>
 								
 							<Form.Row >
-							    <Form.Group className="col-sm-6" controlId="excavacion">
+							    <Form.Group className="col-sm-12" controlId="excavacion">
 									<Form.Label>Excavación:</Form.Label>
 									 <Select
 											placeholder={'Seleccione Excavación'}
@@ -788,7 +787,10 @@ class AddEjemplar extends React.Component {
 											value={selectedExcavacion}
 											isClearable
 									  />
-								</Form.Group>  
+                	</Form.Group>    
+              	</Form.Row>
+                {/*      
+							  
 							    <Form.Group className="col-sm-6" controlId="pais">
 									<Form.Label>País:</Form.Label>
 									<Select 
@@ -825,7 +827,7 @@ class AddEjemplar extends React.Component {
 										/>
                                 
                             </Form.Group>
-                            </Form.Row>
+                </Form.Row> */}
 							 <Form.Row >
 							 <Form.Group controlId="muestraHome">
 									<Form.Check inline 

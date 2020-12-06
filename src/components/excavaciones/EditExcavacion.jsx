@@ -87,14 +87,14 @@ class EditExcavacion extends React.Component {
         this.setState({ exploraciones: exploraciones })
       });
 
-      fetch('http://museo.fi.uncoma.edu.ar:3006/api/pais')
+    /*  fetch('http://museo.fi.uncoma.edu.ar:3006/api/pais')
       .then((response) => {
           return response.json()
         })
         .then((countries) => {
 		  var paises=  countries.paises.map((opt) => ({ label: opt.nombre, value: opt._id }) ); 	
           this.setState({paises: paises })
-        });
+        });*/
   } 
 
   //una vez cargado en el DOM
@@ -120,17 +120,17 @@ class EditExcavacion extends React.Component {
             }
         
       
-            this.traerProvincias(excavacions.excavacionId.idPais)
-        this.traerCiudades(excavacions.excavacionId.idProvincia)
+           // this.traerProvincias(excavacions.excavacionId.idPais)
+          //  this.traerCiudades(excavacions.excavacionId.idProvincia)
           
       
         var colectorSelect=[]
         var directorSelect=[]
         var paleontologoSelect=[]
         var exploracionSelect=[]
-        var paisSelect=[]
-        var provinciaSelect=[]
-            var ciudadSelect=[]		  
+      //  var paisSelect=[]
+       // var provinciaSelect=[]
+       // var ciudadSelect=[]		  
       
                     
 
@@ -176,7 +176,7 @@ class EditExcavacion extends React.Component {
         }	
 
           
-          if(excavacions.excavacionId.idPais!==null && excavacions.excavacionId.idPais!=='')
+      /*    if(excavacions.excavacionId.idPais!==null && excavacions.excavacionId.idPais!=='')
         {
     
         paisSelect= this.state.paises.filter(option => option.value === excavacions.excavacionId.idPais)
@@ -207,7 +207,7 @@ class EditExcavacion extends React.Component {
         }	
         else{
           ciudadSelect=null
-        }
+        }*/
         
             this.setState({ nombre: excavacions.excavacionId.nombre,
                             descripcion: excavacions.excavacionId.descripcion,
@@ -217,15 +217,12 @@ class EditExcavacion extends React.Component {
                             motivoBaja: excavacions.excavacionId.motivoBaja, 
                             muestraHome: excavacions.excavacionId.muestraHome,
                             bochonesId:excavacions.excavacionId.bochonesEncontrados,
-                selectedPais: paisSelect,
-                            selectedCiudad: ciudadSelect,
-                            selectedProvincia: provinciaSelect,
-                selectedExploracion: exploracionSelect,
-                selectedDirector:directorSelect,
+                            selectedExploracion: exploracionSelect,
+                            selectedDirector:directorSelect,
                             selectedColector:colectorSelect,
                             selectedPaleontologo: paleontologoSelect,
-                idAreaExcavacion: excavacions.excavacionId.idArea,
-                puntoGpsExcavacion: excavacions.excavacionId.puntoGps
+                            idAreaExcavacion: excavacions.excavacionId.idArea,
+                            puntoGpsExcavacion: excavacions.excavacionId.puntoGps
 
                           })
       
@@ -238,7 +235,7 @@ class EditExcavacion extends React.Component {
   
     //**** FUNCIONES DE PRECARGA ***/
 
-  traerProvincias(idPais)
+ /* traerProvincias(idPais)
   {
     if(idPais!==null && idPais!=="")
     {		
@@ -282,7 +279,7 @@ class EditExcavacion extends React.Component {
 		  this.setState({ciudades: [] });
 	  }		  
   
-    } 
+    } */
 	
 	
 	//**Manejadores**
@@ -334,7 +331,7 @@ class EditExcavacion extends React.Component {
         this.setState({selectedExploracion});		
       }
 
-      handlePaisChange= (selectedPais) => { 
+    /*  handlePaisChange= (selectedPais) => { 
 	
 		  if(selectedPais!=null)
 		  {	  
@@ -393,7 +390,7 @@ class EditExcavacion extends React.Component {
 
       handleCiudadChange = (selectedCiudad) => {
 			 this.setState({selectedCiudad}) 
-      }
+      }*/
     
 	 handleSubmit = (event) => {
 		 
@@ -539,9 +536,9 @@ class EditExcavacion extends React.Component {
        const {selectedDirector} = this.state;
        const {selectedPaleontologo} = this.state;	
        const {selectedExploracion}= this.state;
-	   const {selectedPais}= this.state;
+	   /*const {selectedPais}= this.state;
 	   const {selectedProvincia}= this.state;
-	   const {selectedCiudad}= this.state;
+	   const {selectedCiudad}= this.state;*/
 	   
 	   
 		let optBochones = this.state.bochones.map((opt) => ({ label: opt.nombre, value: opt._id }) );
@@ -676,7 +673,7 @@ class EditExcavacion extends React.Component {
                          <legend >Datos Geográficos</legend>
                          <hr/>
 						   <Form.Row >
-                              <Form.Group className="col-sm-6" controlId="exploracion">
+                              <Form.Group className="col-sm-12" controlId="exploracion">
                                 <Form.Label>Exploración Asociada:</Form.Label>
                                 <Select 
                                         placeholder={'Seleccione Exploración'} 
@@ -687,7 +684,9 @@ class EditExcavacion extends React.Component {
 										isClearable
 										required />
                             </Form.Group>
-                            <Form.Group className="col-sm-6" controlId="pais">
+                            </Form.Row>
+
+                         {/*   <Form.Group className="col-sm-6" controlId="pais">
                                 <Form.Label>País:</Form.Label>
                                 <Select 
                                         placeholder={'Seleccione País'} 
@@ -723,7 +722,7 @@ class EditExcavacion extends React.Component {
 										isClearable />
                                 
                             </Form.Group>
-                            </Form.Row>
+    </Form.Row> */}
 							<br/>
 							
                             
