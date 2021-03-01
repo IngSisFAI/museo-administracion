@@ -51,5 +51,6 @@
     "not ie <= 11",
     "not op_mini all"
   ],
-  "homepage": "http://museoadministracion.fi.uncoma.edu.ar"
+  "homepage": "http://museoadministracion.fi.uncoma.edu.ar",
+  "proxy": "http://museoadministracion.fi.uncoma.edu.ar:3006"
 }
