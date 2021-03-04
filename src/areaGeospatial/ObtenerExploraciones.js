@@ -19,7 +19,7 @@ export default class ObtenerExcavacion extends Component {
       puntosGpsExcavaciones: [],
       capasExploracion: true,
       capasExcavacion: true,
-      // capasPuntosGps: true,
+      capasPuntosGps: true,
       datosPuntoGps: false,
       miUbicacion: false,
       grilla: false,
@@ -79,8 +79,6 @@ export default class ObtenerExcavacion extends Component {
       );
 
       if (datosAreaExploracion) {
-        console.log("********************** ", datosAreaExploracion);
-
         const datosExploracion = `<p><b>Area Exploración</b>
         <br />Nombre Area: ${datosAreaExploracion.nombre}
         <br />Fecha: ${new Date(datosAreaExploracion.fecha)}
@@ -108,7 +106,7 @@ export default class ObtenerExcavacion extends Component {
 
   obtenerTodasExploraciones = async () => {
     const response = await fetch(
-      `http://museo.fi.uncoma.edu.ar:3006/api/areaExploracion`,
+      "http://museo.fi.uncoma.edu.ar:3006/api/areaExploracion",
       {
         method: "GET",
         headers: {
@@ -124,6 +122,7 @@ export default class ObtenerExcavacion extends Component {
 
     const resultado = await response.json();
     const exploracionesCompletas = resultado.exploraciones;
+
     if (exploracionesCompletas.length) {
       let poligonosExcavaciones = [],
         coordenadasExcavaciones = [],
@@ -145,8 +144,6 @@ export default class ObtenerExcavacion extends Component {
 
         let coordenadas;
         exploracionCompleta.excavaciones.forEach((excavacion) => {
-          debugger;
-
           coordenadas = excavacion.areaExcavacion.locacion.coordinates[0];
           coordenadas = coordenadas.map((c) => ({ lat: c[0], lng: c[1] }));
 
@@ -178,9 +175,7 @@ export default class ObtenerExcavacion extends Component {
         });
 
         const datosExploracion = {
-          nombre: exploracionCompleta.areaExploracion
-            ? exploracionCompleta.areaExploracion.nombre
-            : "",
+          nombre: exploracionCompleta.nombre,
           ciudad: exploracionCompleta.areaExploracion
             ? exploracionCompleta.areaExploracion.ciudad
             : "Neuquen",
@@ -323,102 +318,104 @@ export default class ObtenerExcavacion extends Component {
     return (
       <>
         <Menu />
-        <h1>Datos Geográficos</h1>
-        <div className="principal">
-          <ToastContainer
-            position="top-right"
-            autoClose={5000}
-            transition={Slide}
-            hideProgressBar={true}
-            newestOnTop={true}
-            closeOnClick
-            pauseOnHover
-          />
-          <div id="map" className="contenedorMapa" />
+        <div className="datos-geograficos-contenedor">
+          <h1>Datos Geográficos</h1>
+          <div className="principal">
+            <ToastContainer
+              position="top-right"
+              autoClose={5000}
+              transition={Slide}
+              hideProgressBar={true}
+              newestOnTop={true}
+              closeOnClick
+              pauseOnHover
+            />
+            <div id="map" className="contenedorMapa" />
 
-          <div className="contenedorMenu">
-            <div style={{ marginBottom: 20 }}>
-              Filtrar capas y Datos Geograficos:
+            <div className="contenedorMenu">
+              <div style={{ marginBottom: 20 }}>
+                Filtrar capas y Datos Geograficos:
+              </div>
+              <form>
+                <label>
+                  <input
+                    name="capasExploracion"
+                    type="checkbox"
+                    checked={this.state.capasExploracion}
+                    onChange={() =>
+                      this.handleInputArea(
+                        "capasExploracion",
+                        "exploraciones",
+                        ""
+                      )
+                    }
+                  />
+                  Capas de Exploracion
+                </label>
+
+                <label>
+                  <input
+                    name="capasExcavacion"
+                    type="checkbox"
+                    checked={this.state.capasExcavacion}
+                    onChange={() =>
+                      this.handleInputArea(
+                        "capasExcavacion",
+                        "excavaciones",
+                        "green"
+                      )
+                    }
+                  />
+                  Capas de Excavacion
+                </label>
+
+                <label>
+                  <input
+                    name="capasPuntosGps"
+                    type="checkbox"
+                    checked={this.state.capasPuntosGps}
+                    onChange={() =>
+                      this.handleInputGps(
+                        "capasPuntosGps",
+                        "puntosGpsExcavaciones"
+                      )
+                    }
+                  />
+                  Puntos GPS de Excavaciones
+                </label>
+
+                <label>
+                  <input
+                    name="datosPuntoGps"
+                    type="checkbox"
+                    checked={this.state.datosPuntoGps}
+                    onChange={() =>
+                      this.handleInputDatosGps(
+                        "datosPuntoGps",
+                        "puntosGpsExcavaciones"
+                      )
+                    }
+                  />
+                  Mostrar Datos Punto GPS
+                </label>
+
+                <label>
+                  <input
+                    name="grillaVisible"
+                    type="checkbox"
+                    checked={this.state.grilla}
+                    onChange={() =>
+                      this.handleInputChange(
+                        "grillaVisible",
+                        () => this.agregarGrilla(),
+                        () => this.removerGrilla()
+                      )
+                    }
+                  />
+                  Agregar Grilla
+                </label>
+              </form>
             </div>
-            <form>
-              <label>
-                <input
-                  name="capasExploracion"
-                  type="checkbox"
-                  checked={this.state.capasExploracion}
-                  onChange={() =>
-                    this.handleInputArea(
-                      "capasExploracion",
-                      "exploraciones",
-                      ""
-                    )
-                  }
-                />
-                Capas de Exploracion
-              </label>
-
-              <label>
-                <input
-                  name="capasExcavacion"
-                  type="checkbox"
-                  checked={this.state.capasExcavacion}
-                  onChange={() =>
-                    this.handleInputArea(
-                      "capasExcavacion",
-                      "excavaciones",
-                      "green"
-                    )
-                  }
-                />
-                Capas de Excavacion
-              </label>
-
-              <label>
-                <input
-                  name="capasPuntosGps"
-                  type="checkbox"
-                  checked={this.state.capasPuntosGps}
-                  onChange={() =>
-                    this.handleInputGps(
-                      "capasPuntosGps",
-                      "puntosGpsExcavaciones"
-                    )
-                  }
-                />
-                Puntos GPS de Excavaciones
-              </label>
-
-              <label>
-                <input
-                  name="datosPuntoGps"
-                  type="checkbox"
-                  checked={this.state.datosPuntoGps}
-                  onChange={() =>
-                    this.handleInputDatosGps(
-                      "datosPuntoGps",
-                      "puntosGpsExcavaciones"
-                    )
-                  }
-                />
-                Mostrar Datos Punto GPS
-              </label>
-
-              <label>
-                <input
-                  name="grillaVisible"
-                  type="checkbox"
-                  checked={this.state.grilla}
-                  onChange={() =>
-                    this.handleInputChange(
-                      "grillaVisible",
-                      () => this.agregarGrilla(),
-                      () => this.removerGrilla()
-                    )
-                  }
-                />
-                Agregar Grilla
-              </label>
-            </form>
           </div>
         </div>
       </>

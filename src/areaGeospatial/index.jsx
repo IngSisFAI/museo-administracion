@@ -1,12 +1,11 @@
-import React, { Component } from 'react';
-import './AreaGeoespacial.css';
+import React, { Component } from "react";
+import "./AreaGeoespacial.css";
 
-import CrearExploracion from './CrearExploracion';
-import CrearExcavacion from './CrearExcavacion';
-import ModificarExcavacion from './ModificarExcavacion';
-import ModificarExploracion from './ModificarExploracion';
-import ObtenerExploraciones from  './ObtenerExploraciones';
-
+import CrearExploracion from "./CrearExploracion";
+import CrearExcavacion from "./CrearExcavacion";
+import ModificarExcavacion from "./ModificarExcavacion";
+import ModificarExploracion from "./ModificarExploracion";
+import ObtenerExploraciones from "./ObtenerExploraciones";
 
 export default class AreaGeoespacial extends Component {
   constructor() {
@@ -18,7 +17,7 @@ export default class AreaGeoespacial extends Component {
       crearExploracion: false,
       crearExcavacion: false,
     };
-  };
+  }
 
   setearEstadoInicial = () => {
     this.setState({
@@ -26,7 +25,7 @@ export default class AreaGeoespacial extends Component {
       crearExcavacion: false,
       modificarExcavacion: false,
       obtenerExploraciones: false,
-    })
+    });
   };
 
   obtenerExploraciones = () => {
@@ -48,7 +47,7 @@ export default class AreaGeoespacial extends Component {
     this.setearEstadoInicial();
     this.setState({ crearExcavacion: true });
   };
-  
+
   crearExploracion = () => {
     this.setearEstadoInicial();
     this.setState({ crearExploracion: true });
@@ -59,40 +58,55 @@ export default class AreaGeoespacial extends Component {
       <React.Fragment>
         <div className="row" style={{ marginTop: 25 }}>
           <div className="col-md-2">
-            <button className="btn btn-outline-primary" onClick={this.obtenerExploraciones}>
+            <button
+              className="btn btn-outline-primary"
+              onClick={this.obtenerExploraciones}
+            >
               VISUALIZAR EXPLORACIONES
             </button>
           </div>
           <div className="col-md-2">
-            <button className="btn btn-outline-primary" onClick={this.modificarExcavacion}>
+            <button
+              className="btn btn-outline-primary"
+              onClick={this.modificarExcavacion}
+            >
               MODIFICAR AREA EXCAVACION
             </button>
           </div>
           <div className="col-md-2">
-            <button className="btn btn-outline-primary" onClick={this.modificarExploracion}>
+            <button
+              className="btn btn-outline-primary"
+              onClick={this.modificarExploracion}
+            >
               MODIFICAR AREA EXPLORACION
             </button>
           </div>
           <div className="col-md-2">
-            <button className="btn btn-outline-primary" onClick={this.crearExploracion}>
+            <button
+              className="btn btn-outline-primary"
+              onClick={this.crearExploracion}
+            >
               ALTA AREA EXPLORACION
             </button>
           </div>
           <div className="col-md-2">
-            <button className="btn btn-outline-primary" onClick={this.crearExcavacion}>
+            <button
+              className="btn btn-outline-primary"
+              onClick={this.crearExcavacion}
+            >
               ALTA AREA EXCAVACION
             </button>
           </div>
-       </div> 
-      <div style={{ marginTop: 25 }}>
-        {this.state.crearExploracion && <CrearExploracion />}
-        {this.state.crearExcavacion && <CrearExcavacion />}
-        {this.state.modificarExcavacion && <ModificarExcavacion />}
-        {this.state.modificarExploracion && <ModificarExploracion />}
-        {this.state.obtenerExploraciones && <ObtenerExploraciones />}
-      </div>
-
+        </div>
+        <div style={{ marginTop: 25 }}>
+          {this.state.crearExploracion && <CrearExploracion />}
+          {this.state.crearExcavacion && <CrearExcavacion />}
+          {this.state.modificarExcavacion && <ModificarExcavacion />}
+          {this.state.modificarExploracion && <ModificarExploracion />}
+          <ObtenerExploraciones />
+          {this.state.obtenerExploraciones && <ObtenerExploraciones />}
+        </div>
       </React.Fragment>
     );
-  };
-};
+  }
+}
