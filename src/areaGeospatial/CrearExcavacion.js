@@ -105,6 +105,7 @@ export default class CrearExcavacion extends Component {
   };
 
   setearPuntoExcavacion = () => {
+    console.log('testing')
     if (
       this.state.areaExcavacion &&
       !this.state.puntoGPSExcavacion &&
