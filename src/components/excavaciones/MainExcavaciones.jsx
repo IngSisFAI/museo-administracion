@@ -9,13 +9,18 @@ import { Link } from "react-router-dom";
 import Moment from "moment";
 import Menu from "./../Menu";
 import Cookies from "universal-cookie";
+import axios from 'axios';
 
 const cookies = new Cookies();
+
+var removeItemFromArr = ( arr, item ) => {
+  return arr.filter( e => e !== item );
+};
 
 class MainExcavaciones extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { excavaciones: [] };
+    this.state = { excavaciones: [], idExploracion:"", arrayExcExploracion:[], bochones:[] };
   }
 
   componentDidMount() {
@@ -36,43 +41,112 @@ class MainExcavaciones extends React.Component {
   }
 
   eliminar(id) {
-    fetch("http://museo.fi.uncoma.edu.ar:3006/api/excavacion/" + id, {
-      method: "delete",
-    })
-      .then(function (response) {
-        if (response.ok) {
-          console.log("¡Se eliminó la Excavación con Éxito!");
-        }
+
+    fetch("http://museo.fi.uncoma.edu.ar:3006/api/excavacionId/"+id)
+      .then(response => response.json())
+      .then(data => {
+             this.setState({ idExploracion: data.excavacionId.idExploracion, bochones: data.excavacionId.bochonesEncontrados});  
       })
-      .then(function (resp) {
-        const destino =
-          "/var/www/museo-administracion/html/images/excavaciones/" + id + "/";
-        fetch("http://museo.fi.uncoma.edu.ar:3006/api/deleteDirectorio", {
-          method: "get",
-          headers: {
-            "Content-Type": undefined,
-            path: destino,
-          },
-        })
-          .then(function (response) {
-            if (response.ok) {
-              toast.success("¡Se eliminó la Excavación con Éxito!");
-              setTimeout(() => {
-                window.location.href = "/excavaciones";
-              }, 1500);
-            }
+      .then(resp2=>{
+
+        var bochones=this.state.bochones;
+        var longitud=bochones.length;
+                      
+        if(longitud>0){
+                toast.error("Imposible eliminar. Existen bochones asociados a la Excavación.");
+        }
+        else{
+
+          fetch("http://museo.fi.uncoma.edu.ar:3006/api/exploracionId/"+this.state.idExploracion)
+          .then(response => response.json())
+          .then(data2 => {
+           
+            var excavacionesId=data2.exploracionId.idExcavaciones
+            excavacionesId=removeItemFromArr(excavacionesId,id)
+            this.setState({ arrayExcExploracion: excavacionesId});  
+          })
+          .then(res3=>{
+                var dataExc={
+                   "idExcavaciones": this.state.arrayExcExploracion
+                }
+                fetch("http://museo.fi.uncoma.edu.ar:3006/api/exploracion/" + this.state.idExploracion, {
+                      method: 'put',
+                      body: JSON.stringify(dataExc),
+                      headers:{
+                                'Content-Type': 'application/json'
+                              }  
+                })
+                .then( function(response) {
+                 if(response.ok) {
+                      
+                        //Elimino la Excavación ahora
+                      fetch("http://museo.fi.uncoma.edu.ar:3006/api/excavacion/" + id, {
+                        method: "delete",
+                      })
+                        .then(function (response) {
+                          if (response.ok) {
+                            console.log("¡Se eliminó la Excavación con Éxito!");
+                          }
+                        })
+                        .then(function (resp) {
+                          const destino =
+                            "/var/www/museo-administracion/html/images/excavaciones/" + id + "/";
+                          fetch("http://museo.fi.uncoma.edu.ar:3006/api/deleteDirectorio", {
+                            method: "get",
+                            headers: {
+                              "Content-Type": undefined,
+                              path: destino,
+                            },
+                          })
+                            .then(function (response) {
+                              if (response.ok) {
+                                toast.success("¡Se eliminó la Excavación con Éxito!");
+                                setTimeout(() => {
+                                  window.location.href = "/excavaciones";
+                                }, 1500);
+                              }
+                            })
+                            .catch(function (error) {
+                              toast.error("Error al eliminar. Intente nuevamente.");
+                              console.log(
+                                "Hubo un problema con la petición Fetch:" + error.message
+                              );
+                            });
+                        })
+                        .catch(function (error) {
+                          toast.error("Error al eliminar. Intente nuevamente.");
+                          console.log("Hubo un problema con la petición Fetch:" + error.message);
+                        });
+  
+                       }
+  
+                })
+                .catch(function(error) {
+                  toast.error("Error al guardar. Intente nuevamente.");
+                  console.log('Hubo un problema con la petición Fetch:' , error.message);
+                });
+  
           })
           .catch(function (error) {
-            toast.error("Error al eliminar. Intente nuevamente.");
-            console.log(
-              "Hubo un problema con la petición Fetch:" + error.message
-            );
-          });
+            console.log(error);
+          })
+          
+
+
+        }
+
+
+
+
       })
       .catch(function (error) {
-        toast.error("Error al eliminar. Intente nuevamente.");
-        console.log("Hubo un problema con la petición Fetch:" + error.message);
-      });
+        console.log(error);
+      })    
+
+
+
+
+    
   }
 
   render() {

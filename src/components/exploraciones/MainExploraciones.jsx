@@ -15,7 +15,7 @@ const cookies = new Cookies();
 class MainExploraciones extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { exploraciones: [] };
+    this.state = { exploraciones: []};
   }
 
   componentDidMount() {
@@ -36,21 +36,39 @@ class MainExploraciones extends React.Component {
   }
 
   eliminar(id) {
-    fetch("http://museo.fi.uncoma.edu.ar:3006/api/exploracion/" + id, {
-      method: "delete",
-    })
-      .then(function (response) {
-        if (response.ok) {
-          toast.success("¡Se eliminó la Exploración con Éxito!");
-          setTimeout(() => {
-            window.location.href = "/exploraciones";
-          }, 1500);
-        }
+
+    fetch("http://museo.fi.uncoma.edu.ar:3006/api/exploracionId/"+id)
+      .then(response => response.json())
+      .then(data => {
+            var longitud=(data.exploracionId.idExcavaciones).length
+            if(longitud==0){
+              //se puede eliminar la exploración
+                fetch("http://museo.fi.uncoma.edu.ar:3006/api/exploracion/" + id, {
+                  method: "delete",
+                })
+                  .then(function (response) {
+                    if (response.ok) {
+                      toast.success("¡Se eliminó la Exploración con Éxito!");
+                      setTimeout(() => {
+                        window.location.href = "/exploraciones";
+                      }, 1500);
+                    }
+                  })
+                  .catch(function (error) {
+                    toast.error("Error al eliminar. Intente nuevamente.");
+                    console.log("Hubo un problema con la petición Fetch:" + error.message);
+                  });
+            }
+            else{
+              toast.error("Existen Excavaciones asociadas a la Exploración.");
+            }
+          
       })
       .catch(function (error) {
-        toast.error("Error al eliminar. Intente nuevamente.");
-        console.log("Hubo un problema con la petición Fetch:" + error.message);
-      });
+        console.log(error);
+      })    
+
+
   }
 
   render() {

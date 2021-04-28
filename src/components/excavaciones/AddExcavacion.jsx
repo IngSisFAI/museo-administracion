@@ -265,6 +265,7 @@ class AddExcavacion extends React.Component {
           idProvincia: idProv,
           idCiudad: idCity,
           muestraHome: this.state.muestraHome,
+          bochonesEncontrados:[]
         };
 
         fetch("http://museo.fi.uncoma.edu.ar:3006/api/excavacion", {
