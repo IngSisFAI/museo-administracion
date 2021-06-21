@@ -49,7 +49,7 @@ class EditPersona extends React.Component {
     
     componentDidMount(){
 
-      if(!cookies.get('username') && !cookies.get('password'))
+      if(!cookies.get('user') && !cookies.get('password'))
       {
           window.location.href='/';
       }

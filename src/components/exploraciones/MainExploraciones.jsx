@@ -109,11 +109,11 @@ class MainExploraciones extends React.Component {
                     hidden: true,
                   },
                   {
-                    title: "Nombre",
+                    title: "Nombre del Área",
                     field: "nombre",
                   },
                   {
-                    title: "Fecha",
+                    title: "Fecha Inicio",
                     field: "fecha",
                     type: "date",
                     render: (rowData) =>

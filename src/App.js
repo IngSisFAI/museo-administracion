@@ -43,6 +43,9 @@ import AddUsuario from "./components/usuarios/AddUsuario";
 import EditUsuario from "./components/usuarios/EditUsuario";
 import ChangePassword from "./components/usuarios/ChangePassword";
 
+//Documentacion
+import Documentacion from "./components/documentacion/MainDocumentacion";
+
 class App extends Component {
   render() {
     return (
@@ -76,6 +79,8 @@ class App extends Component {
           <Route path="/bochones" component={Bochones} />
           <Route path="/addBochon" component={AddBochon} />
           <Route path="/editBochon/:id" component={EditBochon} />
+
+          <Route path="/documentacion" component={Documentacion} />
 
           <Route path="/usuarios" component={Usuarios} />
           <Route path="/addUsuario" component={AddUsuario} />

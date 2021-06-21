@@ -1,9 +1,9 @@
 import React from "react";
-import { Form, Button } from "react-bootstrap";
+import { Form, Button, Tabs, Tab, Table, Modal} from "react-bootstrap";
 import { ToastContainer, toast, Slide } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faSave, faReply, faCompass } from "@fortawesome/free-solid-svg-icons";
+import { faSave, faReply, faCompass, faTrash, faPlus, faShare, faEdit, faTimesCircle } from "@fortawesome/free-solid-svg-icons";
 import { Link } from "react-router-dom";
 import Select from "react-select";
 import CrearExcavacion from "../../areaGeospatial/CrearExcavacion";
@@ -16,9 +16,11 @@ class AddExcavacion extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      colectores: [],
+      auxiliares: [],
+      auxiliaresId:[],
       directores: [],
-      paleontologos: [],
+      profesionales: [],
+      profesionalesId:[],
       exploraciones: [],
       paises: [],
       selectedPais: null,
@@ -34,13 +36,61 @@ class AddExcavacion extends React.Component {
       motivoBaja: "",
       muestraHome: false,
       selectedExploracion: "",
-      selectedColector: null,
+      selectedAuxiliar: null,
       selectedDirector: null,
-      selectedPaleontologo: null,
+      selectedProfesional: null,
       muestra: false,
       idAreaExcavacion: "",
       puntoGpsExcavacion: {},
-      validated: false,
+      validateddb: false,
+      tabbas:false,
+      tabh: true,
+      validatedh: false,
+      archivosD: [],
+      tabgeo: true,
+      validatedgeo: false,
+      tabtax: true,
+      validatedtax: false,
+      geologicos:'',
+      taxonomicos:'',
+      tabpiezas: true,
+      validatedpiezas: false,
+      tabbochon: true,
+      validatedbochon: false,
+      nombrePieza:'',
+      identificador:'',
+      codigoCampo:'',
+      nroBochon:'',
+      infoAdicional:'',
+      piezasAsociadas:[],
+      piezas:[],
+      formPiezas: {
+        idPieza: "",
+        identificadorPieza: "",
+        nombrePieza: "",
+        descripcionPieza:""
+      },
+      identificadorPieza:'',
+      nombrePieza:'',
+      descripcionPieza:'',
+      modalActualizarPieza: false,
+      selectedPieza: null,
+      piezasId:[],
+      bochones:[],
+      piezas:[],
+      formBochones: {
+        idBochon: "",
+        codigoCampoM: "",
+        nroBochonM: "",
+        piezasAsociadasM:[],
+        infoAdicionalM:"",
+        piezasAsociadasNamesM:[]
+      },
+      piezasNames:[],
+      modalActualizarBochon: false,
+      piezasIdModal:[],
+      selectedPiezaM: null,
+      key: 'dbasicos',
     };
   }
 
@@ -54,9 +104,9 @@ class AddExcavacion extends React.Component {
         })
         .then((empleados) => {
           this.setState({
-            colectores: empleados.personas,
+            auxiliares: empleados.personas,
             directores: empleados.personas,
-            paleontologos: empleados.personas,
+            profesionales: empleados.personas,
           });
         });
 
@@ -91,9 +141,6 @@ class AddExcavacion extends React.Component {
     this.setState({ nombre: evt.target.value });
   };
 
-  handleDescChange = (evt) => {
-    this.setState({ descripcion: evt.target.value });
-  };
 
   handleCodigoChange = (evt) => {
     this.setState({ codigo: evt.target.value });
@@ -111,82 +158,53 @@ class AddExcavacion extends React.Component {
     this.setState({ motivoBaja: evt.target.value });
   };
 
-  handleColectorChange = (selectedColector) => {
-    this.setState({ selectedColector });
+  handleAuxiliaresChange = (selectedAuxiliar) => {
+    let auxiliares = Array.from(selectedAuxiliar, option => option.value);
+    this.setState({selectedAuxiliar});
+    this.setState({auxiliaresId:auxiliares});
   };
 
   handleDirectorChange = (selectedDirector) => {
     this.setState({ selectedDirector });
   };
 
-  handlePaleontologoChange = (selectedPaleontologo) => {
-    this.setState({ selectedPaleontologo });
+  handleProfesionalesChange = (selectedProfesional) => {
+    let profesionales = Array.from(selectedProfesional, option => option.value);
+    this.setState({selectedProfesional});
+    this.setState({profesionalesId:profesionales});
   };
 
   handleExploracionesChange = (selectedExploracion) => {
     this.setState({ selectedExploracion });
   };
 
-  /*  handlePaisChange= (selectedPais) => { 
-	  
-	  
-		  if(selectedPais!=null)
-		  {	  
-		  
-			  
-				this.setState(prevState => ({
-					selectedProvincia: null
-					}
-				  ));
-				
-				fetch('http://museo.fi.uncoma.edu.ar:3006/api/provinciaIdPais/'+selectedPais.value)
-				.then((response) => {
-					return response.json()
-				  })
-				  .then((estados) => {
-					this.setState({provincias: estados.provincias, selectedPais});
+  handleGeologicosChange = (evt) => {
+    this.setState({ geologicos: evt.target.value });
+  };
 
-				  });
-		   }
-           else{
-			   this.setState({
-					selectedPais:null, selectedProvincia:null, selectedCiudad:null, provincias:[], ciudades:[]});
-		   }		   
-      }
+  handleTaxonomicosChange = (evt) => {
+    this.setState({ taxonomicos: evt.target.value });
+  }; 
 
-      handleProvinciaChange= (selectedProvincia) => { 
+  handleIdentificadorPiezaChange = (evt) => {
+    this.setState({ identificadorPieza: evt.target.value });
+  };
 
+  handleNombrePiezaChange = (evt) => {
+    this.setState({ nombrePieza: evt.target.value });
+  }; 
 
-       if(selectedProvincia!=null)
-	   {	
-			this.setState(prevState => ({
-				selectedCiudad: null
-				}
-			  ));
-			
-			fetch('http://museo.fi.uncoma.edu.ar:3006/api/ciudadIdProv/'+selectedProvincia.value)
-			.then((response) => {
-				return response.json()
-			  })
-			  .then((cities) => {
-				this.setState({ciudades: cities.ciudades , selectedProvincia});
+  handleCodCampoChange = (evt) => {
+    this.setState({ codigoCampo: evt.target.value });
+  }; 
 
-			  });
-	   }
-       else	  
-       {
-		    this.setState({
-				 selectedProvincia:null, selectedCiudad:null,  ciudades:[]});
-		   
-	   }		   
-      
-	  
-	  }
+  handleInfoAdicionalChange = (evt) => {
+    this.setState({ infoAdicional: evt.target.value });
+  };
 
-      handleCiudadChange = (selectedCiudad) => {
-		 
-        this.setState({selectedCiudad});
-      }*/
+  handleNroBochonChange = (evt) => {
+    this.setState({ nroBochon: evt.target.value });
+  }; 
 
   handleSubmit = (event) => {
     const form = event.currentTarget;
@@ -314,11 +332,357 @@ class AddExcavacion extends React.Component {
       });
   };
 
-  render() {
-    const { validated } = this.state;
+  filehandleChange = (event) => {
 
-    const { selectedColector } = this.state;
-    let optColectores = this.state.colectores.map((opt) => ({
+    const files=  event.target.files;
+    var arrayFiles= this.state.archivosD;
+  
+
+  Array.from(files).forEach(file => {
+    var key=Math.floor(Math.random() * 1000); 
+    file.id=key;
+    arrayFiles.push(file)
+  })
+  this.setState({archivosD: arrayFiles});
+
+  console.log('SALIDA::', arrayFiles)
+    //aca deberiamos mover el archivo a la carpeta 
+    
+  }
+
+  renderTableDataDenuncia() {
+
+    return this.state.archivosD.map((file, index) => {
+      
+      return (
+        <tr key={index}>
+         <td>
+              <Button variant="danger" type="button" id="eliminarOD" onClick={()=> this.eliminarArchivoDenuncia(file)}>
+              <FontAwesomeIcon icon={faTrash} />
+              </Button>
+         </td>
+         <td>{file.name}</td>
+       
+      </tr>
+      )
+   })
+
+  }
+
+  handleForm1 = (event) => {
+    const form = document.getElementById("form1");
+    event.preventDefault();
+    if (form.checkValidity() === false) {
+      event.stopPropagation();
+    }else{
+      this.setState({tabh:false, key:'dhallazgo'});
+      
+    }
+    this.setState({ validateddb: true });
+  }
+
+  handleSelect=(key) =>{
+    this.setState({ key: key });
+   
+  } 
+
+  handleForm2 = (event) => {
+    const form = document.getElementById("form2");
+    event.preventDefault();
+    if (form.checkValidity() === false) {
+      event.stopPropagation();
+    }else{
+      this.setState({tabgeo:false, key:'dgeo'});
+  
+    }
+    this.setState({ validatedh: true });
+  }
+  
+  handleAntForm2 = (event) => {
+     
+    this.setState({tabbas:false, key:'dbasicos'});
+  
+  }
+
+  handleForm3 = (event) => {
+    const form = document.getElementById("form3");
+    event.preventDefault();
+    if (form.checkValidity() === false) {
+      event.stopPropagation();
+    }else{
+      this.setState({tabtax:false, key:'dtax'});
+  
+    }
+    this.setState({ validatedgeo: true, tabpiezas:false, tabbochon:false  });
+  }
+  
+  handleAntForm3 = (event) => {
+     
+    this.setState({tabh:false, key:'dhallazgo'});
+  
+  }
+
+  
+insertarPieza= ()=>{
+
+  //aca guardaria en BD y haria un select luego de los prestamos asociados al ejemplar y lo cargamos en el array prestamos
+     var piezas=this.state.piezas
+     var pieza={
+         "idPieza": Math.floor(Math.random() * 100) ,
+         "identificadorPieza": this.state.identificadorPieza,
+         "nombrePieza": this.state.nombrePieza,
+         "descripcionPieza":this.state.descripcionPieza,
+     }
+     piezas.push(pieza)
+     this.setState({piezas:piezas, identificadorPieza:'', nombrePieza:'',descripcionPieza:''})
+ 
+}
+
+renderTableDataPiezas() {
+
+  return this.state.piezas.map((pieza) => {
+   
+    return (
+      <tr key={pieza.idPieza}>
+       <td><Button variant="secondary" type="button" id="editar" onClick={() => this.mostrarModalActualizarPieza(pieza)}>
+          <FontAwesomeIcon icon={faEdit} />
+          </Button>
+          &nbsp;
+          <Button variant="danger" type="button" id="eliminar" onClick={()=> this.eliminarPieza(pieza)}>
+          <FontAwesomeIcon icon={faTrash} />
+          </Button></td>
+       <td>{pieza.identificadorPieza}</td>
+       <td>{pieza.nombrePieza}</td>
+       <td>{pieza.descripcionPieza}</td>
+       
+    </tr>
+    )
+ })
+
+
+
+}
+
+handleDescPiezaChange = (evt) => {
+  this.setState({ descripcionPieza: evt.target.value });
+};
+
+eliminarPieza = (dato) => {
+  //aca tambien hay que eliminar en la BD y traer los prestamos
+ var opcion = window.confirm("¿Está seguro que deseas eliminar la Pieza?");
+ if (opcion == true) {
+   var contador = 0;
+   var arreglo = this.state.piezas;
+   arreglo.map((registro) => {
+     if (dato.id == registro.id) {
+       arreglo.splice(contador, 1);
+     }
+     contador++;
+   });
+   this.setState({ piezas: arreglo});
+ }
+};
+
+mostrarModalActualizarPieza = (dato) => {
+  console.log(dato);
+   this.setState({
+     formPiezas: dato,
+     modalActualizarPieza: true,
+   });
+ };
+
+ cerrarModalActualizarPieza = () => {
+  this.setState({ modalActualizarPieza: false });
+};
+
+handleChange = (e) => {
+  console.log(e.target.name)
+  this.setState({
+    formPiezas: {
+      ...this.state.formPiezas,
+      [e.target.name]: e.target.value,
+    },
+  });
+};
+
+editarPieza = (dato) => {
+  //update en la BD
+  var contador = 0;
+  var arreglo = this.state.piezas;
+  arreglo.map((registro) => {
+    if (dato.idPieza == registro.idPieza) {
+      arreglo[contador].identificadorPieza = dato.identificadorPieza;
+      arreglo[contador].nombrePieza = dato.nombrePieza;
+      arreglo[contador].descripcionPieza = dato.descripcionPieza;
+    }
+    contador++;
+  });
+  this.setState({ piezas: arreglo, modalActualizarPieza: false });
+};
+
+handlePiezasChange = (selectedPieza) => {
+  let piezas = Array.from(selectedPieza, option => option.value);
+  let names = Array.from(selectedPieza, option => option.label);
+  
+  this.setState({selectedPieza});
+  this.setState({piezasId:piezas, piezasNames: names});
+};
+
+insertarBochon= ()=>{
+
+  //aca guardaria en BD y haria un select luego de los prestamos asociados al ejemplar y lo cargamos en el array prestamos
+     var bochones=this.state.bochones
+     var bochon={
+         "idBochon": Math.floor(Math.random() * 100) ,
+         "codigoCampoM": this.state.codigoCampo,
+         "nroBochonM": this.state.nroBochon,
+         "infoAdicionalM":this.state.infoAdicional,
+         "piezasAsociadasM": this.state.piezasId,
+         "piezasAsociadasNamesM": this.state.piezasNames
+     }
+     bochones.push(bochon)
+     this.setState({bochones:bochones, codigoCampo:'', nroBochon:'',infoAdicional:'', piezasId:[], selectedPieza: null, piezasNames:[]  })
+ 
+}
+
+renderTableDataBochones() {
+
+  return this.state.bochones.map((bochon) => {
+   
+    return (
+      <tr key={bochon.idBochon}>
+       <td><Button variant="secondary" type="button" id="editar" onClick={() => this.mostrarModalActualizarBochon(bochon)}>
+          <FontAwesomeIcon icon={faEdit} />
+          </Button>
+          &nbsp;
+          <Button variant="danger" type="button" id="eliminar" onClick={()=> this.eliminarBochon(bochon)}>
+          <FontAwesomeIcon icon={faTrash} />
+          </Button></td>
+       <td>{bochon.codigoCampoM}</td>
+       <td>{bochon.nroBochonM}</td>
+       <td>{(bochon.piezasAsociadasNamesM).toString()}</td>
+       <td>{bochon.infoAdicionalM}</td>
+       
+    </tr>
+    )
+ })
+
+
+
+}
+
+mostrarModalActualizarBochon = (dato) => {
+  let optPiezasM = this.state.piezas.map((opt) => ({
+    label: '('+opt.identificadorPieza+') '+opt.nombrePieza,
+    value: opt.idPieza,
+  }));
+  var piezasSelect=[]
+  piezasSelect= optPiezasM.filter(({value}) =>  dato.piezasAsociadasM.includes(value))
+
+
+   this.setState({
+     formBochones: dato,
+     modalActualizarBochon: true,
+     selectedPiezaM: piezasSelect,
+     piezasId:dato.piezasAsociadasM,
+     piezasNames: dato.piezasAsociadasNamesM
+   });
+ };
+
+ cerrarModalActualizarBochon = () => {
+  this.setState({ modalActualizarBochon: false });
+};
+
+handlePiezasModalChange = (selectedPiezaM) => {
+  let piezas = Array.from(selectedPiezaM, option => option.value);
+  let names = Array.from(selectedPiezaM, option => option.label);
+
+  console.log(selectedPiezaM)
+  this.setState({selectedPiezaM});
+  this.setState({piezasId:piezas, piezasNames: names});  
+};
+
+handleChangeB = (e) => {
+  console.log('TARGET:. ',e.target.name)
+  this.setState({
+    formBochones: {
+      ...this.state.formBochones,
+      [e.target.name]: e.target.value,
+    },
+  });
+};
+
+
+editarBochon = (dato) => {
+
+  console.log(dato)
+  //update en la BD
+  var contador = 0;
+  var arreglo = this.state.bochones;
+  arreglo.map((registro) => {
+    if (dato.idBochon == registro.idBochon) {
+      arreglo[contador].codigoCampoM = dato.codigoCampoM;
+      arreglo[contador].nroBochonM = dato.nroBochonM;
+      arreglo[contador].piezasAsociadasM = this.state.piezasId;
+      arreglo[contador].infoAdicionalM = dato.infoAdicionalM;
+      arreglo[contador].piezasAsociadasNamesM = this.state.piezasNames;
+    }
+    contador++;
+  });
+  console.log(arreglo);
+  this.setState({ bochones: arreglo, modalActualizarBochon: false, piezasId:[] });
+};
+
+
+eliminarBochon = (dato) => {
+  //aca tambien hay que eliminar en la BD y traer los prestamos
+ var opcion = window.confirm("¿Está seguro que deseas eliminar el Bochón?");
+ if (opcion == true) {
+   var contador = 0;
+   var arreglo = this.state.bochones;
+   arreglo.map((registro) => {
+     if (dato.idBochon == registro.idBochon) {
+       arreglo.splice(contador, 1);
+     }
+     contador++;
+   });
+   this.setState({ bochones: arreglo});
+ }
+};
+
+
+eliminarArchivoDenuncia = (dato) => {
+  //aca tambien hay que eliminar en la BD y traer los prestamos
+ var opcion = window.confirm("¿Está seguro que deseas eliminar el Archivo?");
+ if (opcion == true) {
+   var contador = 0;
+   var arreglo = this.state.archivosD;
+   arreglo.map((registro) => {
+     if (dato.id == registro.id) {
+       arreglo.splice(contador, 1);
+     }
+     contador++;
+   });
+
+   this.setState({ archivosD: arreglo});
+ }
+};
+
+
+
+  
+  
+
+  render() {
+    const { validateddb } = this.state;
+    const { validatedh } = this.state;
+    const { validatedgeo } = this.state;
+    const { validatedtax } = this.state;
+    const { validatedpiezas } = this.state;
+    const { validatedbochon } = this.state;
+
+    const { selectedAuxiliar } = this.state;
+    let optAuxiliares = this.state.auxiliares.map((opt) => ({
       label: opt.nombres + " " + opt.apellidos,
       value: opt._id,
     }));
@@ -329,8 +693,8 @@ class AddExcavacion extends React.Component {
       value: opt._id,
     }));
 
-    const { selectedPaleontologo } = this.state;
-    let optPaleontologos = this.state.paleontologos.map((opt) => ({
+    const { selectedProfesional } = this.state;
+    let optProfesionales = this.state.profesionales.map((opt) => ({
       label: opt.nombres + " " + opt.apellidos,
       value: opt._id,
     }));
@@ -341,14 +705,15 @@ class AddExcavacion extends React.Component {
       value: opt._id,
     }));
 
-    /*const { selectedPais } = this.state; 
-        let optPaises = this.state.paises.map((opt) => ({ label: opt.nombre, value: opt._id }) );
-		
-		const { selectedProvincia } = this.state;
-		let optProvincias = this.state.provincias.map((opt) => ({ label: opt.nombre, value: opt._id }) );
-		
-		const { selectedCiudad } = this.state;
-		let optCiudades = this.state.ciudades.map((opt) => ({ label: opt.nombre, value: opt._id }) );*/
+    const { selectedPieza } = this.state;
+    const { selectedPiezaM } = this.state;
+    let optPiezas = this.state.piezas.map((opt) => ({
+      label: '('+opt.identificadorPieza+') '+opt.nombrePieza,
+      value: opt.idPieza,
+    }));
+
+
+   
 
     return (
       <>
@@ -358,29 +723,21 @@ class AddExcavacion extends React.Component {
             <div id="contenido" align="left" className="container">
               <br />
               <h3 className="page-header" align="left">
-                <FontAwesomeIcon icon={faCompass} /> Agregar Excavación
+                <FontAwesomeIcon icon={faCompass} /> Nueva Excavación
               </h3>
               <hr />
-              <Form
-                noValidate
-                validated={validated}
-                onSubmit={this.handleSubmit}
-              >
-                <ToastContainer
-                  position="top-right"
-                  autoClose={5000}
-                  transition={Slide}
-                  hideProgressBar={true}
-                  newestOnTop={true}
-                  closeOnClick
-                  pauseOnHover
-                />
+             
+
+     <Tabs id="tabEjemplar" activeKey={this.state.key} onSelect={this.handleSelect}>
+      <Tab eventKey="dbasicos" title="Datos Básicos" disabled={this.state.tabbas}>
+        <Form id="form1" noValidate validated={validateddb}>     
+             
                 <fieldset>
                   <legend>Datos Básicos</legend>
                   <hr />
                   <Form.Row>
                     <Form.Group className="col-sm-12" controlId="nombre">
-                      <Form.Label>Nombre:</Form.Label>
+                      <Form.Label>Nombre del Área:</Form.Label>
                       <Form.Control
                         type="text"
                         placeholder="Ingrese Nombre"
@@ -393,7 +750,7 @@ class AddExcavacion extends React.Component {
                       </Form.Control.Feedback>
                     </Form.Group>
                   </Form.Row>
-
+   {/*
                   <Form.Row>
                     <Form.Group className="col-sm-12" controlId="descripcion">
                       <Form.Label>Descripción:</Form.Label>
@@ -405,10 +762,11 @@ class AddExcavacion extends React.Component {
                       />
                     </Form.Group>
                   </Form.Row>
+   */}
 
                   <Form.Row>
                     <Form.Group className="col-sm-6" controlId="codigo">
-                      <Form.Label>Código:</Form.Label>
+                      <Form.Label>Código de Campo:</Form.Label>
                       <Form.Control
                         type="text"
                         placeholder="Ingrese Código"
@@ -421,19 +779,8 @@ class AddExcavacion extends React.Component {
                         Por favor, ingrese Código.
                       </Form.Control.Feedback>
                     </Form.Group>
-                    <Form.Group className="col-sm-6" controlId="colector">
-                      <Form.Label>Colector:</Form.Label>
-                      <Select
-                        placeholder={"Seleccione Colector"}
-                        options={optColectores}
-                        onChange={this.handleColectorChange}
-                        value={selectedColector}
-                        isClearable
-                      />
-                    </Form.Group>
-                  </Form.Row>
 
-                  <Form.Row>
+
                     <Form.Group className="col-sm-6" controlId="director">
                       <Form.Label>Director:</Form.Label>
                       <Select
@@ -444,20 +791,42 @@ class AddExcavacion extends React.Component {
                         isClearable
                       />
                     </Form.Group>
-                    <Form.Group className="col-sm-6" controlId="paleontologo">
-                      <Form.Label>Paleontólogo:</Form.Label>
+
+                    
+                  </Form.Row>
+
+                
+
+                  <Form.Row>
+
+                  <Form.Group className="col-sm-6" controlId="auxiliares">
+                      <Form.Label>Equipo de Auxiliares:</Form.Label>
                       <Select
-                        placeholder={"Seleccione Paleontólogo"}
-                        options={optPaleontologos}
-                        onChange={this.handlePaleontologoChange}
-                        value={selectedPaleontologo}
+                        placeholder={"Seleccione..."}
+                        options={optAuxiliares}
+                        onChange={this.handleAuxiliaresChange}
+                        value={selectedAuxiliar}
                         isClearable
+                        isMulti
+                      />
+                    </Form.Group>
+
+                    
+                    <Form.Group className="col-sm-6" controlId="profesionales">
+                      <Form.Label>Equipo de Profesionales:</Form.Label>
+                      <Select
+                        placeholder={"Seleccione..."}
+                        options={optProfesionales}
+                        onChange={this.handleProfesionalesChange}
+                        value={selectedProfesional}
+                        isClearable
+                        isMulti
                       />
                     </Form.Group>
                   </Form.Row>
 
                   <Form.Row>
-                    <Form.Group className="col-sm-4" controlId="fechaInicio">
+                    <Form.Group className="col-sm-6" controlId="fechaInicio">
                       <Form.Label>Fecha Inicio:</Form.Label>
                       <Form.Control
                         type="date"
@@ -466,8 +835,8 @@ class AddExcavacion extends React.Component {
                       />
                     </Form.Group>
 
-                    <Form.Group className="col-sm-4" controlId="fbaja">
-                      <Form.Label>Fecha Baja:</Form.Label>
+                    <Form.Group className="col-sm-6" controlId="fbaja">
+                      <Form.Label>Fecha de Término:</Form.Label>
                       <Form.Control
                         type="date"
                         value={this.state.fbaja}
@@ -475,7 +844,7 @@ class AddExcavacion extends React.Component {
                       />
                     </Form.Group>
 
-                    <Form.Group className="col-sm-4" controlId="motivoBaja">
+            {/*      <Form.Group className="col-sm-4" controlId="motivoBaja">
                       <Form.Label>Motivo Baja:</Form.Label>
                       <Form.Control
                         as="textarea"
@@ -483,12 +852,95 @@ class AddExcavacion extends React.Component {
                         value={this.state.motivoBaja}
                         onChange={this.handleMotivoChange}
                       />
-                    </Form.Group>
+                     </Form.Group> */}
+
                   </Form.Row>
+                  <Form.Group controlId="muestra">
+                    <Form.Check
+                      inline
+                      type="checkbox"
+                      label="Muestra en Página Web?"
+                      checked={this.state.muestraHome}
+                      onChange={this.handleMuestraChange.bind(this)}
+                    />
+                  </Form.Group>
+                  <br/>
+                  <Form.Row >
+
+                <Button variant="outline-secondary" type="button" id="siguiente1" onClick={this.handleForm1}>
+                Siguiente <FontAwesomeIcon icon={faShare} /> 
+                </Button>  
+                </Form.Row>  
+                <br/>
+
                 </fieldset>
 
-                <fieldset>
-                  <legend>Datos Geográficos</legend>
+       </Form>
+       </Tab>
+       
+       <Tab eventKey="dhallazgo" title="Hallazgo" disabled={this.state.tabh}>
+          <Form id="form2" noValidate validated={validatedh}>     
+          <Form.Row >
+                
+               <Form.Group className="col-sm-12" controlId="tipoHallazgo">
+                  <br/>
+                  <Form.Label>Tipo Hallazgo:</Form.Label>
+         
+                  <Form.Control
+                         as="select"
+                         onChange={this.handleColeccionesChange} 
+                         required
+                     >
+                       <option value="">Seleccione Opción</option>
+                       <option value="1">Fortuito</option>
+                       <option value="2">Denuncia</option>
+                       <option value="3">Exploración</option>
+                       
+                       
+                     </Form.Control>
+                     <Form.Control.Feedback type="invalid">
+                               Por favor, ingrese Tipo.
+                               </Form.Control.Feedback>
+
+               </Form.Group>
+               
+             </Form.Row>      
+             <Form.Label>Si seleccionó Denuncia, adjunte archivo(s) a continuación de la misma:</Form.Label>   
+             <Form.Row>  
+                      <Form.Group className="col-sm-8" controlId="filesAut">
+                          <label>Archivo:</label>
+                           <input type="file" className="form-control"  onChange={this.filehandleChange.bind(this)}  />
+                      </Form.Group>
+
+                      <Form.Group className="col-sm-8" controlId="filesAut">
+                         <Table border="0">
+                            <tbody>
+                            
+                                   {this.renderTableDataDenuncia()}
+                             
+                            </tbody>
+                             
+                         </Table>
+                      </Form.Group>  
+            </Form.Row>
+
+            <Form.Row >
+                       <Button variant="outline-secondary" type="button" id="anterior2" onClick={this.handleAntForm2}>
+                        <FontAwesomeIcon icon={faReply} /> Anterior
+                        </Button> 
+                        &nbsp;
+                      <Button variant="outline-secondary" type="button" id="siguiente2" onClick={this.handleForm2}>
+								       Siguiente <FontAwesomeIcon icon={faShare} /> 
+								      </Button>  
+                    </Form.Row>  
+
+          </Form>
+       </Tab>  
+
+       <Tab eventKey="dgeo" title="Datos Geográficos" disabled={this.state.tabgeo}>
+          <Form id="form3" noValidate validated={validatedgeo}>   
+
+          <legend>Datos Geográficos</legend>
                   <hr />
                   <Form.Row>
                     <Form.Group className="col-sm-12" controlId="exploracion">
@@ -502,37 +954,7 @@ class AddExcavacion extends React.Component {
                       />
                     </Form.Group>
                   </Form.Row>
-                  {/*   <Form.Group className="col-sm-6" controlId="pais"> 
-                                <Form.Label>País:</Form.Label>
-                                <Select 
-                                        placeholder={'Seleccione País'} 
-                                        options={optPaises}
-                                        onChange={this.handlePaisChange} 
-                                        value={selectedPais} isClearable />
-                                
-                            </Form.Group> /*}
-                            </Form.Row>
-							
-							{/* <Form.Row >
-                              <Form.Group className="col-sm-6" controlId="provincia">
-                                <Form.Label>Provincia:</Form.Label>
-                                <Select 
-                                        placeholder={'Seleccione Provincia'} 
-                                        options={optProvincias}
-                                        onChange={this.handleProvinciaChange} 
-                                        value={selectedProvincia} isClearable />
-                                
-                            </Form.Group>
-                            <Form.Group className="col-sm-6" controlId="ciudad">
-                                <Form.Label>Ciudad:</Form.Label>
-                                <Select 
-                                        placeholder={'Seleccione Ciudad'} 
-                                        options={optCiudades}
-                                        onChange={this.handleCiudadChange} 
-                                        value={selectedCiudad} isClearable />
-                                
-                            </Form.Group>
-              </Form.Row> */}
+               
                   <br />
 
                   <CrearExcavacion
@@ -542,17 +964,46 @@ class AddExcavacion extends React.Component {
                   />
                   <br />
 
-                  <Form.Group controlId="muestra">
-                    <Form.Check
-                      inline
-                      type="checkbox"
-                      label="Muestra en Página Web?"
-                      checked={this.state.muestraHome}
-                      onChange={this.handleMuestraChange.bind(this)}
-                    />
-                  </Form.Group>
-                </fieldset>
-                <hr />
+                  <Form.Row >
+                       <Button variant="outline-secondary" type="button" id="anterior3" onClick={this.handleAntForm3}>
+                        <FontAwesomeIcon icon={faReply} /> Anterior
+                        </Button> 
+                        &nbsp;
+                      <Button variant="outline-secondary" type="button" id="siguiente3" onClick={this.handleForm3}>
+								       Siguiente <FontAwesomeIcon icon={faShare} /> 
+								      </Button>  
+                </Form.Row>  
+
+
+          </Form>
+        </Tab>  
+
+        <Tab eventKey="dtax" title="Datos Geológicos/Taxonómicos" disabled={this.state.tabtax}>
+          <Form id="form4" noValidate validated={validatedtax}>  
+
+                    <Form.Row>  
+                      <Form.Group className="col-sm-12" controlId="geologicos">
+                        <Form.Label>Geológicos:</Form.Label>
+                        <Form.Control
+                         as='textarea'
+                          onChange={this.handleGeologicosChange}
+                          value={this.state.geologicos}
+                        />
+                      </Form.Group>
+                    </Form.Row>
+
+                    <Form.Row>  
+                      <Form.Group className="col-sm-12" controlId="taxonomicos">
+                        <Form.Label>Taxonómicos:</Form.Label>
+                        <Form.Control
+                         as='textarea'
+                          onChange={this.handleTaxonomicosChange}
+                          value={this.state.taxonomicos}
+                        />
+                      </Form.Group>
+                    </Form.Row>
+
+                    <hr />
                 <Form.Row>
                   <Form.Group className="mx-sm-3 mb-2">
                     <Button variant="primary" type="submit" id="guardar">
@@ -560,16 +1011,279 @@ class AddExcavacion extends React.Component {
                     </Button>
                     &nbsp;&nbsp;
                     <Link to="/excavaciones">
-                      <Button variant="secondary" type="button" id="volver">
-                        <FontAwesomeIcon icon={faReply} /> Cancelar
+                      <Button variant="danger" type="button" id="volver">
+                        <FontAwesomeIcon icon={faTimesCircle} /> Cancelar
                       </Button>
                     </Link>
                   </Form.Group>
                 </Form.Row>
 
+              
+      
+
+          </Form>
+         </Tab> 
+       
+         <Tab eventKey="dpiezas" title="Piezas" disabled={this.state.tabpiezas}>
+          <Form id="form5" noValidate validated={validatedpiezas}>  
+
+          <Form.Row>
+                    <Form.Group className="col-sm-6" controlId="identificadorPieza">
+                      <Form.Label>Identificador:</Form.Label>
+                      <Form.Control
+                        type="text"
+                        value={this.state.identificadorPieza}
+                        onChange={this.handleIdentificadorPiezaChange}
+                      />
+                    </Form.Group>
+
+                    <Form.Group className="col-sm-6" controlId="nombrePieza">
+                      <Form.Label>Nombre:</Form.Label>
+                      <Form.Control
+                        type="text"
+                        value={this.state.nombrePieza}
+                        onChange={this.handleNombrePiezaChange}
+                      />
+                    </Form.Group>
+            </Form.Row>  
+            <Form.Row>  
+                      <Form.Group className="col-sm-12" controlId="descripcionPieza">
+                        <Form.Label>Descripción:</Form.Label>
+                        <Form.Control
+                         as='textarea'
+                          onChange={this.handleDescPiezaChange}
+                          value={this.state.descripcionPieza}
+                        />
+                      </Form.Group>
+            </Form.Row>    
+            <Form.Row> 
+                 <Form.Group className="mx-sm-3 mb-2">
+                      <Button variant="primary" type="button" id="guardarPieza" onClick={() => this.insertarPieza()}>
+                      <FontAwesomeIcon icon={faPlus} /> Agregar
+                      </Button>
+                  </Form.Group>
+          </Form.Row>	 
+
+            <Form.Row>
+            <Table striped bordered hover  responsive>
+              <thead className="thead-dark">
+              <tr>
+                <th>Acción</th>
+                  <th>Identificador</th>
+                  <th>Nombre</th>
+                  <th>Descripción</th>
+                </tr>
+              </thead>	
+              <tbody>
+                  {this.renderTableDataPiezas()}
+              </tbody>
+            </Table> 
+            </Form.Row>    
+
+          </Form>
+         </Tab> 
+
+         <Tab eventKey="dbochones" title="Bochones" disabled={this.state.tabbochon}>
+          <Form id="form6" noValidate validated={validatedbochon}>  
+             
+          <Form.Row>
+                    <Form.Group className="col-sm-6" controlId="codigoCampo">
+                      <Form.Label>Código Campo:</Form.Label>
+                      <Form.Control
+                        type="text"
+                        value={this.state.codigoCampo}
+                        onChange={this.handleCodCampoChange}
+                      />
+                    </Form.Group>
+
+                    <Form.Group className="col-sm-6" controlId="nroBochon">
+                      <Form.Label>Nro. Bochón:</Form.Label>
+                      <Form.Control
+                        type="text"
+                        value={this.state.nroBochon}
+                        onChange={this.handleNroBochonChange}
+                      />
+                    </Form.Group>
+            </Form.Row>  
+            <Form.Row>
+
+                  <Form.Group className="col-sm-12" controlId="piezasAsoc">
+                      <Form.Label>Piezas Asociadas:</Form.Label>
+                      <Select
+                        placeholder={"Seleccione..."}
+                        options={optPiezas}
+                        onChange={this.handlePiezasChange}
+                        value={selectedPieza}
+                        isClearable
+                        isMulti
+                      />
+                    </Form.Group>
+             </Form.Row>       
+            <Form.Row>  
+                      <Form.Group className="col-sm-12" controlId="infoAdicional">
+                        <Form.Label>Información Adicional:</Form.Label>
+                        <Form.Control
+                         as='textarea'
+                          onChange={this.handleInfoAdicionalChange}
+                          value={this.state.infoAdicional}
+                        />
+                      </Form.Group>
+            </Form.Row>    
+            <Form.Row> 
+                 <Form.Group className="mx-sm-3 mb-2">
+                      <Button variant="primary" type="button" id="guardarBochon" onClick={() => this.insertarBochon()}>
+                      <FontAwesomeIcon icon={faPlus} /> Agregar
+                      </Button>
+                  </Form.Group>
+          </Form.Row>	 
+
+            <Form.Row>
+            <Table striped bordered hover  responsive>
+              <thead className="thead-dark">
+              <tr>
+                <th>Acción</th>
+                  <th>Cód. Campo</th>
+                  <th>Nro. Bochon</th>
+                  <th>Piezas Asociadas</th>
+                  <th>Información Adicional</th>
+                </tr>
+              </thead>	
+              <tbody>
+                  {this.renderTableDataBochones() }
+              </tbody>
+            </Table> 
+            </Form.Row>
+
+          </Form>
+         </Tab> 
+
+
+      </Tabs> 
+
+      <Modal
+        show={this.state.modalActualizarPieza}
+        onHide={() => this.cerrarModalActualizarPieza()}
+        backdrop="static"
+        keyboard={false}
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>Editar Pieza</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+              <Form.Row>
+                      <Form.Group className="col-sm-12" controlId="idPieza">
+                              <Form.Control as="input" type="hidden"  value={this.state.formPiezas.idPieza} />
+                      </Form.Group>
+              </Form.Row>
+              <Form.Row>
+                      <Form.Group className="col-sm-12" controlId="identificadorPieza">
+                                      <Form.Label>Identificador:</Form.Label>
+                                      <Form.Control type="text" autoComplete="off" name="identificadorPieza"   onChange={this.handleChange} value={this.state.formPiezas.identificadorPieza} />
+                      </Form.Group>	
+              </Form.Row>
+              <Form.Row>
+
+                      <Form.Group className="col-sm-12" controlId="nombrePieza">
+                                      <Form.Label>Nombre:</Form.Label>
+                                      <Form.Control type="text" autoComplete="off" name="nombrePieza"   onChange={this.handleChange} value={this.state.formPiezas.nombrePieza} />
+                      </Form.Group>
+              </Form.Row>
+
+              <Form.Row>
+
+                      <Form.Group className="col-sm-12" controlId="nombrePieza">
+                                      <Form.Label>Descripción:</Form.Label>
+                                      <Form.Control as='textarea'  name="descripcionPieza"   onChange={this.handleChange} value={this.state.formPiezas.descripcionPieza} />
+                      </Form.Group>
+              </Form.Row>
+
+
+
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => this.cerrarModalActualizarPieza()}>
+            Cerrar
+          </Button>
+          <Button variant="primary" id="guardarAct" onClick={() => this.editarPieza(this.state.formPiezas)}> <FontAwesomeIcon icon={faSave} /> Guardar</Button>
+        </Modal.Footer>
+      </Modal>
+
+      <Modal
+        show={this.state.modalActualizarBochon}
+        onHide={() => this.cerrarModalActualizarBochon()}
+        backdrop="static"
+        keyboard={false}
+        size="lg"
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>Editar Bochón</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+        <Form.Row>
+                    <Form.Group className="col-sm-6" controlId="codigoCampoM">
+                      <Form.Label>Código Campo:</Form.Label>
+                      <Form.Control
+                        type="text"
+                        name='codigoCampoM'
+                        value={this.state.formBochones.codigoCampoM}
+                        onChange={this.handleChangeB}
+                      />
+                    </Form.Group>
+
+                    <Form.Group className="col-sm-6" controlId="nroBochonM">
+                      <Form.Label>Nro. Bochón:</Form.Label>
+                      <Form.Control
+                        type="text"
+                        name='nroBochonM'
+                        value={this.state.formBochones.nroBochonM}
+                        onChange={this.handleChangeB}
+                      />
+                    </Form.Group>
+            </Form.Row>  
+            <Form.Row>
+
+                  <Form.Group className="col-sm-12" controlId="piezasAsocM">
+                      <Form.Label>Piezas Asociadas:</Form.Label>
+                      <Select
+                        placeholder={"Seleccione..."}
+                        options={optPiezas}
+                        onChange={this.handlePiezasModalChange}
+                        value={selectedPiezaM}
+                        isClearable
+                        isMulti
+                      />
+                    </Form.Group>
+             </Form.Row>       
+            <Form.Row>  
+                      <Form.Group className="col-sm-12" controlId="infoAdicionalM">
+                        <Form.Label>Información Adicional:</Form.Label>
+                        <Form.Control
+                         as='textarea'
+                         name='infoAdicionalM'
+                          onChange={this.handleChangeB}
+                          value={this.state.formBochones.infoAdicionalM}
+                        />
+                      </Form.Group>
+            </Form.Row>    
+
+
+
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => this.cerrarModalActualizarBochon()}>
+            Cerrar
+          </Button>
+          <Button variant="primary" id="guardarAct" onClick={() => this.editarBochon(this.state.formBochones)}> <FontAwesomeIcon icon={faSave} /> Guardar</Button>
+        </Modal.Footer>
+      </Modal>
+
+    
+               
+               
+
                 <br />
                 <br />
-              </Form>
+            
             </div>
           </div>
         </div>

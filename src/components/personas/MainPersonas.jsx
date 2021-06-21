@@ -9,6 +9,7 @@ import { withRouter, Link } from 'react-router-dom';
 import Menu from "./../Menu"
 import Cookies from 'universal-cookie';
 
+
 const cookies = new Cookies();
 
 
@@ -52,8 +53,10 @@ class MainPersonas extends React.Component {
 
 	
 	componentDidMount(){
+
     
-      if(!cookies.get('username') && !cookies.get('password'))
+    
+      if(!cookies.get('user') && !cookies.get('password'))
       {
           window.location.href='/';
       }
@@ -61,59 +64,130 @@ class MainPersonas extends React.Component {
       {
 
     
-          fetch('http://museo.fi.uncoma.edu.ar:3006/api/persona')
-          .then(res => res.json())
+          fetch('http://museo.fi.uncoma.edu.ar:3006/api/personas', {
+            method: 'GET', 
+            headers: {
+              'Authorization': 'Bearer '+cookies.get('token')
+            }})
+            .then( response => {
+              return response.json();
+          })
         .then(
           (result) => {
-              this.setState({
-            personas: result.personas          
-          });
+              if(typeof result.personas !== 'undefined') {
+                 
+                        this.setState({
+                      personas: result.personas          
+                    });
+              }else{
+                cookies.remove("id", { path: "/" });
+                cookies.remove("nombre", { path: "/" });
+                cookies.remove("apellido", { path: "/" });
+                cookies.remove("user", { path: "/" });
+                cookies.remove("password", { path: "/" });
+                cookies.remove("permiso", { path: "/" });
+                cookies.remove("token", { path: "/" });
+                window.location.href = "/";
+              }
+             
+             
           }).catch(error=>{
-              console.log("Error")
+              console.log("Error al consultar personas:", error)
           });
       } 
 
     }
 
 
-    eliminar (id)
+    eliminar(id, foto, cv)
     {
-	  var resultPersonas=[];	
-      const destino = "/var/www/museo-administracion/html/images/personas/" + id+'/'; 
+	    var resultPersonas=[];	
+      const destino = '/var/www/consulta/html/assets/datos/personal/fotosPersonal'; 
+      const img=destino+foto;
+
+      const destinoCV = '/var/www/consulta/html/assets/datos/personal/curriculumPersonal'; 
+      const curriculum=destinoCV+cv;
 
        fetch('http://museo.fi.uncoma.edu.ar:3006/api/persona/' + id, {
           method: 'DELETE',
+          headers: {
+            'Authorization': 'Bearer '+cookies.get('token')
+          }
         })
         .then(function(response) {
         if (response.ok) {
               console.log("¡Se eliminó a la persona con Éxito!");
         
         }
-        }).then( function(res) {
-					       fetch('http://museo.fi.uncoma.edu.ar:3006/api/deleteDirectorio', {
+        })
+        .then( function(res) {
+					       fetch('http://museo.fi.uncoma.edu.ar:3006/api/deleteArchivo', {
 											method: 'get',
 											headers:{
 													  'Content-Type': undefined,
-													  'path': destino
+													  'path': img,
+                            'Authorization': 'Bearer '+cookies.get('token')
 													}      
-											})
-						  .then(function(response) {
-							  if(response.ok) {
-								   console.log('Se eliminaron los archivos con exito.');
-								   toast.success("¡Se eliminó la Persona con Éxito!");
-					
-							  } 
-						  })
-                          .then( function()
+											}) .then(response => {
+                        return response.json();
+                      })  
+						   .then(function(response) {
+							
+								   console.log('Se elimino el archivo con exito.');
+							
+						   })
+              .then(function(){
+
+               
+                  fetch('http://museo.fi.uncoma.edu.ar:3006/api/deleteArchivo', {
+                       method: 'get',
+                       headers:{
+                             'Content-Type': undefined,
+                             'path': curriculum,
+                             'Authorization': 'Bearer '+cookies.get('token')
+                           }      
+                       }) .then(response => {
+                         return response.json();
+                       })  
+                   .then(function(response) {
+                          toast.success("¡Se eliminó la Persona con Éxito!");
+                     }).catch(error=>{
+                                 console.log("Error al eliminar archivo:", error)
+                       });
+              })
+              .then( function()
 						     {
-								  fetch('http://museo.fi.uncoma.edu.ar:3006/api/persona')
-									.then(res => res.json())
-								  .then(
-									 function(result){
-											resultPersonas= result.personas
-									}).catch(error=>{
-										 console.log("Error:"+ error.message)
-									 });
+                   
+                  fetch('http://museo.fi.uncoma.edu.ar:3006/api/personas', {
+                    method: 'GET', 
+                    headers: {
+                      'Authorization': 'Bearer '+cookies.get('token')
+                    }})
+                    .then( response => {
+                      return response.json();
+                      })
+                    .then(
+                      function(result) {
+                          if(typeof result.personas !== 'undefined') {
+                            
+                                   resultPersonas=result.personas
+                              //   this.setState({ personas: result.personas });
+
+                          }else{
+                            cookies.remove("id", { path: "/" });
+                            cookies.remove("nombre", { path: "/" });
+                            cookies.remove("apellido", { path: "/" });
+                            cookies.remove("user", { path: "/" });
+                            cookies.remove("password", { path: "/" });
+                            cookies.remove("permiso", { path: "/" });
+                            cookies.remove("token", { path: "/" });
+                            window.location.href = "/";
+                          }
+                        
+                        
+                      }).catch(error=>{
+                          console.log("Error al consultar personas:", error)
+                      });
 								 
 							 }
 						  
@@ -187,9 +261,9 @@ class MainPersonas extends React.Component {
                           tooltip: 'Eliminar Persona',
                           onClick: (event, rowData) => {
                             // Do save operation
-                            if( window.confirm('¿Está seguro de eliminar el afiliado seleccionado?'))
+                            if( window.confirm('¿Está seguro de eliminar la persona seleccionada?'))
                             {
-                              this.eliminar(rowData._id); 
+                              this.eliminar(rowData._id, rowData.foto, rowData.curriculum); 
                               
                             }
                           }

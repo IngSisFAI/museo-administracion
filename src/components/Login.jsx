@@ -1,13 +1,13 @@
-import { AssignmentReturnRounded, DesktopWindows } from "@material-ui/icons";
 import React from "react";
 import './Login.css'
-import { Form, Button } from 'react-bootstrap';
+import { Form, Button, Alert} from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faSignInAlt} from '@fortawesome/free-solid-svg-icons'
-import  Imagen from './LOGOUNC.png';
+import  Imagen from './iconoMUC.jpeg';
 import axios from 'axios';
 import md5 from 'md5';
 import Cookies from "universal-cookie"
+import moment from 'moment'
 
 const cookies = new Cookies();
 
@@ -17,7 +17,9 @@ class Login extends React.Component {
     super(props);
     this.state = {
          user:'',
-         password:''
+         password:'',
+         show: false,
+         showError:false
     }
   }
 
@@ -37,26 +39,26 @@ class Login extends React.Component {
                return response.data;
            })
            .then (response => {
-               if(response.usuarios.length>0)
+               if(response.usuario!==null)
                {  
-                     cookies.set('id', response.usuarios[0]._id, {path: "/"});
-                     cookies.set('nombre', response.usuarios[0].nombre, {path: "/"});
-                     cookies.set('apellido', response.usuarios[0].apellido, {path: "/"});
-                     cookies.set('user', response.usuarios[0].user, {path: "/"});
-                     cookies.set('password', response.usuarios[0].password, {path: "/"});
-                     cookies.set('permiso', response.usuarios[0].permiso, {path: "/"});
+                     cookies.set('id', response.usuario._id, {path: "/", expires: new Date(moment().add(120, 'm').format())});
+                     cookies.set('nombre', response.usuario.nombre, {path: "/", expires: new Date(moment().add(120, 'm').format())});
+                     cookies.set('apellido', response.usuario.apellido, {path: "/", expires: new Date(moment().add(120, 'm').format())});
+                     cookies.set('user', response.usuario.user, {path: "/", expires: new Date(moment().add(120, 'm').format())});
+                     cookies.set('password', response.usuario.password, {path: "/",  expires: new Date(moment().add(120, 'm').format())});
+                     cookies.set('permiso', response.usuario.permiso, {path: "/", expires: new Date(moment().add(120, 'm').format())});
+                     cookies.set('token', response.token, {path: "/", expires: new Date(moment().add(120, 'm').format())});
                      window.location.href="/home";
                }
                else
                {
-                 
-                  document.getElementById('divAlerta').removeAttribute('style');
-                  document.getElementById('password').value='';
+                  this.setState({show: true, password:'', showError:false})
                }
 
            })
            .catch ( error => {
                  console.log(error);
+                 this.setState({showError: true, show: false})
            })
    
     
@@ -72,7 +74,7 @@ class Login extends React.Component {
                <div className="fadeIn first">
                  <br/>
                  <p>Sistema de Administración</p>
-                 <p>Museo de Geología y Paleontología - UNComa.</p>
+                 <p>Museo de Ciencias Naturales - UNComa.</p>
                  <img src={Imagen} id="icono" alt="Museo Icono" />
                  <br/>
                  <br/>
@@ -87,9 +89,12 @@ class Login extends React.Component {
                   
                   <div id="formFooter">
                       <div className="underlineHover">
-                      <div className="alert alert-danger" id="divAlerta" role="alert" style={{display: 'none'}}>
-                        ¡Usuario o Contraseña incorrecto!
-                      </div>
+                            <Alert variant="danger" show={this.state.show}>
+                               ¡Usuario o Contraseña incorrecto!
+                            </Alert>
+                            <Alert variant="danger" show={this.state.showError}>
+                               Error de conexión, intente nuevamente.
+                            </Alert>
                       </div>
                   </div>
                </div>

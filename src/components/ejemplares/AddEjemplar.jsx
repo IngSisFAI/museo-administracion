@@ -1,13 +1,14 @@
 import React from "react";
-import { Form, Button } from 'react-bootstrap';
+import { Form, Button, Tabs, Tab, Table, Modal } from 'react-bootstrap';
 import { ToastContainer, toast, Slide } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faSave, faReply, faPaw} from '@fortawesome/free-solid-svg-icons'
+import { faSave, faReply, faPaw, faPlus, faFileArchive, faTrash, faEdit, faShare, faTimesCircle} from '@fortawesome/free-solid-svg-icons'
 import { Link} from 'react-router-dom';
 import Select from 'react-select';
 import Menu from "./../Menu"
 import Cookies from 'universal-cookie';
+import Moment from 'moment';
 
 const cookies = new Cookies();
 
@@ -26,6 +27,7 @@ class AddEjemplar extends React.Component {
                 nroColeccion:"",
                 fechaColeccion:"",
                 dimensionAlto:"",
+                dimensionLargo:"",
                 dimensionAncho:"",
                 peso:"",
                 alimentacion:"",
@@ -56,7 +58,7 @@ class AddEjemplar extends React.Component {
                 muestraHome: false,
                 excavaciones: [],
                 selectedExcavacion: null,
-                selectedTipo: { value: 'Encontrado', label: 'Encontrado' },
+           //     selectedTipo: { value: 'Encontrado', label: 'Encontrado' },
                 fbaja:"",
                 motivo:"",
                 ilustracionCompleta:"",
@@ -67,11 +69,49 @@ class AddEjemplar extends React.Component {
                 videos:[],
                 colecciones:[],
                 selectedColeccion:null,
-				validated: false,
-				paisesArray:[]
+                selectedIngresadoPor:null,
+                validated: false,
+                paisesArray:[],
+                colectores:[],
+                show: false,
+                tabdim: true,
+                key: 'dbasicos',
+                op:'I',
+                tabgeo: true,
+                validateddim: false,
+                tabbas: false,
+                validatedgeo: false,
+                tabgeo: true,
+                tabtax: true,
+                validatedtax: false,
+                tabarea: true,
+                validatedarea: false,
+                tabpres: true,
+                validatedpres: false,
+                tabotros: true,
+                validatedotros: false,
+                prestamos:  [],
+               fprestamo:'',
+               fdevolucion:'',
+               investigador:'',
+               institucion:'',
+               modalActualizar: false,
+               modalInsertar: false,
+               form: {
+                id: "",
+                fprestamo: "",
+                fdevolucion: "",
+                institucion:"",
+                investigador:"",
+              },
+              modalSubir: false,
+              archivos:[],
+              archivosOD:[],
         }        
        
       }
+
+    
 
       componentDidMount() {
 
@@ -100,23 +140,66 @@ class AddEjemplar extends React.Component {
           })
           .then((excav) => {
             this.setState({ excavaciones: excav.excavaciones })
+            
+          fetch('http://museo.fi.uncoma.edu.ar:3006/api/coleccion')
+          .then((response) => {
+              return response.json()
+            })
+            .then((collection) => {
+              this.setState({ colecciones: collection.colecciones })
+              fetch("http://museo.fi.uncoma.edu.ar:3006/api/persona")
+              .then((response) => {
+                return response.json();
+              })
+              .then((empleados) => {
+                this.setState({
+                  colectores: empleados.personas,
+                });
+              }).catch(function (error) {
+                toast.error("Error al guardar. Intente nuevamente.");
+                console.log(
+                  "Hubo un problema con la petición Fetch:",
+                  error.message
+                );
+              });
+
+            }).catch(function (error) {
+              toast.error("Error al guardar. Intente nuevamente.");
+              console.log(
+                "Hubo un problema con la petición Fetch:",
+                error.message
+              );
+            });
+            
+          }).catch(function (error) {
+            toast.error("Error al guardar. Intente nuevamente.");
+            console.log(
+              "Hubo un problema con la petición Fetch:",
+              error.message
+            );
           });
 
-          fetch('http://museo.fi.uncoma.edu.ar:3006/api/coleccion')
-        .then((response) => {
-            return response.json()
-          })
-          .then((collection) => {
-            this.setState({ colecciones: collection.colecciones })
-          });
 
            
       }
 	  
 	  //Manejadores de cada campo 
+
+
+    handleShow = evt => {
+      this.setState({ show: true });
+    };
+
+    handleClose = evt => {
+      this.setState({ show: false});
+    };
 	  
       handleNombreChange = evt => {
         this.setState({ nombre: evt.target.value });
+      };
+
+      handleColectorChange = (selectedColector) => {
+        this.setState({ selectedColector });
       };
 
 
@@ -129,8 +212,14 @@ class AddEjemplar extends React.Component {
   
 
        handleColeccionesChange = (selectedColeccion) => {
-        this.setState({selectedColeccion});
-        console.log(`Option selected:`, selectedColeccion );
+        this.setState({selectedColeccion:selectedColeccion.target.value });
+       // console.log(`Option selected:`, selectedColeccion.target.value );
+       
+      }
+
+      handleIngresadoPorChange = (event) => {
+        this.setState({selectedIngresadoPor:event.target.value });
+      // console.log(`Option selected:`, event.target.value );
        
       }
 
@@ -138,8 +227,8 @@ class AddEjemplar extends React.Component {
         this.setState({ fechaColeccion: evt.target.value });
       };
 
-      handleDimensionAltoChange = evt => {
-        this.setState({ dimensionAlto: evt.target.value });
+      handleDimensionLargoChange = evt => {
+        this.setState({ dimensionLargo: evt.target.value });
       };
 
       handleDimensionAnchoChange = evt => {
@@ -147,8 +236,8 @@ class AddEjemplar extends React.Component {
         this.setState({ dimensionAncho: evt.target.value });
       };
 
-      handlePesoChange = evt => {
-        this.setState({ peso: evt.target.value });
+      handleDimensionAltoChange = evt => {
+        this.setState({ dimensionAlto: evt.target.value });
       };
 
       handleAlimentacionChange = evt => {
@@ -228,153 +317,44 @@ class AddEjemplar extends React.Component {
         this.setState({ especie: evt.target.value });
       };
 
+      handleFPrestamoChange = evt => {
+        this.setState({ fprestamo: evt.target.value });
+      };
 
+      handleFDevolucionChange = evt => {
+        this.setState({ fdevolucion: evt.target.value });
+      };
+
+      handleInvestigadorChange = evt => {
+        this.setState({ investigador: evt.target.value });
+      };
+
+      handleInstitucionChange = evt => {
+        this.setState({ institucion: evt.target.value });
+      };
+      
+
+   
+
+      handleChange = (e) => {
+        console.log(e.target.name)
+        this.setState({
+          form: {
+            ...this.state.form,
+            [e.target.name]: e.target.value,
+          },
+        });
+      };
+
+    
 
 
       handleExcavacionesChange = (selectedExcavacion) => {
+      //  console.log(selectedExcavacion);
         this.setState({selectedExcavacion});
-        
-		
-	/*	if(selectedExcavacion!==null)
-		{
-			 fetch('http://museo.fi.uncoma.edu.ar:3006/api/excavacionId/'+selectedExcavacion.value)
-			 .then((response) => {
-                               return response.json()
-               })
-             .then((result) => {
-				 
-                 if(result.excavacionId.idPais!=='' && result.excavacionId.idPais!==null)	
-                 {					 
-					  var paisSelect= this.state.paisesArray.filter(option => option.value === result.excavacionId.idPais)
-					  this.setState({selectedPais: paisSelect[0]})		
-
-					  fetch('http://museo.fi.uncoma.edu.ar:3006/api/provinciaIdPais/'+result.excavacionId.idPais)
-						.then((response) => {
-							return response.json()
-						  })
-						  .then((estados) => {
-							    var provincias =estados.provincias.map((opt) => ({ label: opt.nombre, value: opt._id }) ); 
-							    this.setState({provincias: estados.provincias});
-							    if(result.excavacionId.idProvincia!=='' && result.excavacionId.idProvincia!==null)
-								{
-							        var provSelect= provincias.filter(option => option.value === result.excavacionId.idProvincia)
-							        this.setState({selectedProvincia: provSelect[0]});
-									fetch('http://museo.fi.uncoma.edu.ar:3006/api/ciudadIdProv/'+result.excavacionId.idProvincia)
-										.then((response) => {
-											return response.json()
-										  })
-										  .then((cities) => {
-											     var ciudades =cities.ciudades.map((opt) => ({ label: opt.nombre, value: opt._id }) );
-                                                 this.setState({ciudades: cities.ciudades});												 
-											     if(result.excavacionId.idCiudad!=='' && result.excavacionId.idCiudad!==null)	
-												 {
-													var ciudadSelect= ciudades.filter(option => option.value === result.excavacionId.idCiudad);
-											        this.setState({selectedCiudad:ciudadSelect[0]});
-												 }
-												 else{
-													this.setState({selectedCiudad: null, ciudades:[]})  
-												 }
-										  })
-								}	
-								else{
-									
-									this.setState({selectedProvincia: null,selectedCiudad: null, provincias: [], ciudades:[]}) 
-								}
-						   
-						 			 
-							  
-						  }).catch(function(error) {
-								toast.error("Error al consultar. Intente nuevamente.");
-								console.log('Hubo un problema con la petición Fetch:',error.message);
-							  });
-				 }
-				 else {
-					 
-					this.setState({selectedPais: null, selectedProvincia: null,selectedCiudad: null, provincias: [], ciudades:[]}) 
-
-					 
-				 }				 
-			  
-			  
-			  
-			  }).catch(function(error) {
-					toast.error("Error al consultar. Intente nuevamente.");
-					console.log('Hubo un problema con la petición Fetch:',error.message);
-				  });
-			
-			
-			
-		}
-        else
-		{
-			this.setState({selectedPais: null, selectedProvincia: null,selectedCiudad: null, provincias: [], ciudades:[]}) 
-
-		}		*/	
-       
       }
 
-
-   /*   handlePaisChange= (selectedPais) => { 
-	  
-	  
-		  if(selectedPais!=null)
-		  {	  
-		  
-			  
-				this.setState(prevState => ({
-					selectedProvincia: null
-					}
-				  ));
-				
-				fetch('http://museo.fi.uncoma.edu.ar:3006/api/provinciaIdPais/'+selectedPais.value)
-				.then((response) => {
-					return response.json()
-				  })
-				  .then((estados) => {
-					this.setState({provincias: estados.provincias, selectedPais});
-
-				  });
-		   }
-           else{
-			   this.setState({
-					selectedPais:null, selectedProvincia:null, selectedCiudad:null, provincias:[], ciudades:[]});
-		   }		   
-      }
-
-      handleProvinciaChange= (selectedProvincia) => { 
-
-
-       if(selectedProvincia!=null)
-	   {	
-			this.setState(prevState => ({
-				selectedCiudad: null
-				}
-			  ));
-			
-			fetch('http://museo.fi.uncoma.edu.ar:3006/api/ciudadIdProv/'+selectedProvincia.value)
-			.then((response) => {
-				return response.json()
-			  })
-			  .then((cities) => {
-				this.setState({ciudades: cities.ciudades , selectedProvincia});
-
-			  });
-	   }
-       else	  
-       {
-		    this.setState({
-				 selectedProvincia:null, selectedCiudad:null,  ciudades:[]});
-		   
-	   }		   
-      
-	  
-	  }
-
-      handleCiudadChange = (selectedCiudad) => {
-		 
-        this.setState({selectedCiudad});
-      }*/
-
+  
       handleMuestraChange(evt) {
         this.setState({ muestraHome: evt.target.checked });
       }
@@ -396,13 +376,13 @@ class AddEjemplar extends React.Component {
           event.stopPropagation();
 		  
 		   toast.error('Ingrese datos obligatorios.');
-		  if(this.state.selectedExcavacion=="" || this.state.selectedExcavacion==null)
+		  if(this.state.selectedExcavacion==="" || this.state.selectedExcavacion===null)
 		  {
 			 toast.error('Seleccione una Excavación.');  
 			  
 		  }	
 		  
-		  if(this.state.selectedColeccion=="" || this.state.selectedColeccion==null)
+		  if(this.state.selectedColeccion==="" || this.state.selectedColeccion===null)
 		  {
 			 toast.error('Seleccione una Colección.');  
 			  
@@ -412,14 +392,14 @@ class AddEjemplar extends React.Component {
         }
         else
         { 
-	      if(this.state.selectedExcavacion=="" || this.state.selectedExcavacion==null)
+	      if(this.state.selectedExcavacion==="" || this.state.selectedExcavacion===null)
 		  {
 			 toast.error('Seleccione una Excavación!');  
 			  
 		  }	
 		  else
 		  {
-			   if(this.state.selectedColeccion=="" || this.state.selectedColeccion==null)
+			   if(this.state.selectedColeccion==="" || this.state.selectedColeccion===null)
 			  {
 				 toast.error('Seleccione una Colección.');  
 				  
@@ -520,6 +500,339 @@ class AddEjemplar extends React.Component {
 	}	
 
 
+  handleForm1 = (event) => {
+    const form = document.getElementById("form1");
+    event.preventDefault();
+    if (form.checkValidity() === false) {
+      event.stopPropagation();
+    }else{
+      this.setState({tabdim:false, key:'ddimensiones'});
+    }
+    this.setState({ validated: true });
+  }
+
+  handleSelect=(key) =>{
+    this.setState({ key: key });
+  } 
+
+  handleForm2 = (event) => {
+    const form = document.getElementById("form2");
+    event.preventDefault();
+    if (form.checkValidity() === false) {
+      event.stopPropagation();
+    }else{
+      this.setState({tabgeo:false, key:'dgeologicos'});
+    }
+    this.setState({ validateddim: true });
+  }
+
+  handleAntForm2 = (event) => {
+   
+      this.setState({tabbas:false, key:'dbasicos'});
+  
+  }
+
+  handleForm3 = (event) => {
+    const form = document.getElementById("form3");
+    event.preventDefault();
+    if (form.checkValidity() === false) {
+      event.stopPropagation();
+    }else{
+      this.setState({tabtax:false, key:'dtaxonomicos'});
+    }
+    this.setState({ validatedgeo: true });
+  }
+
+  handleAntForm3 = (event) => {
+   
+      this.setState({tabdim:false, key:'ddimensiones'});
+  
+  }
+
+  handleForm4 = (event) => {
+    const form = document.getElementById("form4");
+    event.preventDefault();
+    if (form.checkValidity() === false) {
+      event.stopPropagation();
+    }else{
+      this.setState({tabarea:false, key:'darea'});
+    }
+    this.setState({ validatedtax: true });
+  }
+
+  handleAntForm4 = (event) => {
+   
+      this.setState({tabgeo:false, key:'dgeologicos'});
+  
+  }
+
+  handleForm5 = (event) => {
+    const form = document.getElementById("form5");
+    event.preventDefault();
+    if (form.checkValidity() === false) {
+      event.stopPropagation();
+     
+      
+    }else{
+      if(this.state.selectedExcavacion==="" || this.state.selectedExcavacion===null)
+		  {
+			 toast.error('Seleccione una Excavación.');  
+			  
+		  }	else{
+        this.setState({tabotros:false, key:'dotros', tabpres:false});
+      }
+    
+    }
+    this.setState({ validatedarea: true });
+  }
+
+  handleAntForm5 = (event) => {
+   
+      this.setState({tabtax:false, key:'dtaxonomicos'});
+  
+  }
+
+  handleForm6 = (event) => {
+   
+      this.setState({tabotros:false, key:'dotros', validatedpres: true});
+    
+  }
+
+  handleAntForm6 = (event) => {
+   
+      this.setState({tabarea:false, key:'dotros'});
+  
+  }
+
+
+  renderTableData() {
+
+    return this.state.prestamos.map((prestamo) => {
+     
+      return (
+        <tr key={prestamo.id}>
+         <td><Button variant="secondary" type="button" id="editar" onClick={() => this.mostrarModalActualizar(prestamo)}>
+            <FontAwesomeIcon icon={faEdit} />
+            </Button>
+            &nbsp;
+            <Button variant="danger" type="button" id="eliminar" onClick={()=> this.eliminar(prestamo)}>
+            <FontAwesomeIcon icon={faTrash} />
+            </Button></td>
+         <td>{prestamo.fprestamo ? Moment(prestamo.fprestamo).format('DD/MM/YYYY') :''}</td>
+         <td>{prestamo.fdevolucion ? Moment(prestamo.fdevolucion).format('DD/MM/YYYY') :''}</td>
+         <td>{prestamo.investigador}</td>
+         <td>{prestamo.institucion}</td>
+         <td><Button variant="secondary" type="button" id="subir" onClick={() => this.mostrarModalSubir(prestamo)}>
+            <FontAwesomeIcon icon={faFileArchive} />
+            </Button></td>
+      </tr>
+      )
+   })
+
+
+  
+ }
+
+
+
+insertar= ()=>{
+
+    //aca guardaria en BD y haria un select luego de los prestamos asociados al ejemplar y lo cargamos en el array prestamos
+       var prestamos=this.state.prestamos
+       var prestamo={
+           "id": Math.floor(Math.random() * 100) ,
+           "fprestamo": this.state.fprestamo,
+           "fdevolucion": this.state.fdevolucion,
+           "investigador":this.state.investigador,
+           "institucion": this.state.institucion
+       }
+       prestamos.push(prestamo)
+       this.setState({prestamos:prestamos, fprestamo:'', fdevolucion:'',investigador:'',institucion:''})
+   
+ }
+
+ eliminar = (dato) => {
+   //aca tambien hay que eliminar en la BD y traer los prestamos
+  var opcion = window.confirm("¿Está seguro que deseas eliminar el Prestamo?");
+  if (opcion == true) {
+    var contador = 0;
+    var arreglo = this.state.prestamos;
+    arreglo.map((registro) => {
+      if (dato.id == registro.id) {
+        arreglo.splice(contador, 1);
+      }
+      contador++;
+    });
+    this.setState({ prestamos: arreglo});
+  }
+};
+
+
+editar = (dato) => {
+  //update en la BD
+  var contador = 0;
+  var arreglo = this.state.prestamos;
+  arreglo.map((registro) => {
+    if (dato.id == registro.id) {
+      arreglo[contador].fprestamo = dato.fprestamo;
+      arreglo[contador].fdevolucion = dato.fdevolucion;
+      arreglo[contador].investigador = dato.investigador;
+      arreglo[contador].institucion = dato.institucion;
+    }
+    contador++;
+  });
+  this.setState({ prestamos: arreglo, modalActualizar: false });
+};
+
+mostrarModalActualizar = (dato) => {
+ console.log(dato);
+  this.setState({
+    form: dato,
+    modalActualizar: true,
+  });
+};
+
+cerrarModalActualizar = () => {
+  this.setState({ modalActualizar: false });
+};
+
+mostrarModalSubir = (dato) => {
+  console.log(dato);
+   this.setState({
+     form: dato,
+     modalSubir: true,
+   });
+ };
+
+ cerrarModalSubir = () => {
+  this.setState({ modalSubir: false });
+};
+
+filehandleChange = (event) => {
+
+  const files=  event.target.files;
+  var arrayFiles= this.state.archivos;
+  
+
+  Array.from(files).forEach(file => {
+    var key=Math.floor(Math.random() * 1000); 
+    file.id=key;
+    arrayFiles.push(file)
+  })
+  this.setState({archivos: arrayFiles});
+
+  //aca deberiamos mover el archivo a la carpeta 
+  
+
+
+};
+
+
+
+
+renderTableDataFiles() {
+
+ // console.log(this.state.archivos);
+
+  return this.state.archivos.map((file, index) => {
+    
+    return (
+      <tr key={index}>
+       <td>
+            <Button variant="danger" type="button" id="eliminar" onClick={()=> this.eliminarArchivo(file)}>
+            <FontAwesomeIcon icon={faTrash} />
+            </Button>
+       </td>
+       <td>{file.name}</td>
+     
+    </tr>
+    )
+ })
+
+
+
+}
+
+
+eliminarArchivo = (dato) => {
+  //aca tambien hay que eliminar en la BD y traer los prestamos
+ var opcion = window.confirm("¿Está seguro que deseas eliminar el Archivo?");
+ if (opcion == true) {
+   var contador = 0;
+   var arreglo = this.state.archivos;
+   arreglo.map((registro) => {
+     if (dato.id == registro.id) {
+       arreglo.splice(contador, 1);
+     }
+     contador++;
+   });
+   this.setState({ archivos: arreglo});
+ }
+};
+
+
+fileodatoshandleChange = (event) => {
+
+  const files=  event.target.files;
+  var arrayFiles= this.state.archivosOD;
+  
+
+  Array.from(files).forEach(file => {
+    var key=Math.floor(Math.random() * 1000); 
+    file.id=key;
+    arrayFiles.push(file)
+  })
+  this.setState({archivosOD: arrayFiles});
+
+  console.log('SALIDA::', arrayFiles)
+
+  //aca deberiamos mover el archivo a la carpeta 
+  
+
+
+};
+
+
+
+
+renderTableDataFilesODatos() {
+
+  return this.state.archivosOD.map((file, index) => {
+    
+    return (
+      <tr key={index}>
+       <td>
+            <Button variant="danger" type="button" id="eliminarOD" onClick={()=> this.eliminarArchivoODatos(file)}>
+            <FontAwesomeIcon icon={faTrash} />
+            </Button>
+       </td>
+       <td>{file.name}</td>
+     
+    </tr>
+    )
+ })
+
+
+}
+
+
+eliminarArchivoODatos = (dato) => {
+  //aca tambien hay que eliminar en la BD y traer los prestamos
+ var opcion = window.confirm("¿Está seguro que deseas eliminar el Archivo?");
+ if (opcion == true) {
+   var contador = 0;
+   var arreglo = this.state.archivosOD;
+   arreglo.map((registro) => {
+     if (dato.id == registro.id) {
+       arreglo.splice(contador, 1);
+     }
+     contador++;
+   });
+   this.setState({ archivosOD: arreglo});
+ }
+};
+
+ 
 
 
 	
@@ -529,15 +842,27 @@ class AddEjemplar extends React.Component {
         const { selectedProvincia } = this.state; 
         const { selectedCiudad } = this.state;*/
         const { selectedExcavacion } = this.state;
-        const { selectedTipo } = this.state;
-        const { selectedColeccion} = this.state;
+       // const { selectedTipo } = this.state;
+       // const { selectedColeccion} = this.state;
 		const {validated} = this.state;
+    const {validateddim} = this.state;
+    const {validatedgeo} = this.state;
+    const {validatedtax} = this.state;
+    const {validatedarea} = this.state;
+    const {validatedpres} = this.state;
+    const {validatedotros} = this.state;
 
        /* let optPaises = this.state.paises.map((opt) => ({ label: opt.nombre, value: opt._id }) );
         let optProvincias = this.state.provincias.map((opt) => ({ label: opt.nombre, value: opt._id }) );
         let optCiudades = this.state.ciudades.map((opt) => ({ label: opt.nombre, value: opt._id }) );*/
         let optExcavaciones = this.state.excavaciones.map((opt) => ({ label: opt.nombre, value: opt._id }) );
-        let optColecciones = this.state.colecciones.map((opt) => ({ label: opt.nombre, value: opt._id }) );
+      //  let optColecciones = this.state.colecciones.map((opt) => ({ label: opt.nombre, value: opt._id }) );
+
+      const { selectedColector } = this.state;
+      let optColectores = this.state.colectores.map((opt) => ({
+        label: opt.nombres + " " + opt.apellidos,
+        value: opt._id,
+      }));
 		
 
 	 return(
@@ -548,57 +873,65 @@ class AddEjemplar extends React.Component {
                 <div id="contenido" align="left" className="container">
                      <br/>   
                     <h3 className="page-header" align="left">
-                       <FontAwesomeIcon icon={faPaw} /> Agregar Ejemplar
+                       <FontAwesomeIcon icon={faPaw} /> Ficha de Ingreso
                     </h3>
                     <hr />
-					<Form noValidate validated={validated} onSubmit={this.handleSubmit}>
-                    <ToastContainer
-                        position="top-right"
-                        autoClose={5000}
-                        transition={Slide}
-                        hideProgressBar={true}
-                        newestOnTop={true}
-                        closeOnClick
-                        pauseOnHover
-                        />
-						 <fieldset>
-                            <legend >Datos Básicos</legend>
-							<hr/>
-						   <Form.Row >
+				
+
+
+
+
+
+  <Tabs id="tabEjemplar" activeKey={this.state.key} onSelect={this.handleSelect}>
+  <Tab eventKey="dbasicos" title="Datos Básicos" disabled={this.state.tabbas}>
+
+  <Form id="form1" noValidate validated={validated}>
+
+  <Form.Row >
 							  <Form.Group className="col-sm-12" controlId="nombre">
-                                <Form.Label>Nombre:</Form.Label>
-                                <Form.Control type="text" placeholder="Ingrese Nombre" autocomplete="off" required onChange={this.handleNombreChange} value={this.state.nombre} />
+                                <Form.Label>Sigla:</Form.Label>
+                                <Form.Control type="text" placeholder="Obligatorio" autoComplete="off" required onChange={this.handleNombreChange} value={this.state.nombre} />
                                 <Form.Control.Feedback type="invalid">
-                                Por favor, ingrese Nombre.
+                                Por favor, ingrese Sigla.
                                 </Form.Control.Feedback>
                               </Form.Group>
                             </Form.Row>
 							
 							<Form.Row >
-							    <Form.Group className="col-sm-4" controlId="tipoEjemplar">
-								<Form.Label>Tipo Ejemplar:</Form.Label>
-								  <Select  
-                                                    placeholder={'Seleccione Tipo'}
-                                                    options={optTipos} 
-                                                    onChange={this.handleTipoChange} 
-                                                    value={selectedTipo}
-												
-                                                    />
-								</Form.Group>
-								<Form.Group className="col-sm-4" controlId="coleccion">
-								   <Form.Label>Colección:</Form.Label>
-								   <Select      
-                                                    placeholder={'Seleccione Colección'}
-                                                    options={optColecciones} 
-                                                    onChange={this.handleColeccionesChange} 
-                                                    value={selectedColeccion}
-													isClearable
-                                                    />
-								</Form.Group>
+							 
+							
 								<Form.Group className="col-sm-4" controlId="fechaColeccion">
-								 <Form.Label>Fecha Ingreso Colección:</Form.Label>
+								 <Form.Label>Fecha Ingreso:</Form.Label>
                                     <Form.Control type="date" value={this.state.fechaColeccion}
-                                                    onChange={this.handleFechaColeccionChange}/>
+                                                    onChange={this.handleFechaColeccionChange} required/>
+                                                    <Form.Control.Feedback type="invalid">
+                                Por favor, ingrese Fecha.
+                                </Form.Control.Feedback>
+								</Form.Group>
+
+
+                <Form.Group className="col-sm-8" controlId="coleccion">
+								   <Form.Label>Tipo Colección:</Form.Label>
+					
+                   <Form.Control
+                          as="select"
+                          onChange={this.handleColeccionesChange} 
+                          required
+                      >
+                        <option value="">Seleccione Opción</option>
+                        {
+                           this.state.colecciones.map(item=>(
+                             <option key={item._id} value={item._id}>{item.nombre}</option>
+                           ))
+
+                        }
+                        
+                        
+                      </Form.Control>
+                      <Form.Control.Feedback type="invalid">
+                                Por favor, ingrese Tipo.
+                                </Form.Control.Feedback>
+
 								</Form.Group>
 							
 							</Form.Row>
@@ -614,170 +947,198 @@ class AddEjemplar extends React.Component {
                                     <Form.Control as="textarea" rows={3}  value={this.state.motivo} onChange={this.handleMotivoChange}/>
                             </Form.Group>
 							</Form.Row>
-							
-							<Form.Row >
-							
+
+             
+              <Form.Row >
+							 <Form.Group controlId="muestraHome">
+									<Form.Check inline 
+									            type="checkbox" 
+												label="Muestra en Página Web?" 
+												checked={this.state.muestraHome}
+												onChange={this.handleMuestraChange.bind(this)} 
+												/>
+						      </Form.Group>
+                             </Form.Row>
+                
+                <Form.Row >
+                  <Button variant="outline-secondary" type="button" id="siguiente" onClick={this.handleForm1}>
+								  Siguiente <FontAwesomeIcon icon={faShare} /> 
+								  </Button>  
+                </Form.Row>  
+    </Form> 
+
+  </Tab>
+ 
+
+
+  
+
+  <Tab eventKey="ddimensiones" title="Dimensiones" disabled={this.state.tabdim}>
+  <Form id="form2" noValidate validated={validateddim} >
+    <Form.Row >
 							<Form.Group className="col-sm-4" controlId="dimensionAlto">
-                                <Form.Label>Dimensión Alto:</Form.Label>
-                                <Form.Control type="text" placeholder="Ingrese Alto" autocomplete="off" required onChange={this.handleDimensionAltoChange} value={this.state.dimensionAlto} />
+                                <Form.Label>Alto:</Form.Label>
+                                <Form.Control type="text" placeholder="Obligatorio" autoComplete="off" required onChange={this.handleDimensionAltoChange} value={this.state.dimensionAlto} />
                                 <Form.Control.Feedback type="invalid">
                                 Por favor, ingrese Dimensión Alto.
                                 </Form.Control.Feedback>
                               </Form.Group>
 							  
-							   <Form.Group className="col-sm-4" controlId="dimensionAncho">
-                                <Form.Label>Dimensión Largo:</Form.Label>
-                                <Form.Control type="text" placeholder="Ingrese Largo" autocomplete="off" required value={this.state.dimensionAncho} onChange={this.handleDimensionAnchoChange} />
+							   <Form.Group className="col-sm-4" controlId="dimensionLargo">
+                                <Form.Label>Largo:</Form.Label>
+                                <Form.Control type="text" placeholder="Obligatorio" autoComplete="off" required value={this.state.dimensionLargo} onChange={this.handleDimensionLargoChange} />
                                 <Form.Control.Feedback type="invalid">
                                 Por favor, ingrese Largo.
                                 </Form.Control.Feedback>
                               </Form.Group>
 							  
-							  <Form.Group className="col-sm-4" controlId="peso">
-                                <Form.Label>Peso:</Form.Label>
-                                <Form.Control type="text" placeholder="Ingrese Peso" autocomplete="off" required onChange={this.handlePesoChange} value={this.state.peso} />
+							  <Form.Group className="col-sm-4" controlId="dimensionAncho">
+                                <Form.Label>Ancho:</Form.Label>
+                                <Form.Control type="text" placeholder="Obligatorio" autoComplete="off" required onChange={this.handleDimensionAnchoChange} value={this.state.dimensionAncho} />
                                 <Form.Control.Feedback type="invalid">
-                                Por favor, ingrese Peso.
+                                Por favor, ingrese Ancho.
                                 </Form.Control.Feedback>
                               </Form.Group>
 							
-							</Form.Row>
-							
-							<Form.Row >
-							   <Form.Group className="col-sm-12" controlId="alimentacion">
-                                <Form.Label>Alimentación:</Form.Label>
-                                <Form.Control type="text" autocomplete="off"   onChange={this.handleAlimentacionChange} value={this.state.alimentacion} />
+				</Form.Row>
+        <Form.Row >
+                <Button variant="outline-secondary" type="button" id="anterior1" onClick={this.handleAntForm2}>
+								   <FontAwesomeIcon icon={faReply} /> Anterior
+								  </Button> 
+                  &nbsp;
+                  <Button variant="outline-secondary" type="button" id="siguiente1" onClick={this.handleForm2}>
+								  Siguiente <FontAwesomeIcon icon={faShare} /> 
+								  </Button>  
+        </Form.Row>  
 
-                               </Form.Group>
-							</Form.Row>
-							
-							<Form.Row>
-							   <Form.Group className="col-sm-12" controlId="ubicacion">
-                                <Form.Label>Ubicación:</Form.Label>
-                                <Form.Control type="text" autocomplete="off"   onChange={this.handleUbicacionChange} value={this.state.ubicacion} />
-							   </Form.Group>	
-							</Form.Row>
-							
-							<Form.Row >
-							   <Form.Group className="col-sm-12" controlId="descripcion1">
-                                <Form.Label>Descripción 1:</Form.Label>
-                                <Form.Control as="textarea" rows={3}   value={this.state.descripcion1} onChange={this.handleDescripcion1Change} />
-                               </Form.Group>
-							</Form.Row>
-							
-							<Form.Row >
-							   <Form.Group className="col-sm-12" controlId="descripcion1A">
-                                <Form.Label>Descripción 1A:</Form.Label>
-                                <Form.Control as="textarea" rows={3}  value={this.state.descripcion1A} onChange={this.handleDescripcion1AChange} />
-                               </Form.Group>
-							</Form.Row>
-							
-							<Form.Row >
-							   <Form.Group className="col-sm-12" controlId="descripcion2">
-                                <Form.Label>Descripción 2:</Form.Label>
-                                <Form.Control as="textarea" rows={3}   value={this.state.descripcion2} onChange={this.handleDescripcion2Change} />
-                               </Form.Group>
-							</Form.Row>
-							
-							<Form.Row >
-							   <Form.Group className="col-sm-12" controlId="descripcion3">
-                                <Form.Label>Descripción 3:</Form.Label>
-                                <Form.Control as="textarea" rows={3}   value={this.state.descripcion3} onChange={this.handleDescripcion3Change} />
-                               </Form.Group>
-							</Form.Row>
-							
-							<br/>   
-                              <legend >Datos Geológicos</legend>
-                            <hr/>
-							
-							<Form.Row >
-							
-							  <Form.Group className="col-sm-4" controlId="formacion">
-                                <Form.Label>Formación:</Form.Label>
-                                <Form.Control type="text"  autocomplete="off"  onChange={this.handleFormacionChange} value={this.state.formacion} />
-                              </Form.Group>
-							  
-							   <Form.Group className="col-sm-4" controlId="grupo">
-                                <Form.Label>Grupo:</Form.Label>
-                                <Form.Control type="text"  autocomplete="off"  onChange={this.handleGrupoChange} value={this.state.grupo} />
-                              </Form.Group>
-							  
-							   <Form.Group className="col-sm-4" controlId="subgrupo">
-                                <Form.Label>Subgrupo:</Form.Label>
-                                <Form.Control type="text"  autocomplete="off"  onChange={this.handleSubgrupoChange} value={this.state.subgrupo} />
-                              </Form.Group>
+        </Form>	   
+  </Tab>
+  <Tab eventKey="dgeologicos" title="Datos Geológicos" disabled={this.state.tabgeo}>
+  <Form id="form3" noValidate validated={validatedgeo} >
 
-							</Form.Row>
+  <Form.Row >
 							
-							<Form.Row >
+              <Form.Group className="col-sm-4" controlId="formacion">
+                              <Form.Label>Formación:</Form.Label>
+                              <Form.Control type="text"  autoComplete="off"  onChange={this.handleFormacionChange} value={this.state.formacion} />
+                            </Form.Group>
+              
+               <Form.Group className="col-sm-4" controlId="grupo">
+                              <Form.Label>Grupo:</Form.Label>
+                              <Form.Control type="text"  autoComplete="off"  onChange={this.handleGrupoChange} value={this.state.grupo} />
+                            </Form.Group>
+              
+               <Form.Group className="col-sm-4" controlId="subgrupo">
+                              <Form.Label>Subgrupo:</Form.Label>
+                              <Form.Control type="text"  autoComplete="off"  onChange={this.handleSubgrupoChange} value={this.state.subgrupo} />
+                            </Form.Group>
+
+            </Form.Row>
+
+            <Form.Row >
 							
 							  <Form.Group className="col-sm-4" controlId="edad">
                                 <Form.Label>Edad:</Form.Label>
-                                <Form.Control type="text"  autocomplete="off"  onChange={this.handleEdadChange} value={this.state.edad} />
+                                <Form.Control type="text"  autoComplete="off"  onChange={this.handleEdadChange} value={this.state.edad} />
                               </Form.Group>
 							  
 							   <Form.Group className="col-sm-4" controlId="perido">
                                 <Form.Label>Período:</Form.Label>
-                                <Form.Control type="text"  autocomplete="off"  onChange={this.handlePeriodoChange} value={this.state.periodo} />
+                                <Form.Control type="text"  autoComplete="off"  onChange={this.handlePeriodoChange} value={this.state.periodo} />
                               </Form.Group>
 							  
 							   <Form.Group className="col-sm-4" controlId="era">
                                 <Form.Label>Era:</Form.Label>
-                                <Form.Control type="text"  autocomplete="off"  onChange={this.handleEraChange} value={this.state.era} />
+                                <Form.Control type="text"  autoComplete="off"  onChange={this.handleEraChange} value={this.state.era} />
                               </Form.Group>
 
 							</Form.Row>
-							
-							<Form.Row >
-							
-							  <Form.Group className="col-sm-4" controlId="reino">
-                                <Form.Label>Reino:</Form.Label>
-                                <Form.Control type="text"  autocomplete="off"  onChange={this.handleReinoChange} value={this.state.reino} />
-                              </Form.Group>
-							  
-							   <Form.Group className="col-sm-4" controlId="filo">
-                                <Form.Label>Filo:</Form.Label>
-                                <Form.Control type="text"  autocomplete="off"  onChange={this.handleFiloChange} value={this.state.filo} />
-                              </Form.Group>
-							  
-							   <Form.Group className="col-sm-4" controlId="clase">
-                                <Form.Label>Clase:</Form.Label>
-                                <Form.Control type="text"  autocomplete="off"  onChange={this.handleClaseChange} value={this.state.clase} />
-                              </Form.Group>
+              <Form.Row >
+                  <Button variant="outline-secondary" type="button" id="anterior2" onClick={this.handleAntForm3}>
+								   <FontAwesomeIcon icon={faReply} /> Anterior
+								  </Button> 
+                  &nbsp;
+                  <Button variant="outline-secondary" type="button" id="siguiente2" onClick={this.handleForm3}>
+								  Siguiente <FontAwesomeIcon icon={faShare} /> 
+								  </Button>  
+             </Form.Row>  
 
-							</Form.Row>
-							
-							<Form.Row >
-							
-							  <Form.Group className="col-sm-4" controlId="orden">
-                                <Form.Label>Orden:</Form.Label>
-                                <Form.Control type="text"  autocomplete="off"  onChange={this.handleOrdenChange} value={this.state.orden} />
-                              </Form.Group>
-							  
-							   <Form.Group className="col-sm-4" controlId="familia">
-                                <Form.Label>Familia:</Form.Label>
-                                <Form.Control type="text"  autocomplete="off"  onChange={this.handleFamiliaChange} value={this.state.familia} />
-                              </Form.Group>
-							  
-							   <Form.Group className="col-sm-4" controlId="genero">
-                                <Form.Label>Género:</Form.Label>
-                                <Form.Control type="text"  autocomplete="off"  onChange={this.handleGeneroChange} value={this.state.genero} />
-                              </Form.Group>
+     </Form>         
+  </Tab>
+  <Tab eventKey="dtaxonomicos" title="Datos Taxonómicos" disabled={this.state.tabtax}>
 
-							</Form.Row>
+  <Form id="form4" noValidate validated={validatedtax} >
+     <Form.Row >
 							
-							<Form.Row>
-							   <Form.Group className="col-sm-12" controlId="especie">
-                                <Form.Label>Especie:</Form.Label>
-                                <Form.Control type="text" autocomplete="off"  onChange={this.handleEspecieChange} value={this.state.especie} />
-							   </Form.Group>	
-							</Form.Row>
-							
-							 <br/>   
-                             <legend >Área de Hallazgo</legend>
-                             <hr/>
-								
-							<Form.Row >
+              <Form.Group className="col-sm-4" controlId="reino">
+                              <Form.Label>Reino:</Form.Label>
+                              <Form.Control type="text"  autoComplete="off"  onChange={this.handleReinoChange} value={this.state.reino} />
+                            </Form.Group>
+              
+               <Form.Group className="col-sm-4" controlId="filo">
+                              <Form.Label>Filo:</Form.Label>
+                              <Form.Control type="text"  autoComplete="off"  onChange={this.handleFiloChange} value={this.state.filo} />
+                            </Form.Group>
+              
+               <Form.Group className="col-sm-4" controlId="clase">
+                              <Form.Label>Clase:</Form.Label>
+                              <Form.Control type="text"  autoComplete="off"  onChange={this.handleClaseChange} value={this.state.clase} />
+                            </Form.Group>
+
+            </Form.Row>
+            
+            <Form.Row >
+            
+              <Form.Group className="col-sm-4" controlId="orden">
+                              <Form.Label>Orden:</Form.Label>
+                              <Form.Control type="text"  autoComplete="off"  onChange={this.handleOrdenChange} value={this.state.orden} />
+                            </Form.Group>
+              
+               <Form.Group className="col-sm-4" controlId="familia">
+                              <Form.Label>Familia:</Form.Label>
+                              <Form.Control type="text"  autoComplete="off"  onChange={this.handleFamiliaChange} value={this.state.familia} />
+                            </Form.Group>
+              
+               <Form.Group className="col-sm-4" controlId="genero">
+                              <Form.Label>Género:</Form.Label>
+                              <Form.Control type="text"  autoComplete="off"  onChange={this.handleGeneroChange} value={this.state.genero} />
+                            </Form.Group>
+
+            </Form.Row>
+            
+            <Form.Row>
+               <Form.Group className="col-sm-12" controlId="especie">
+                              <Form.Label>Especie:</Form.Label>
+                              <Form.Control type="text" autoComplete="off"  onChange={this.handleEspecieChange} value={this.state.especie} />
+               </Form.Group>	
+            </Form.Row>
+
+            <Form.Row >
+                  <Button variant="outline-secondary" type="button" id="anterior3" onClick={this.handleAntForm4}>
+								   <FontAwesomeIcon icon={faReply} /> Anterior
+								  </Button> 
+                  &nbsp;
+                  <Button variant="outline-secondary" type="button" id="siguiente3" onClick={this.handleForm4}>
+								  Siguiente <FontAwesomeIcon icon={faShare} /> 
+								  </Button>  
+             </Form.Row>  
+     </Form>       
+
+  </Tab>
+  <Tab eventKey="darea" title="Área de Hallazgo" disabled={this.state.tabarea}>
+   <Form id="form5" noValidate validated={validatedarea} >
+                     <ToastContainer
+                        position="top-right"
+                        autoClose={5000}
+                        transition={Slide}
+                        hideProgressBar={true}
+                        newestOnTop={true}
+                        closeOnClick
+                        pauseOnHover
+                        />
+
+    		
+           <Form.Row >
 							    <Form.Group className="col-sm-12" controlId="excavacion">
 									<Form.Label>Excavación:</Form.Label>
 									 <Select
@@ -789,6 +1150,368 @@ class AddEjemplar extends React.Component {
 									  />
                 	</Form.Group>    
               	</Form.Row>
+                <Form.Row >
+                  <Button variant="outline-secondary" type="button" id="anterior4" onClick={this.handleAntForm5}>
+								   <FontAwesomeIcon icon={faReply} /> Anterior
+								  </Button> 
+                  &nbsp;
+                  <Button variant="outline-secondary" type="button" id="siguiente4" onClick={this.handleForm5}>
+								  Siguiente <FontAwesomeIcon icon={faShare} /> 
+								  </Button>  
+             </Form.Row>   
+
+    </Form>
+  </Tab>
+
+
+
+  <Tab eventKey="dotros" title="Otros Datos" disabled={this.state.tabotros}>
+  <Form id="form7" noValidate validated={validatedotros} >
+  <Form.Row>
+							   <Form.Group className="col-sm-12" controlId="ubicacion">
+                                <Form.Label>Ubicación:</Form.Label>
+                                <Form.Control type="text" autoComplete="off"   onChange={this.handleUbicacionChange} value={this.state.ubicacion} />
+							   </Form.Group>	
+							</Form.Row>
+
+              <Form.Row >
+
+
+                <Form.Group className="col-sm-6" controlId="ingresadoPor">
+								   <Form.Label>Material Ingresado Por:</Form.Label>
+					
+                   <Form.Control
+                          as="select"
+                          className="form-control"
+                          onChange={this.handleIngresadoPorChange} 
+                          required
+                      >
+                        <option value="">Seleccione Opción</option>
+                        <option value="1">Donación</option>
+                        <option value="2">Excavación realizada MUC</option>
+                        <option value="3">Otros</option>
+                        
+                        
+                        
+                      </Form.Control>
+                      <Form.Control.Feedback type="invalid">
+                                Por favor, seleccione opción.
+                                </Form.Control.Feedback>
+
+								</Form.Group>
+							
+
+                    <Form.Group className="col-sm-6" controlId="colector">
+                      <Form.Label>Colector:</Form.Label>
+                      <Select
+                        placeholder={"Seleccione Opción"}
+                        options={optColectores}
+                        onChange={this.handleColectorChange}
+                        value={selectedColector}
+                        isClearable
+                      />
+                    </Form.Group>
+                  </Form.Row>
+
+							
+							<Form.Row >
+							   <Form.Group className="col-sm-12" controlId="descripcion1">
+                                <Form.Label>Tipo de Intervención:</Form.Label>
+                                <Form.Control as="textarea" rows={3}   value={this.state.descripcion1} onChange={this.handleDescripcion1Change} />
+                               </Form.Group>
+							</Form.Row>
+							
+							<Form.Row >
+							   <Form.Group className="col-sm-12" controlId="descripcion1A">
+                                <Form.Label>Autores:</Form.Label>
+                                <Form.Control as="textarea" rows={3}  value={this.state.descripcion1A} onChange={this.handleDescripcion1AChange} />
+                               </Form.Group>
+							</Form.Row>
+							
+							<Form.Row >
+							   <Form.Group className="col-sm-12" controlId="descripcion2">
+                                <Form.Label>Publicaciones:</Form.Label>
+                                <Form.Control as="textarea" rows={3}   value={this.state.descripcion2} onChange={this.handleDescripcion2Change} />
+                               </Form.Group>
+							</Form.Row>
+            
+              <Form.Row>
+            {/*    <Form.Group className="col-sm-6" controlId="archivopdf">
+               
+                      <Form.File id="archivopdf"  label="Archivos:" multiple onChange={this.fileodatoshandleChange.bind(this)} />*/}
+                  <Form.Group className="col-sm-8" >
+                                <Form.Label>Curriculum Vitae:</Form.Label>
+                                <input type="file" id="archivopdf" className="form-control"  accept="application/pdf" onChange={this.fileodatoshandleChange.bind(this)}  />
+                           </Form.Group>
+            
+              </Form.Row>
+
+              <Form.Row>
+                    <Form.Group className="col-sm-6" controlId="archivopdf">
+                      
+                        <Table striped bordered hover  responsive>
+                            <thead className="thead-dark">
+                            <tr>
+                                <th>Acción</th>
+                                <th>Nombre</th>
+                              </tr>
+                            </thead>	
+                            <tbody>
+                               {this.renderTableDataFilesODatos()}
+                            </tbody>
+                          </Table> 
+                        
+                             
+                        </Form.Group>
+              </Form.Row>
+
+
+          
+					<Form.Row >
+							   <Form.Group className="col-sm-12" controlId="descripcion3">
+                                <Form.Label>Observaciones Adicionales:</Form.Label>
+                                <Form.Control as="textarea" rows={3}   value={this.state.descripcion3} onChange={this.handleDescripcion3Change} />
+                               </Form.Group>
+							</Form.Row>
+
+              <hr/>
+                      <Form.Row> 
+					<Form.Group className="mx-sm-3 mb-2">
+								  <Button variant="primary" type="submit" id="guardar">
+								  <FontAwesomeIcon icon={faSave} /> Guardar
+								  </Button>
+								  &nbsp;&nbsp;
+								 <Link to='/ejemplares'>
+								  <Button variant="danger" type="button" id="volver">
+								  <FontAwesomeIcon icon={faTimesCircle} /> Cancelar
+								  </Button>
+								  </Link>
+  
+							</Form.Group>
+					  </Form.Row>					  
+     </Form>
+  </Tab>
+
+  <Tab eventKey="dprestamos" title="Préstamos" disabled={this.state.tabpres}>
+  <Form id="form6" noValidate validated={validatedpres} >
+      <Form.Row>
+                <Form.Group className="col-sm-3" controlId="fprestamo">
+                                <Form.Label>Fecha Préstamo:</Form.Label>
+                                <Form.Control type="date" autoComplete="off" name="fprestamo"  onChange={this.handleFPrestamoChange} value={this.state.fprestamo} />
+							   </Form.Group>	
+
+                 <Form.Group className="col-sm-3" controlId="fdevolucion">
+                                <Form.Label>Fecha Devolución:</Form.Label>
+                                <Form.Control type="date" autoComplete="off"  name="fdevolucion" onChange={this.handleFDevolucionChange} value={this.state.fdevolucion} />
+							   </Form.Group>
+
+                 <Form.Group className="col-sm-3" controlId="investigador">
+                                <Form.Label>Investigador Resposable:</Form.Label>
+                                <Form.Control type="text" autoComplete="off" name="investigador"  onChange={this.handleInvestigadorChange} value={this.state.investigador} />
+							   </Form.Group>	
+
+                 <Form.Group className="col-sm-3" controlId="institucion">
+                                <Form.Label>Institución:</Form.Label>
+                                <Form.Control type="text" autoComplete="off" name="institucion"  onChange={this.handleInstitucionChange} value={this.state.institucion} />
+							   </Form.Group>		
+
+                 
+
+
+
+     </Form.Row>
+
+     <Form.Row> 
+					<Form.Group className="mx-sm-3 mb-2">
+								  <Button variant="primary" type="button" id="guardarPres" onClick={() => this.insertar()}>
+								  <FontAwesomeIcon icon={faPlus} /> Agregar
+								  </Button>
+							</Form.Group>
+			</Form.Row>	
+    
+      <Form.Row>
+      <Table striped bordered hover  responsive>
+         <thead className="thead-dark">
+         <tr>
+           <th>Acción</th>
+            <th>Fecha Préstamo</th>
+            <th>Fecha Devolución</th>
+            <th>Investigador Responsable</th>
+            <th>Institución</th>
+            <th>Archivos</th>
+          </tr>
+        </thead>	
+        <tbody>
+             {this.renderTableData()}
+        </tbody>
+      </Table> 
+      </Form.Row>   
+             <Form.Row >
+                  <Button variant="outline-secondary" type="button" id="anterior5" onClick={this.handleAntForm6}>
+								   <FontAwesomeIcon icon={faReply} /> Anterior
+								  </Button> 
+								
+             </Form.Row>   
+ 
+    </Form>
+   </Tab>
+
+  
+</Tabs>
+
+
+<Modal
+        show={this.state.modalActualizar}
+        onHide={() => this.cerrarModalActualizar()}
+        backdrop="static"
+        keyboard={false}
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>Editar Préstamo</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+              <Form.Row>
+                      <Form.Group className="col-sm-12" controlId="id">
+                              <Form.Control as="input" type="hidden"  value={this.state.form.id} />
+                      </Form.Group>
+              </Form.Row>
+              <Form.Row>
+                      <Form.Group className="col-sm-6" controlId="fprestamo">
+                                      <Form.Label>Fecha Préstamo:</Form.Label>
+                                      <Form.Control type="date" autoComplete="off" name="fprestamo"   onChange={this.handleChange} value={this.state.form.fprestamo} />
+                      </Form.Group>	
+
+                      <Form.Group className="col-sm-6" controlId="fdevolucion">
+                                      <Form.Label>Fecha Devolución:</Form.Label>
+                                      <Form.Control type="date" autoComplete="off" name="fdevolucion"   onChange={this.handleChange} value={this.state.form.fdevolucion} />
+                      </Form.Group>
+              </Form.Row>
+
+              <Form.Row> 
+                  <Form.Group className="col-sm-12" controlId="investigador">
+                                      <Form.Label>Investigador Responsable:</Form.Label>
+                                      <Form.Control type="text" autoComplete="off" name="investigador"  onChange={this.handleChange} value={this.state.form.investigador} />
+                      </Form.Group>	
+              </Form.Row>  
+              <Form.Row>
+                      <Form.Group className="col-sm-12" controlId="institucion">
+                                      <Form.Label>Institución:</Form.Label>
+                                      <Form.Control type="text" autoComplete="off"  name="institucion"  onChange={this.handleChange} value={this.state.form.institucion} />
+                      </Form.Group>		
+
+
+              </Form.Row> 
+
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => this.cerrarModalActualizar()}>
+            Cerrar
+          </Button>
+          <Button variant="primary" id="guardarAct" onClick={() => this.editar(this.state.form)}> <FontAwesomeIcon icon={faSave} /> Guardar</Button>
+        </Modal.Footer>
+      </Modal>
+
+
+      <Modal
+        show={this.state.modalSubir}
+        onHide={() => this.cerrarModalSubir()}
+        backdrop="static"
+        keyboard={false}
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>Archivos Adjuntos</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+              <Form.Row>
+                      <Form.Group className="col-sm-12" controlId="id">
+                              <Form.Control as="input" type="hidden"  value={this.state.form.id} />
+                      </Form.Group>
+              </Form.Row>
+              <Form.Row>
+                      <Form.Group className="col-sm-12" controlId="filesPrestamo">
+                      <Form.File id="filesPrestamo" label="Archivos:" onChange={this.filehandleChange.bind(this)} multiple/>
+                      </Form.Group>	        
+              </Form.Row>
+              <Form.Row>
+                    <legend>Lista </legend>
+                    <hr/>
+                      <Form.Group className="col-sm-12" controlId="id">
+                        <Table striped bordered hover  responsive>
+                          <thead className="thead-dark">
+                          <tr>
+                              <th>Acción</th>
+                              <th>Nombre</th>
+                            </tr>
+                          </thead>	
+                          <tbody>
+                          {this.renderTableDataFiles()}
+                          </tbody>
+                        </Table> 
+                         
+                    </Form.Group>
+
+              </Form.Row>
+
+    
+
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => this.cerrarModalSubir()}>
+            Cerrar
+          </Button>
+        
+        </Modal.Footer>
+      </Modal>
+
+
+
+					
+						   
+
+          
+							
+						 {/*  <Form.Group className="col-sm-4" controlId="tipoEjemplar">
+								<Form.Label>Tipo Ejemplar:</Form.Label>
+								  <Select  
+                                                    placeholder={'Seleccione Tipo'}
+                                                    options={optTipos} 
+                                                    onChange={this.handleTipoChange} 
+                                                    value={selectedTipo}
+												
+                                                    />
+                </Form.Group> */}
+
+
+  
+						
+							
+							
+							
+
+    		{/*	   <Select      
+                                                    placeholder={'Seleccione Colección'}
+                                                    options={optColecciones} 
+                                                    onChange={this.handleColeccionesChange} 
+                                                    value={selectedColeccion}
+													isClearable
+              /> */}
+
+						
+
+					{/*		
+							<Form.Row >
+							   <Form.Group className="col-sm-12" controlId="alimentacion">
+                                <Form.Label>Alimentación:</Form.Label>
+                                <Form.Control type="text" autoComplete="off"   onChange={this.handleAlimentacionChange} value={this.state.alimentacion} />
+
+                               </Form.Group>
+          </Form.Row>*/}
+
+    
+
+        
+			
+
                 {/*      
 							  
 							    <Form.Group className="col-sm-6" controlId="pais">
@@ -828,36 +1551,9 @@ class AddEjemplar extends React.Component {
                                 
                             </Form.Group>
                 </Form.Row> */}
-							 <Form.Row >
-							 <Form.Group controlId="muestraHome">
-									<Form.Check inline 
-									            type="checkbox" 
-												label="Muestra en Página Web?" 
-												checked={this.state.muestraHome}
-												onChange={this.handleMuestraChange.bind(this)} 
-												/>
-						      </Form.Group>
-                             </Form.Row>
-						 <br/>					 
-					     </fieldset>	
-                          <hr/>
-                      <Form.Row> 
-					<Form.Group className="mx-sm-3 mb-2">
-								  <Button variant="primary" type="submit" id="guardar">
-								  <FontAwesomeIcon icon={faSave} /> Guardar
-								  </Button>
-								  &nbsp;&nbsp;
-								 <Link to='/ejemplares'>
-								  <Button variant="secondary" type="button" id="volver">
-								  <FontAwesomeIcon icon={faReply} /> Cancelar
-								  </Button>
-								  </Link>
-							</Form.Group>
-					  </Form.Row>					  
-
-					<br/>
-                    <br/>							 
-					</Form>	
+							 
+						 
+					
 			    </div>
               </div> 
         </div>		

@@ -108,11 +108,11 @@ render()
             <Form.Row>
                  <div id="contenido" align="left" className="container">
                     
-                    <legend> <FontAwesomeIcon icon={faPaw} /> Gestión de Ejemplares</legend>
+                    <legend> <FontAwesomeIcon icon={faPaw} /> Inventarios MUC </legend>
                     <hr/>  
                     <Link to='/addEjemplar'>
                         <Button variant="primary" type="buttom" >
-                            <FontAwesomeIcon icon={faPlus} /> Agregar
+                            <FontAwesomeIcon icon={faPlus} /> Ficha de Ingreso
                         </Button>
                     </Link>
                     <br/>
@@ -128,15 +128,15 @@ render()
                           hidden: true
                         },
                         {
-                          title: 'Nombre',
+                          title: 'Sigla',
                           field: 'nombre'
                         },
                         {
-                          title: 'Tipo',
+                          title: 'Tipo Colección',
                           field: 'tipoEjemplar'
                         },
                         {
-                          title: 'Ubicación Museo',
+                          title: 'Especie???',
                           field: 'ubicacionMuseo'
                         }
                       ]}
