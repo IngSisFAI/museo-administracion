@@ -267,38 +267,67 @@ class AddPersona extends React.Component {
        
     }
 
+ 
+
   eliminarArchivoFoto = (dato) => {
     //console.log(dato);
-    
+
     var opcion = window.confirm("¿Está seguro que desea eliminar el Archivo?");
-    var destino= "/var/www/consulta/html/assets/datos/personal/fotosPersonal/"+dato; 
-    if (opcion == true) { 
-      fetch('http://museo.fi.uncoma.edu.ar:3006/api/deleteArchivo', {
-        method: 'get',
-        headers:{
+    var destino = "/var/www/consulta/html/assets/datos/personal/fotosPersonal/" + dato;
+    if (opcion == true) {
+
+      var data = {
+        "foto": ""
+      }
+      fetch('http://museo.fi.uncoma.edu.ar:3006/api/persona/' + this.state.idPersona, {
+        method: 'put',
+        body: JSON.stringify(data),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + cookies.get('token')
+        }
+      })
+        .then(function (response) {
+          if (response.ok) {
+            console.log("¡Se actualizaron los datos de la Persona con Éxito!");
+
+          }
+        })
+        .then(function () {
+
+          fetch('http://museo.fi.uncoma.edu.ar:3006/api/deleteArchivo', {
+            method: 'get',
+            headers: {
               'Content-Type': undefined,
               'path': destino,
-              'Authorization': 'Bearer '+cookies.get('token')
-            }      
-        })
-        .then(response => {
-          return response.json();
-        })  
-      .then(function(response) {
-        console.log(response.msg);
-        if((response.msg).trim()==='OK') {
-          console.log('ok');
-          toast.success("¡Se eliminó el Archivo con Éxito!");
-          this.setState({archivoFoto:null, extFoto:'', tableImage: null })
+              'Authorization': 'Bearer ' + cookies.get('token')
+            }
+          })
+            .then(response => {
+              return response.json();
+            })
+            .then(function (response) {
+              console.log(response.msg);
+              if ((response.msg).trim() === 'OK') {
+                console.log('ok');
+                toast.success("¡Se eliminó el Archivo con Éxito!");
+                this.setState({ archivoFoto: null, extFoto: '', tableImage: null })
 
-        } else{
-          console.log('error');
-          toast.error("¡Se produjo un error al eliminar archivo!");
-        }
-      }.bind(this)).catch(function(error) { 
-        toast.error("Error al eliminar. Intente nuevamente.");
-        console.log('Hubo un problema con la petición Fetch:' + error.message);
-      });
+              } else {
+                console.log('error');
+                toast.error("¡Se produjo un error al eliminar archivo!");
+              }
+            }.bind(this)).catch(function (error) {
+              toast.error("Error al eliminar. Intente nuevamente.");
+              console.log('Hubo un problema con la petición Fetch (2):' + error.message);
+            });
+
+
+        }.bind(this))
+        .catch(function (error) {
+          toast.error("Error al guardar. Intente nuevamente.");
+          console.log('Hubo un problema con la petición Fetch (1):' + error.message);
+        });
 
     }
 
@@ -306,40 +335,68 @@ class AddPersona extends React.Component {
 
   eliminarArchivoCV = (dato) => {
     //console.log(dato);
-    
+
     var opcion = window.confirm("¿Está seguro que desea eliminar el Curriculum Vitae?");
-    var destino= "/var/www/consulta/html/assets/datos/personal/curriculumPersonal/"+dato; 
-    if (opcion == true) { 
-      fetch('http://museo.fi.uncoma.edu.ar:3006/api/deleteArchivo', {
-        method: 'get',
-        headers:{
+    var destino = "/var/www/consulta/html/assets/datos/personal/curriculumPersonal/" + dato;
+    if (opcion == true) {
+
+      var data = {
+        "curriculum": ""
+      }
+      fetch('http://museo.fi.uncoma.edu.ar:3006/api/persona/' + this.state.idPersona, {
+        method: 'put',
+        body: JSON.stringify(data),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + cookies.get('token')
+        }
+      })
+        .then(function (response) {
+          if (response.ok) {
+            console.log("¡Se actualizaron los datos de la Persona con Éxito!");
+
+          }
+        })
+        .then(function () {
+
+          fetch('http://museo.fi.uncoma.edu.ar:3006/api/deleteArchivo', {
+            method: 'get',
+            headers: {
               'Content-Type': undefined,
               'path': destino,
-              'Authorization': 'Bearer '+cookies.get('token')
-            }      
-        })
-        .then(response => {
-          return response.json();
-        })  
-      .then(function(response) {
-        console.log(response.msg);
-        if((response.msg).trim()==='OK') {
-          console.log('ok');
-          toast.success("¡Se eliminó el Archivo con Éxito!");
-          this.setState({archivoCV:null, extCV:'', tableCV: null })
+              'Authorization': 'Bearer ' + cookies.get('token')
+            }
+          })
+            .then(response => {
+              return response.json();
+            })
+            .then(function (response) {
+              console.log(response.msg);
+              if ((response.msg).trim() === 'OK') {
+                console.log('ok');
+                toast.success("¡Se eliminó el Archivo con Éxito!");
+                this.setState({ archivoCV: null, extCV: '', tableCV: null })
 
-        } else{
-          console.log('error');
-          toast.error("¡Se produjo un error al eliminar archivo!");
-        }
-      }.bind(this)).catch(function(error) { 
-        toast.error("Error al eliminar. Intente nuevamente.");
-        console.log('Hubo un problema con la petición Fetch:' + error.message);
-      });
+              } else {
+                console.log('error');
+                toast.error("¡Se produjo un error al eliminar archivo!");
+              }
+            }.bind(this)).catch(function (error) {
+              toast.error("Error al eliminar. Intente nuevamente.");
+              console.log('Hubo un problema con la petición Fetch (2):' + error.message);
+            });
+
+
+        }.bind(this))
+        .catch(function (error) {
+          toast.error("Error al guardar. Intente nuevamente.");
+          console.log('Hubo un problema con la petición Fetch (1):' + error.message);
+        });
 
     }
 
   }
+
   
   
 
@@ -383,10 +440,11 @@ renderTableDataCV() {
 
 
 subirFoto=()=>{
+  console.log(this.state.archivoFoto);
   const MAXIMO_TAMANIO_BYTES = 5000000;
   const types=['image/jpg', 'image/jpeg', 'image/jpe','image/png','image/gif', 'image/bpm', 'image/tif','image/tiff'];
   var foto= this.state.archivoFoto
-  if(foto!==null){
+  if(foto!==null && foto.length!==0){
          var namePhoto =	'/'+this.state.nroDoc+'.'+this.state.extFoto
          var size= foto[0].size;
          var type= foto[0].type;
@@ -481,7 +539,7 @@ subirCV=()=>{
   const types=['application/pdf'];
 
   var cv= this.state.archivoCV
-  if(cv!==null){
+  if(cv!==null && cv.length!==0){
          var nameCV =	'/'+'cv_'+this.state.nroDoc+'.'+this.state.extCV
          var size= cv[0].size;
          var type= cv[0].type;
