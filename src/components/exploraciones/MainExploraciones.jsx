@@ -12,6 +12,10 @@ import Cookies from "universal-cookie";
 
 const cookies = new Cookies();
 
+//Variables Globales
+const urlApi = process.env.REACT_APP_API_HOST;
+
+
 class MainExploraciones extends React.Component {
   constructor(props) {
     super(props);
@@ -22,7 +26,11 @@ class MainExploraciones extends React.Component {
     if (!cookies.get("username") && !cookies.get("password")) {
       window.location.href = "/";
     } else {
-      fetch("http://museo.fi.uncoma.edu.ar:3006/api/exploracion")
+      fetch(urlApi+"/exploracion", {
+        method: 'GET', 
+        headers: {
+          'Authorization': 'Bearer '+cookies.get('token')
+        }})
         .then((res) => res.json())
         .then((result) => {
           this.setState({
@@ -35,15 +43,15 @@ class MainExploraciones extends React.Component {
     }
   }
 
-  eliminar(id) {
+  eliminar(id) { //Falta que elimine el dircetorio
 
-    fetch("http://museo.fi.uncoma.edu.ar:3006/api/exploracionId/"+id)
+    fetch(urlApi+"/exploracionId/"+id)
       .then(response => response.json())
       .then(data => {
             var longitud=(data.exploracionId.idExcavaciones).length
             if(longitud==0){
               //se puede eliminar la exploración
-                fetch("http://museo.fi.uncoma.edu.ar:3006/api/exploracion/" + id, {
+                fetch(urlApi+"/exploracion/" + id, {
                   method: "delete",
                 })
                   .then(function (response) {
@@ -110,14 +118,14 @@ class MainExploraciones extends React.Component {
                   },
                   {
                     title: "Nombre del Área",
-                    field: "nombre",
+                    field: "nombreArea",
                   },
                   {
                     title: "Fecha Inicio",
-                    field: "fecha",
+                    field: "fechaInicio",
                     type: "date",
                     render: (rowData) =>
-                      Moment(rowData.fecha).add(1, "days").format("DD/MM/YYYY"),
+                      Moment(rowData.fechaInicio).add(1, "days").format("DD/MM/YYYY"),
                   },
                 ]}
                 data={this.state.exploraciones}

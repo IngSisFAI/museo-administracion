@@ -12,6 +12,10 @@ import Cookies from 'universal-cookie';
 
 const cookies = new Cookies();
 
+//Variables Globales
+const urlApi = process.env.REACT_APP_API_HOST
+const rutaImg=process.env.REACT_APP_RUTA_IMG_PERSONA;
+const rutaDoc=process.env.REACT_APP_RUTA_DOC_PERSONA;
 
 
 const columnsMT = [
@@ -62,9 +66,9 @@ class MainPersonas extends React.Component {
       }
       else
       {
-
+      
     
-          fetch('http://museo.fi.uncoma.edu.ar:3006/api/personas', {
+          fetch(urlApi+'/personas', {
             method: 'GET', 
             headers: {
               'Authorization': 'Bearer '+cookies.get('token')
@@ -102,13 +106,11 @@ class MainPersonas extends React.Component {
     eliminar(id, foto, cv)
     {
 	    var resultPersonas=[];	
-      const destino = '/var/www/consulta/html/assets/datos/personal/fotosPersonal'; 
-      const img=destino+foto;
+  
+      const img=rutaImg+foto;
+      const curriculum=rutaDoc+cv;
 
-      const destinoCV = '/var/www/consulta/html/assets/datos/personal/curriculumPersonal'; 
-      const curriculum=destinoCV+cv;
-
-       fetch('http://museo.fi.uncoma.edu.ar:3006/api/persona/' + id, {
+       fetch(urlApi+'/persona/' + id, {
           method: 'DELETE',
           headers: {
             'Authorization': 'Bearer '+cookies.get('token')
@@ -121,7 +123,7 @@ class MainPersonas extends React.Component {
         }
         })
         .then( function(res) {
-					       fetch('http://museo.fi.uncoma.edu.ar:3006/api/deleteArchivo', {
+					       fetch(urlApi+'/deleteArchivo', {
 											method: 'get',
 											headers:{
 													  'Content-Type': undefined,
@@ -139,7 +141,7 @@ class MainPersonas extends React.Component {
               .then(function(){
 
                
-                  fetch('http://museo.fi.uncoma.edu.ar:3006/api/deleteArchivo', {
+                  fetch(urlApi+'/deleteArchivo', {
                        method: 'get',
                        headers:{
                              'Content-Type': undefined,
@@ -158,7 +160,7 @@ class MainPersonas extends React.Component {
               .then( function()
 						     {
                    
-                  fetch('http://museo.fi.uncoma.edu.ar:3006/api/personas', {
+                  fetch(urlApi+'/personas', {
                     method: 'GET', 
                     headers: {
                       'Authorization': 'Bearer '+cookies.get('token')
@@ -244,6 +246,7 @@ class MainPersonas extends React.Component {
                     
                     <MaterialTable
                       title="Listado"
+                      
                        columns={columnsMT}
                        data={this.state.personas}
                        actions={[

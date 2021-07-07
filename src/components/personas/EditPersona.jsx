@@ -11,8 +11,13 @@ import Menu from "./../Menu"
 import Cookies from 'universal-cookie';
 
 const cookies = new Cookies();
-const urlImage = 'http://museoconsulta.fi.uncoma.edu.ar/assets/datos/personal/fotosPersonal/';
-const urlCV = 'http://museoconsulta.fi.uncoma.edu.ar/assets/datos/personal/curriculumPersonal/';
+
+//Variables Globales
+const urlApi = process.env.REACT_APP_API_HOST
+const urlImage=process.env.REACT_APP_IMAGEN_PERSONA;
+const urlCV=process.env.REACT_APP_DOC_PERSONA;
+const rutaImg=process.env.REACT_APP_RUTA_IMG_PERSONA;
+const rutaDoc=process.env.REACT_APP_RUTA_DOC_PERSONA;
 
 
 class EditPersona extends React.Component {
@@ -58,7 +63,7 @@ class EditPersona extends React.Component {
     else {
 
       var feBaja = null;
-      fetch('http://museo.fi.uncoma.edu.ar:3006/api/personaId/' + this.props.match.params.id,
+      fetch(urlApi+'/personaId/' + this.props.match.params.id,
         {
           headers: {
             'Authorization': 'Bearer ' + cookies.get('token')
@@ -152,7 +157,7 @@ class EditPersona extends React.Component {
 
 
 
-      fetch('http://museo.fi.uncoma.edu.ar:3006/api/persona/' + this.props.match.params.id, {
+      fetch(urlApi+'/persona/' + this.props.match.params.id, {
         method: 'put',
         body: JSON.stringify(data),
         headers: {
@@ -267,13 +272,13 @@ class EditPersona extends React.Component {
     //console.log(dato);
 
     var opcion = window.confirm("¿Está seguro que desea eliminar el Archivo?");
-    var destino = "/var/www/consulta/html/assets/datos/personal/fotosPersonal/" + dato;
+    var destino = rutaImg + dato;
     if (opcion == true) {
 
       var data = {
         "foto": ""
       }
-      fetch('http://museo.fi.uncoma.edu.ar:3006/api/persona/' + this.props.match.params.id, {
+      fetch(urlApi+'/persona/' + this.props.match.params.id, {
         method: 'put',
         body: JSON.stringify(data),
         headers: {
@@ -289,7 +294,7 @@ class EditPersona extends React.Component {
         })
         .then(function () {
 
-          fetch('http://museo.fi.uncoma.edu.ar:3006/api/deleteArchivo', {
+          fetch(urlApi+'/deleteArchivo', {
             method: 'get',
             headers: {
               'Content-Type': undefined,
@@ -331,13 +336,13 @@ class EditPersona extends React.Component {
     //console.log(dato);
 
     var opcion = window.confirm("¿Está seguro que desea eliminar el Curriculum Vitae?");
-    var destino = "/var/www/consulta/html/assets/datos/personal/curriculumPersonal/" + dato;
+    var destino = rutaDoc + dato;
     if (opcion == true) {
 
       var data = {
         "curriculum": ""
       }
-      fetch('http://museo.fi.uncoma.edu.ar:3006/api/persona/' + this.props.match.params.id, {
+      fetch(urlApi+'/persona/' + this.props.match.params.id, {
         method: 'put',
         body: JSON.stringify(data),
         headers: {
@@ -353,7 +358,7 @@ class EditPersona extends React.Component {
         })
         .then(function () {
 
-          fetch('http://museo.fi.uncoma.edu.ar:3006/api/deleteArchivo', {
+          fetch(urlApi+'/deleteArchivo', {
             method: 'get',
             headers: {
               'Content-Type': undefined,
@@ -417,7 +422,7 @@ class EditPersona extends React.Component {
             foto: namePhoto,
           };
           document.getElementById('subir').setAttribute('disabled', 'disabled');
-          fetch('http://museo.fi.uncoma.edu.ar:3006/api/persona/' + this.props.match.params.id, {
+          fetch(urlApi+'/persona/' + this.props.match.params.id, {
             method: 'put',
             body: JSON.stringify(data1),
             headers: {
@@ -428,15 +433,15 @@ class EditPersona extends React.Component {
             .then(function (response) {
               if (response.ok) {
                 console.log("¡Se actualizaron los datos de la Persona con Éxito!");
-                const destino = "/var/www/consulta/html/assets/datos/personal/fotosPersonal";
+                
                 const data = new FormData();
                 data.append("file", foto[0]);
                 // console.log(foto);
 
-                axios.post("http://museo.fi.uncoma.edu.ar:3006/api/uploadArchivo", data, {
+                axios.post(urlApi+"/uploadArchivo", data, {
                   headers: {
                     "Content-Type": undefined,
-                    path: destino,
+                    path: rutaImg,
                     "newfilename": this.state.nroDoc,
                     'Authorization': 'Bearer ' + cookies.get('token')
                   }
@@ -510,7 +515,7 @@ class EditPersona extends React.Component {
             curriculum: nameCV,
           };
           document.getElementById('subirCV').setAttribute('disabled', 'disabled');
-          fetch('http://museo.fi.uncoma.edu.ar:3006/api/persona/' + this.props.match.params.id, {
+          fetch(urlApi+'/persona/' + this.props.match.params.id, {
             method: 'put',
             body: JSON.stringify(data1),
             headers: {
@@ -521,15 +526,15 @@ class EditPersona extends React.Component {
             .then(function (response) {
               if (response.ok) {
                 console.log("¡Se actualizaron los datos de la Persona con Éxito!");
-                const destino = "/var/www/consulta/html/assets/datos/personal/curriculumPersonal";
+               
                 const data = new FormData();
                 data.append("file", cv[0]);
                 // console.log(foto);
 
-                axios.post("http://museo.fi.uncoma.edu.ar:3006/api/uploadArchivo", data, {
+                axios.post(urlApi+"/uploadArchivo", data, {
                   headers: {
                     "Content-Type": undefined,
-                    path: destino,
+                    path: rutaDoc,
                     "newfilename": 'cv_' + this.state.nroDoc,
                     'Authorization': 'Bearer ' + cookies.get('token')
                   }
@@ -647,12 +652,7 @@ class EditPersona extends React.Component {
               </h3>
               <hr />
 
-              <Tabs id="tabPersonas" activeKey={this.state.key} onSelect={this.handleSelect}>
-
-                <Tab eventKey="dbasicos" title="Datos Básicos" disabled={this.state.tabbas}>
-
-                  <Form noValidate validated={validated} onSubmit={this.handleSubmit}>
-                    <ToastContainer
+              <ToastContainer
                       position="top-right"
                       autoClose={5000}
                       transition={Slide}
@@ -661,7 +661,14 @@ class EditPersona extends React.Component {
                       closeOnClick
                       pauseOnHover
                     />
-                    <br />
+                    
+
+              <Tabs id="tabPersonas" activeKey={this.state.key} onSelect={this.handleSelect}>
+
+                <Tab eventKey="dbasicos" title="Datos Básicos" disabled={this.state.tabbas}>
+
+                  <Form noValidate validated={validated} onSubmit={this.handleSubmit}>
+                  <br />
 
                     <Form.Row >
                       <Form.Group className="col-sm-4" controlId="apellido">
@@ -745,15 +752,7 @@ class EditPersona extends React.Component {
 
                 <Tab eventKey="dfiles" title="Archivos Adjuntos" disabled={this.state.tabfile}>
                   <Form id="form" noValidate validated={validatedfile}>
-                    <ToastContainer
-                      position="top-right"
-                      autoClose={5000}
-                      transition={Slide}
-                      hideProgressBar={true}
-                      newestOnTop={true}
-                      closeOnClick
-                      pauseOnHover
-                    />
+                
                     <br />
                     <Form.Row >
                       <Form.Group className="col-sm-12">
@@ -780,11 +779,6 @@ class EditPersona extends React.Component {
 
                       </Form.Group>
 
-
-
-                    </Form.Row>
-
-                    <Form.Row>
                       <Form.Group className="col-sm-6">
                         <Alert show={this.state.showSuccess} variant="success">
                           <p>
@@ -798,7 +792,11 @@ class EditPersona extends React.Component {
                           </p>
                         </Alert>
                       </Form.Group>
+
+
+
                     </Form.Row>
+
 
 
 
@@ -828,11 +826,6 @@ class EditPersona extends React.Component {
 
                       </Form.Group>
 
-
-
-                    </Form.Row>
-
-                    <Form.Row>
                       <Form.Group className="col-sm-6">
                         <Alert show={this.state.showSuccesscv} variant="success">
                           <p>
@@ -846,7 +839,12 @@ class EditPersona extends React.Component {
                           </p>
                         </Alert>
                       </Form.Group>
+
+
+
                     </Form.Row>
+
+                    
 
                   </Form>
                 </Tab>
