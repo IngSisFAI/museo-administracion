@@ -135,7 +135,6 @@ class AddPersona extends React.Component {
 
 
     handleSubmit = (event) => {
-          var dniPersona=""
        
           const form = event.currentTarget;
           event.preventDefault();

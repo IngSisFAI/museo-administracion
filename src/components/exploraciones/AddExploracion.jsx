@@ -51,7 +51,6 @@ class AddExploracion extends React.Component {
       proyecto: '',
       otras: '',
       archivoAut: null,
-      extAut: '',
       detalle: '',
       archivosImg: [],
       op: 'I',
@@ -61,7 +60,12 @@ class AddExploracion extends React.Component {
       showSuccess: false,
       showError: false,
       tableArchivosAut: null,
-      listArchivosAut: []
+      listArchivosAut: [],
+      showSuccessf: false,
+      showErrorf: false,
+      tableImagenes: null,
+      listImages: [],
+      foto: null
     };
     this.reemplazar = this.reemplazar.bind(this);
   }
@@ -115,42 +119,6 @@ class AddExploracion extends React.Component {
   };
 
 
-  /*handleSubmit = (event) => {
-    const form = event.currentTarget;
-    event.preventDefault();
-    if (form.checkValidity() === false) {
-      event.stopPropagation();
-    } else {
-      var data = {
-        nombre: this.state.nombre,
-        fecha: this.state.fecha,
-        areaId: this.state.areaId,
-      };
-
-      fetch("http://museo.fi.uncoma.edu.ar:3006/api/exploracion", {
-        method: "post",
-        body: JSON.stringify(data),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      })
-        .then(function (response) {
-          if (response.ok) {
-            toast.success("¡Se guardó la Exploracion con Éxito!");
-            setTimeout(() => {
-              window.location.replace("/exploraciones");
-            }, 1500);
-          }
-        })
-        .catch(function (error) {
-          toast.error("Error al guardar. Intente nuevamente.");
-          console.log(
-            "Hubo un problema con la petición Fetch:" + error.message
-          );
-        });
-    }
-    this.setState({ validated: true });
-  };*/
 
   handleDirectorChange = (selectedDirector) => {
     this.setState({ selectedDirector });
@@ -180,49 +148,86 @@ class AddExploracion extends React.Component {
         toast.error('Ingrese un Director.');
       }
       else {
-        var data = {
-          "nombreArea": this.state.nombreArea,
-          "fechaInicio": this.state.fechaInicio,
-          "fechaTermino": this.state.fechaFin,
-          "directorId": this.state.selectedDirector.value,
-          "integrantesGrupo": this.state.integrantesId,
-          "idExcavaciones": [],
-          "idArea": this.state.areaId,
-          "empresa": '',
-          "proyectoInvestigacion": '',
-          "otrasEspecificaciones": '',
-          "archAutorizaciones": [],
-          "detallePicking": '',
-          "imagenesExploracion": []
 
-        }
+        const op= this.state.op;
+        if(op==='I'){
 
-      }
+              var data = {
+                "nombreArea": this.state.nombreArea,
+                "fechaInicio": this.state.fechaInicio,
+                "fechaTermino": this.state.fechaFin,
+                "directorId": this.state.selectedDirector.value,
+                "integrantesGrupo": this.state.integrantesId,
+                "idExcavaciones": [],
+                "idArea": this.state.areaId,
+                "empresa": '',
+                "proyectoInvestigacion": '',
+                "otrasEspecificaciones": '',
+                "archAutorizaciones": [],
+                "detallePicking": '',
+                "imagenesExploracion": []
 
-      fetch(urlApi+"/exploracion", {
-        method: "post",
-        body: JSON.stringify(data),
-        headers: {
-          "Content-Type": "application/json",
-          'Authorization': 'Bearer ' + cookies.get('token')
-        },
-      })
-        .then(function (response) {
-          if (response.ok) {
-            console.log("¡Se guardó la Exploracion con Éxito!");
-            return response.json();
+              }
+
+            
+
+            fetch(urlApi+"/exploracion", {
+              method: "post",
+              body: JSON.stringify(data),
+              headers: {
+                "Content-Type": "application/json",
+                'Authorization': 'Bearer ' + cookies.get('token')
+              },
+            })
+              .then(function (response) {
+                if (response.ok) {
+                  console.log("¡Se guardó la Exploracion con Éxito!");
+                  return response.json();
+                }
+              })
+              .then(function (data) {
+                this.setState({ tabsolic: false, key: 'dsolic', op: 'U', exploracionId: data.exploracion._id });
+              }.bind(this))
+              .catch(function (error) {
+                toast.error("Error al guardar. Intente nuevamente.");
+                console.log(
+                  "Hubo un problema con la petición Fetch:" + error.message
+                );
+              });
           }
-        })
-        .then(function (data) {
-          this.setState({ tabsolic: false, key: 'dsolic', op: 'U', exploracionId: data.exploracion._id });
-        }.bind(this))
-        .catch(function (error) {
-          toast.error("Error al guardar. Intente nuevamente.");
-          console.log(
-            "Hubo un problema con la petición Fetch:" + error.message
-          );
-        });
+          else{
 
+              var data = {
+                "nombreArea": this.state.nombreArea,
+                "fechaInicio": this.state.fechaInicio,
+                "fechaTermino": this.state.fechaFin,
+                "directorId": this.state.selectedDirector.value,
+                "integrantesGrupo": this.state.integrantesId
+              }
+
+              fetch(urlApi+"/exploracion/"+this.state.exploracionId, {
+                method: "put",
+                body: JSON.stringify(data),
+                headers: {
+                  "Content-Type": "application/json",
+                  'Authorization': 'Bearer ' + cookies.get('token')
+                },
+              })
+                .then(function (response) {
+                  if (response.ok) {
+                    console.log("¡Se guardó la Exploracion con Éxito!");
+                    return response.json();
+                  }
+                })
+                .catch(function (error) {
+                  toast.error("Error al guardar. Intente nuevamente.");
+                  console.log(
+                    "Hubo un problema con la petición Fetch:" + error.message
+                  );
+                });
+        
+          }    
+      }
 
     }
     this.setState({ validateddbas: true });
@@ -238,6 +243,44 @@ class AddExploracion extends React.Component {
 
     }
     this.setState({ validateddsolic: true });
+  }
+
+  handleForm3 = (event) => {
+
+    var data = {
+      "nombreArea": this.state.nombreArea,
+      "fechaInicio": this.state.fechaInicio,
+      "fechaTermino": this.state.fechaFin,
+      "directorId": this.state.selectedDirector.value,
+      "integrantesGrupo": this.state.integrantesId,
+      "empresa": this.state.empresa,
+      "proyectoInvestigacion": this.state.proyecto,
+      "otrasEspecificaciones": this.state.otras,
+      "detallePicking":this.state.detalle
+    }
+
+    fetch(urlApi+"/exploracion/"+this.state.exploracionId, {
+      method: "put",
+      body: JSON.stringify(data),
+      headers: {
+        "Content-Type": "application/json",
+        'Authorization': 'Bearer ' + cookies.get('token')
+      },
+    })
+      .then(function (response) {
+        if (response.ok) {
+          toast.success("¡Se guardó la Exploracion con Éxito!");
+          return response.json();
+        }
+      })
+      .catch(function (error) {
+        toast.error("Error al guardar. Intente nuevamente.");
+        console.log(
+          "Hubo un problema con la petición Fetch:" + error.message
+        );
+      });
+
+
   }
 
   handleAntForm2 = (event) => {
@@ -267,11 +310,7 @@ class AddExploracion extends React.Component {
   fileshandleChange = (event) => {
     const file = event.target.files;
     const name = file[0].name;
-    const lastDot = name.lastIndexOf('.');
-    const ext = name.substring(lastDot + 1);
-    this.setState({ archivoAut: file, extAut: ext });
-
-
+    this.setState({ archivoAut: file });
   };
 
 
@@ -288,7 +327,7 @@ class AddExploracion extends React.Component {
             </Button>
           </td>
           <td>
-            <a href={this.state.urlArchivo} disabled target="_blank">{file}</a>
+            <a href={urlArchivo+this.state.exploracionId+'/'+file} disabled target="_blank">{file}</a>
           </td>
 
         </tr>
@@ -400,54 +439,128 @@ class AddExploracion extends React.Component {
   };
 
   imageneshandleChange = (event) => {
-    const files = event.target.files;
-    var arrayFiles = this.state.archivosImg;
+    const file = event.target.files;
+    this.setState({ imagen: file });
 
-
-    Array.from(files).forEach(file => {
-      var key = Math.floor(Math.random() * 1000);
-      file.id = key;
-      arrayFiles.push(file)
-    })
-    this.setState({ archivosImg: arrayFiles });
-
-    //aca deberiamos mover el archivo a la carpeta 
   };
 
-  renderTableDataFilesImagenes() {
+  renderTableImagenes() {
 
-    return this.state.archivosImg.map((file, index) => {
+    return this.state.listImages.map((file, index) => {
 
       return (
         <tr key={index}>
           <td>
-            <Button variant="danger" type="button" id="eliminarImg" onClick={() => this.eliminarArchivoImg(file)}>
+            <Button variant="danger" type="button" id="eliminarI" onClick={() => this.eliminarImagen(file)}>
               <FontAwesomeIcon icon={faTrash} />
             </Button>
           </td>
-          <td>{file.name}</td>
+          <td>
+            <a href={urlArchivo+this.state.exploracionId+'/'+file} disabled target="_blank">{file}</a>
+          </td>
 
         </tr>
       )
     })
 
 
+
   }
 
-  eliminarArchivoImg = (dato) => {
-    //aca tambien hay que eliminar en la BD y traer los prestamos
+  eliminarImagen = (dato) => {
+    var destino = rutaExploraciones + this.state.exploracionId + "/" + dato;
     var opcion = window.confirm("¿Está seguro que deseas eliminar el Archivo?");
     if (opcion == true) {
-      var contador = 0;
-      var arreglo = this.state.archivosImg;
-      arreglo.map((registro) => {
-        if (dato.id == registro.id) {
-          arreglo.splice(contador, 1);
+
+      fetch(urlApi+'/exploracionId/' + this.state.exploracionId, {
+        method: 'get',
+        headers: {
+          'Authorization': 'Bearer ' + cookies.get('token')
         }
-        contador++;
-      });
-      this.setState({ archivosImg: arreglo });
+      })
+        .then(response => {
+          return response.json();
+        })
+        .then(function (response) {
+          //aca ya tengo la exploracion, tengo que obtener los archivos de imagenes y quitar el candidato a eliminar
+
+          //elimino archivo del array
+          var archivos = response.exploracionId.imagenesExploracion;
+          var contador = 0;
+          archivos.map((registro) => {
+            if (dato == registro) {
+              archivos.splice(contador, 1);
+            }
+            contador++;
+          });
+
+          var dataImg = {
+            "imagenesExploracion": archivos
+
+          }
+
+          //Actualizo la Exploracion
+          fetch(urlApi+'/exploracion/' + this.state.exploracionId, {
+            method: 'put',
+            body: JSON.stringify(dataImg),
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer ' + cookies.get('token')
+            }
+          })
+            .then(function (response) {
+              if (response.ok) {
+                console.log("¡Se actualizaron los datos de la Exploracion con Éxito!");
+                this.setState({ listImages: archivos });
+
+              }
+            }.bind(this))
+            .then(function (response) {
+              //Elimino Archivo del Server
+              fetch(urlApi+'/deleteArchivo', {
+                method: 'get',
+                headers: {
+                  'Content-Type': undefined,
+                  'path': destino,
+                  'Authorization': 'Bearer ' + cookies.get('token')
+                }
+              })
+                .then(response => {
+                  return response.json();
+                })
+                .then(function (response) {
+
+                  if ((response.msg).trim() === 'OK') {
+                    console.log('ok');
+                    toast.success("¡Se eliminó el Archivo con Éxito!");
+                    this.setState({ imagen: null, tableImagenes: this.renderTableImagenes() })
+
+                  } else {
+                    console.log('error');
+                    toast.error("¡Se produjo un error al eliminar archivo!");
+                  }
+                }.bind(this)).catch(function (error) {
+                  toast.error("Error al eliminar. Intente nuevamente.");
+                  console.log('Hubo un problema con la petición Fetch (3):' + error.message);
+                });
+
+
+            }.bind(this))
+            .catch(function (error) {
+              toast.error("Error al Actualizar Exploracion. Intente nuevamente.");
+              console.log('Hubo un problema con la petición Fetch (2):' + error.message);
+            });
+
+        }.bind(this))
+        .catch(function (error) {
+          toast.error("Error al consultar. Intente nuevamente.");
+          console.log('Hubo un problema con la petición Fetch (1):' + error.message);
+        });
+
+
+
     }
+   
   };
 
   subirAutorizacion = () => {
@@ -596,6 +709,130 @@ class AddExploracion extends React.Component {
 
     return res;
 
+  }
+
+
+  subirImagen = () => {
+
+    const MAXIMO_TAMANIO_BYTES = 5000000;
+    const types = ['image/jpg', 'image/jpeg', 'image/jpe','image/png','image/gif', 'image/bpm', 'image/tif','image/tiff'];
+    var file = this.state.imagen
+
+    if (file !== null && file.length !== 0) {
+      var nameFile = (file[0].name).replace(/\s+/g, "_");
+      nameFile = this.reemplazar(nameFile);
+      var size = file[0].size;
+      var type = file[0].type;
+
+      if (size > MAXIMO_TAMANIO_BYTES) {
+        var tamanio = 5000000 / 1000000;
+        toast.error("El archivo seleccionado supera los " + tamanio + 'Mb. permitidos.');
+        document.getElementById('imagenes').value = '';
+      }
+      else {
+        if (!types.includes(type)) {
+          toast.error("El archivo seleccionado tiene una extensión inválida.");
+          document.getElementById('imagenes').value = '';
+
+        }
+        else {
+          document.getElementById('subirImg').setAttribute('disabled', 'disabled');
+          fetch(urlApi+'/exploracionId/' + this.state.exploracionId, {
+            method: 'get',
+            headers: {
+              'Authorization': 'Bearer ' + cookies.get('token')
+            }
+          })
+            .then(response => {
+              return response.json();
+            })
+            .then(function (response) {
+
+              var listImages = response.exploracionId.imagenesExploracion;
+              listImages.push(nameFile);
+
+              var dataAut = {
+                "imagenesExploracion": listImages,
+              };
+
+              //Primero Actualizo la Exploracion
+              fetch(urlApi+'/exploracion/' + this.state.exploracionId, {
+                method: 'put',
+                body: JSON.stringify(dataAut),
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': 'Bearer ' + cookies.get('token')
+                }
+              })
+                .then(function (response) {
+                  if (response.ok) {
+                    console.log("¡Se actualizaron los datos de la Exploracion con Éxito!");
+                    this.setState({ listImages: listImages });
+
+                  }
+                }.bind(this))
+                .then(function (response) {
+                  //segundo subo archivo al server
+
+                  const destino = rutaExploraciones + this.state.exploracionId;
+                  const data = new FormData();
+                  data.append("file", file[0]);
+
+
+                  axios.post(urlApi+"/uploadArchivo", data, {
+                    headers: {
+                      "Content-Type": undefined,
+                      path: destino,
+                      "newfilename": '',
+                      'Authorization': 'Bearer ' + cookies.get('token')
+                    }
+                  })
+                    .then(response => {
+                      console.log(response);
+                      if (response.statusText === "OK") {
+                        this.setState({ imagen: null, showSuccessf: true, showErrorf: false, urlArchivo: urlArchivo + this.state.exploracionId + '/' + nameFile });
+                        this.setState({ tableImagenes: this.renderTableImagenes() })
+                        document.getElementById('imagenes').value = '';
+                      }
+                      else {
+                        this.setState({ showSuccessf: false, showErrorf: true });
+                      }
+                      document.getElementById('subirImg').removeAttribute('disabled');
+
+                      setTimeout(() => {
+                        this.setState({ showSuccessf: false, showErrorf: false });
+                      }, 5000);
+
+
+                    })
+                    .catch(error => {
+                      this.setState({ showSuccess: false, showError: true });
+                      console.log(error);
+                    });
+
+
+
+
+                }.bind(this))
+                .catch(function (error) {
+                  toast.error("Error al Actualizar Exploracion. Intente nuevamente.");
+                  console.log('Hubo un problema con la petición Fetch (1):' + error.message);
+                });
+
+
+            }.bind(this))
+            .catch(function (error) {
+              toast.error("Error al consultar. Intente nuevamente.");
+              console.log('Hubo un problema con la petición Fetch (2):' + error.message);
+            });
+
+        }
+
+      }
+
+    } else {
+      toast.error("Seleccione un Archivo.");
+    }
   }
 
 
@@ -884,7 +1121,7 @@ class AddExploracion extends React.Component {
                     <br />
                     <Form.Row>
                       <Form.Group className="mx-sm-3 mb-2">
-                        <Button variant="primary" type="submit" id="guardar">
+                        <Button variant="primary" type="button" id="guardar" onClick={this.handleForm3}>
                           <FontAwesomeIcon icon={faSave} /> Guardar
                         </Button>
                         &nbsp;&nbsp;
@@ -912,6 +1149,27 @@ class AddExploracion extends React.Component {
                     </Form.Row>
 
                     <Form.Row>
+                      <Form.Group className="col-sm-2" >
+                        <Button variant="primary" type="button" id="subirImg" onClick={() => this.subirImagen()} >
+                          <FontAwesomeIcon icon={faUpload} /> Subir
+                        </Button>
+                      </Form.Group>
+                      <Form.Group className="col-sm-6">
+                        <Alert show={this.state.showSuccessf} variant="success">
+                          <p>
+                            Se subió el archivo con Éxito!!
+                          </p>
+                        </Alert>
+
+                        <Alert show={this.state.showErrorf} variant="danger">
+                          <p>
+                            El archivo no se pudo subir. Intente nuevamente.
+                          </p>
+                        </Alert>
+                      </Form.Group>
+                    </Form.Row>
+
+                    <Form.Row>
                       <Form.Group className="col-sm-8" >
 
                         <Table striped bordered hover responsive>
@@ -922,7 +1180,7 @@ class AddExploracion extends React.Component {
                             </tr>
                           </thead>
                           <tbody>
-                            {this.renderTableDataFilesImagenes()}
+                            {this.state.tableImagenes}
                           </tbody>
                         </Table>
 
