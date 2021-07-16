@@ -216,9 +216,10 @@ class AddExploracion extends React.Component {
                 .then(function (response) {
                   if (response.ok) {
                     console.log("¡Se guardó la Exploracion con Éxito!");
+                    this.setState({  key: 'dsolic' });
                     return response.json();
                   }
-                })
+                }.bind(this))
                 .catch(function (error) {
                   toast.error("Error al guardar. Intente nuevamente.");
                   console.log(

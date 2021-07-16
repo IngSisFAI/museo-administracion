@@ -14,28 +14,42 @@ const cookies = new Cookies();
 
 //Variables Globales
 const urlApi = process.env.REACT_APP_API_HOST;
+const rutaExploraciones = process.env.REACT_APP_RUTA_EXPLORACIONES;
 
 
 class MainExploraciones extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { exploraciones: []};
+    this.state = { exploraciones: [] };
   }
 
   componentDidMount() {
     if (!cookies.get("username") && !cookies.get("password")) {
       window.location.href = "/";
     } else {
-      fetch(urlApi+"/exploracion", {
-        method: 'GET', 
+      fetch(urlApi + "/exploracion", {
+        method: 'GET',
         headers: {
-          'Authorization': 'Bearer '+cookies.get('token')
-        }})
+          'Authorization': 'Bearer ' + cookies.get('token')
+        }
+      })
         .then((res) => res.json())
         .then((result) => {
-          this.setState({
-            exploraciones: result.exploraciones,
-          });
+          if (typeof result.exploraciones !== 'undefined') {
+            this.setState({
+              exploraciones: result.exploraciones,
+            });
+          }
+          else {
+            cookies.remove("id", { path: "/" });
+            cookies.remove("nombre", { path: "/" });
+            cookies.remove("apellido", { path: "/" });
+            cookies.remove("user", { path: "/" });
+            cookies.remove("password", { path: "/" });
+            cookies.remove("permiso", { path: "/" });
+            cookies.remove("token", { path: "/" });
+            window.location.href = "/";
+          }
         })
         .catch((error) => {
           console.log("Error");
@@ -43,7 +57,71 @@ class MainExploraciones extends React.Component {
     }
   }
 
-  eliminar(id) { //Falta que elimine el dircetorio
+  eliminar(id) {
+
+    fetch(urlApi + "/exploracionId/" + id, {
+      method: 'get',
+      headers: {
+        'Authorization': 'Bearer ' + cookies.get('token')
+      }
+    })
+      .then(response => response.json())
+      .then(data => {
+        var longitud = (data.exploracionId.idExcavaciones).length
+        //verifico primero si tiene excavaciones asociadas, si tiene imposible eliminar.
+        if (longitud == 0) {
+          fetch(urlApi + '/exploracion/' + id, {
+            method: 'DELETE',
+            headers: {
+              'Authorization': 'Bearer ' + cookies.get('token')
+            }
+          })
+            .then(function (response) {
+              if (response.ok) {
+                console.log("¡Se eliminó a la persona con Éxito!");
+
+              }
+            })
+
+            .then(function () {
+              var ruta = rutaExploraciones + id + '/';
+              fetch(urlApi + '/deleteDirectorio', {
+                method: 'get',
+                headers: {
+                  'Content-Type': undefined,
+                  'path': ruta,
+                  'Authorization': 'Bearer ' + cookies.get('token')
+                }
+              }).then(response => {
+                return response.json();
+              })
+                .then(function (response) {
+                  toast.success("¡Se eliminó la Exploración con Éxito!");
+                  setTimeout(() => {
+                    window.location.href = "/exploraciones";
+                  }, 1500);
+                }).catch(error => {
+                  console.log("Error al eliminar archivo:", error)
+                });
+
+            })
+            .catch(function (error) {
+              toast.error("Error al eliminar. Intente nuevamente.");
+              console.log('Hubo un problema con la petición Fetch:' + error.message);
+            });
+
+        }
+        else {
+          toast.error("Existen Excavaciones asociadas a la Exploración.");
+        }
+
+      })
+      .catch(function (error) {
+        console.log(error);
+      })
+
+  }
+  /*eliminar(id) { //Falta que elimine el dircetorio
 
     fetch(urlApi+"/exploracionId/"+id)
       .then(response => response.json())
@@ -77,7 +155,8 @@ class MainExploraciones extends React.Component {
       })    
 
 
-  }
+  }*/
+
 
   render() {
     return (
