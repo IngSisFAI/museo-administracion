@@ -13,7 +13,7 @@
     "cors": "^2.8.5",
     "helmet": "^3.18.0",
     "i": "^0.3.6",
-    "jquery": "^3.4.0",
+    "jquery": "^3.6.0",
     "leaflet": "^1.4.0",
     "leaflet-css": "^0.1.0",
     "leaflet.locatecontrol": "^0.67.0",

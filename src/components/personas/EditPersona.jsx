@@ -9,15 +9,16 @@ import Moment from 'moment';
 import axios from 'axios';
 import Menu from "./../Menu"
 import Cookies from 'universal-cookie';
+import $ from 'jquery';
 
 const cookies = new Cookies();
 
 //Variables Globales
 const urlApi = process.env.REACT_APP_API_HOST
-const urlImage=process.env.REACT_APP_IMAGEN_PERSONA;
-const urlCV=process.env.REACT_APP_DOC_PERSONA;
-const rutaImg=process.env.REACT_APP_RUTA_IMG_PERSONA;
-const rutaDoc=process.env.REACT_APP_RUTA_DOC_PERSONA;
+const urlImage = process.env.REACT_APP_IMAGEN_PERSONA;
+const urlCV = process.env.REACT_APP_DOC_PERSONA;
+const rutaImg = process.env.REACT_APP_RUTA_IMG_PERSONA;
+const rutaDoc = process.env.REACT_APP_RUTA_DOC_PERSONA;
 
 
 class EditPersona extends React.Component {
@@ -63,7 +64,7 @@ class EditPersona extends React.Component {
     else {
 
       var feBaja = null;
-      fetch(urlApi+'/personaId/' + this.props.match.params.id,
+      fetch(urlApi + '/personaId/' + this.props.match.params.id,
         {
           headers: {
             'Authorization': 'Bearer ' + cookies.get('token')
@@ -145,7 +146,7 @@ class EditPersona extends React.Component {
     else {
 
       evt.preventDefault();
-
+      $(".loader").removeAttr("style");
       var data = {
         "nombres": this.state.nombre,
         "apellidos": this.state.apellido,
@@ -157,7 +158,7 @@ class EditPersona extends React.Component {
 
 
 
-      fetch(urlApi+'/persona/' + this.props.match.params.id, {
+      fetch(urlApi + '/persona/' + this.props.match.params.id, {
         method: 'put',
         body: JSON.stringify(data),
         headers: {
@@ -166,12 +167,14 @@ class EditPersona extends React.Component {
         }
       })
         .then(function (response) {
+          $(".loader").fadeOut("slow");
           if (response.ok) {
             toast.success("¡Se guardó la Persona con Éxito!");
             return response.json();
           }
         })
         .catch(function (error) {
+          $(".loader").fadeOut("slow");
           toast.error("Error al guardar. Intente nuevamente.");
           console.log('Hubo un problema con la petición Fetch:' + error.message);
         });
@@ -278,7 +281,8 @@ class EditPersona extends React.Component {
       var data = {
         "foto": ""
       }
-      fetch(urlApi+'/persona/' + this.props.match.params.id, {
+      $(".loader").removeAttr("style");
+      fetch(urlApi + '/persona/' + this.props.match.params.id, {
         method: 'put',
         body: JSON.stringify(data),
         headers: {
@@ -294,7 +298,7 @@ class EditPersona extends React.Component {
         })
         .then(function () {
 
-          fetch(urlApi+'/deleteArchivo', {
+          fetch(urlApi + '/deleteArchivo', {
             method: 'get',
             headers: {
               'Content-Type': undefined,
@@ -306,17 +310,19 @@ class EditPersona extends React.Component {
               return response.json();
             })
             .then(function (response) {
-              console.log(response.msg);
+              $(".loader").fadeOut("slow");
               if ((response.msg).trim() === 'OK') {
                 console.log('ok');
                 toast.success("¡Se eliminó el Archivo con Éxito!");
                 this.setState({ archivoFoto: null, extFoto: '', tableImage: null })
 
               } else {
+                $(".loader").fadeOut("slow");
                 console.log('error');
                 toast.error("¡Se produjo un error al eliminar archivo!");
               }
             }.bind(this)).catch(function (error) {
+              $(".loader").fadeOut("slow");
               toast.error("Error al eliminar. Intente nuevamente.");
               console.log('Hubo un problema con la petición Fetch (2):' + error.message);
             });
@@ -324,6 +330,7 @@ class EditPersona extends React.Component {
 
         }.bind(this))
         .catch(function (error) {
+          $(".loader").fadeOut("slow");
           toast.error("Error al guardar. Intente nuevamente.");
           console.log('Hubo un problema con la petición Fetch (1):' + error.message);
         });
@@ -342,7 +349,8 @@ class EditPersona extends React.Component {
       var data = {
         "curriculum": ""
       }
-      fetch(urlApi+'/persona/' + this.props.match.params.id, {
+      $(".loader").removeAttr("style");
+      fetch(urlApi + '/persona/' + this.props.match.params.id, {
         method: 'put',
         body: JSON.stringify(data),
         headers: {
@@ -358,7 +366,7 @@ class EditPersona extends React.Component {
         })
         .then(function () {
 
-          fetch(urlApi+'/deleteArchivo', {
+          fetch(urlApi + '/deleteArchivo', {
             method: 'get',
             headers: {
               'Content-Type': undefined,
@@ -370,17 +378,19 @@ class EditPersona extends React.Component {
               return response.json();
             })
             .then(function (response) {
-              console.log(response.msg);
+              $(".loader").fadeOut("slow");
               if ((response.msg).trim() === 'OK') {
                 console.log('ok');
                 toast.success("¡Se eliminó el Archivo con Éxito!");
                 this.setState({ archivoCV: null, extCV: '', tableCV: null })
 
               } else {
+                $(".loader").fadeOut("slow");
                 console.log('error');
                 toast.error("¡Se produjo un error al eliminar archivo!");
               }
             }.bind(this)).catch(function (error) {
+              $(".loader").fadeOut("slow");
               toast.error("Error al eliminar. Intente nuevamente.");
               console.log('Hubo un problema con la petición Fetch (2):' + error.message);
             });
@@ -388,6 +398,7 @@ class EditPersona extends React.Component {
 
         }.bind(this))
         .catch(function (error) {
+          $(".loader").fadeOut("slow");
           toast.error("Error al guardar. Intente nuevamente.");
           console.log('Hubo un problema con la petición Fetch (1):' + error.message);
         });
@@ -418,11 +429,12 @@ class EditPersona extends React.Component {
 
         }
         else {
+          $(".loader").removeAttr("style");
           var data1 = {
             foto: namePhoto,
           };
           document.getElementById('subir').setAttribute('disabled', 'disabled');
-          fetch(urlApi+'/persona/' + this.props.match.params.id, {
+          fetch(urlApi + '/persona/' + this.props.match.params.id, {
             method: 'put',
             body: JSON.stringify(data1),
             headers: {
@@ -433,12 +445,12 @@ class EditPersona extends React.Component {
             .then(function (response) {
               if (response.ok) {
                 console.log("¡Se actualizaron los datos de la Persona con Éxito!");
-                
+
                 const data = new FormData();
                 data.append("file", foto[0]);
                 // console.log(foto);
 
-                axios.post(urlApi+"/uploadArchivo", data, {
+                axios.post(urlApi + "/uploadArchivo", data, {
                   headers: {
                     "Content-Type": undefined,
                     path: rutaImg,
@@ -447,7 +459,7 @@ class EditPersona extends React.Component {
                   }
                 })
                   .then(response => {
-                    console.log(response);
+                    $(".loader").fadeOut("slow");
                     if (response.statusText === "OK") {
                       this.setState({ showSuccess: true, showError: false, urlImage: urlImage + this.state.nroDoc + '.' + this.state.extFoto });
                       this.setState({ tableImage: this.renderTableDataFoto() })
@@ -465,12 +477,14 @@ class EditPersona extends React.Component {
 
                   })
                   .catch(error => {
+                    $(".loader").fadeOut("slow");
                     this.setState({ showSuccess: false, showError: true });
                     console.log(error);
                   });
               }
             }.bind(this))
             .catch(function (error) {
+              $(".loader").fadeOut("slow");
               toast.error("Error al guardar. Intente nuevamente.");
               document.getElementById('subir').removeAttribute('disabled');
               console.log('Hubo un problema con la petición Fetch:' + error.message);
@@ -511,11 +525,12 @@ class EditPersona extends React.Component {
           document.getElementById('foto').value = '';
         }
         else {
+          $(".loader").removeAttr("style");
           var data1 = {
             curriculum: nameCV,
           };
           document.getElementById('subirCV').setAttribute('disabled', 'disabled');
-          fetch(urlApi+'/persona/' + this.props.match.params.id, {
+          fetch(urlApi + '/persona/' + this.props.match.params.id, {
             method: 'put',
             body: JSON.stringify(data1),
             headers: {
@@ -526,12 +541,12 @@ class EditPersona extends React.Component {
             .then(function (response) {
               if (response.ok) {
                 console.log("¡Se actualizaron los datos de la Persona con Éxito!");
-               
+
                 const data = new FormData();
                 data.append("file", cv[0]);
                 // console.log(foto);
 
-                axios.post(urlApi+"/uploadArchivo", data, {
+                axios.post(urlApi + "/uploadArchivo", data, {
                   headers: {
                     "Content-Type": undefined,
                     path: rutaDoc,
@@ -540,7 +555,7 @@ class EditPersona extends React.Component {
                   }
                 })
                   .then(response => {
-                    //  console.log(response);
+                    $(".loader").fadeOut("slow");
                     if (response.statusText === "OK") {
                       this.setState({ showSuccesscv: true, showErrorcv: false, urlCV: urlCV + 'cv_' + this.state.nroDoc + '.' + this.state.extCV });
                       this.setState({ tableCV: this.renderTableDataCV() })
@@ -558,12 +573,13 @@ class EditPersona extends React.Component {
 
                   })
                   .catch(error => {
-
+                    $(".loader").fadeOut("slow");
                     console.log(error);
                   });
               }
             }.bind(this))
             .catch(function (error) {
+              $(".loader").fadeOut("slow");
               toast.error("Error al subir el archivo. Intente nuevamente.");
               document.getElementById('subirCV').removeAttribute('disabled');
               console.log('Hubo un problema con la petición Fetch:' + error.message);
@@ -646,6 +662,7 @@ class EditPersona extends React.Component {
         <div className="row">
           <div className="col-md-12">
             <div id="contenido" align="left" className="container">
+              <div className="loader" style={{ display: 'none' }}></div>
               <br />
               <h3 className="page-header" align="left">
                 <FontAwesomeIcon icon={faUser} /> Editar Persona
@@ -653,22 +670,22 @@ class EditPersona extends React.Component {
               <hr />
 
               <ToastContainer
-                      position="top-right"
-                      autoClose={5000}
-                      transition={Slide}
-                      hideProgressBar={true}
-                      newestOnTop={true}
-                      closeOnClick
-                      pauseOnHover
-                    />
-                    
+                position="top-right"
+                autoClose={5000}
+                transition={Slide}
+                hideProgressBar={true}
+                newestOnTop={true}
+                closeOnClick
+                pauseOnHover
+              />
+
 
               <Tabs id="tabPersonas" activeKey={this.state.key} onSelect={this.handleSelect}>
 
                 <Tab eventKey="dbasicos" title="Datos Básicos" disabled={this.state.tabbas}>
 
                   <Form noValidate validated={validated} onSubmit={this.handleSubmit}>
-                  <br />
+                    <br />
 
                     <Form.Row >
                       <Form.Group className="col-sm-4" controlId="apellido">
@@ -752,7 +769,7 @@ class EditPersona extends React.Component {
 
                 <Tab eventKey="dfiles" title="Archivos Adjuntos" disabled={this.state.tabfile}>
                   <Form id="form" noValidate validated={validatedfile}>
-                
+
                     <br />
                     <Form.Row >
                       <Form.Group className="col-sm-12">
@@ -844,7 +861,7 @@ class EditPersona extends React.Component {
 
                     </Form.Row>
 
-                    
+
 
                   </Form>
                 </Tab>
