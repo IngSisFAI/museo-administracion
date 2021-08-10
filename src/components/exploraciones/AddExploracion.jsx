@@ -18,6 +18,7 @@ import Menu from "./../Menu";
 import Cookies from "universal-cookie";
 import Select from 'react-select';
 import axios from "axios";
+import $ from 'jquery';
 
 const cookies = new Cookies();
 
@@ -148,7 +149,7 @@ class AddExploracion extends React.Component {
         toast.error('Ingrese un Director.');
       }
       else {
-
+        $(".loader").removeAttr("style");
         const op= this.state.op;
         if(op==='I'){
 
@@ -180,6 +181,7 @@ class AddExploracion extends React.Component {
               },
             })
               .then(function (response) {
+                $(".loader").fadeOut("slow");  
                 if (response.ok) {
                   console.log("¡Se guardó la Exploracion con Éxito!");
                   return response.json();
@@ -189,6 +191,8 @@ class AddExploracion extends React.Component {
                 this.setState({ tabsolic: false, key: 'dsolic', op: 'U', exploracionId: data.exploracion._id });
               }.bind(this))
               .catch(function (error) {
+                $(".loader").fadeOut("slow");  
+
                 toast.error("Error al guardar. Intente nuevamente.");
                 console.log(
                   "Hubo un problema con la petición Fetch:" + error.message
@@ -214,6 +218,7 @@ class AddExploracion extends React.Component {
                 },
               })
                 .then(function (response) {
+                  $(".loader").fadeOut("slow"); 
                   if (response.ok) {
                     console.log("¡Se guardó la Exploracion con Éxito!");
                     this.setState({  key: 'dsolic' });
@@ -221,6 +226,7 @@ class AddExploracion extends React.Component {
                   }
                 }.bind(this))
                 .catch(function (error) {
+                  $(".loader").fadeOut("slow");  
                   toast.error("Error al guardar. Intente nuevamente.");
                   console.log(
                     "Hubo un problema con la petición Fetch:" + error.message
@@ -247,7 +253,7 @@ class AddExploracion extends React.Component {
   }
 
   handleForm3 = (event) => {
-
+     $(".loader").removeAttr("style");
     var data = {
       "nombreArea": this.state.nombreArea,
       "fechaInicio": this.state.fechaInicio,
@@ -269,12 +275,14 @@ class AddExploracion extends React.Component {
       },
     })
       .then(function (response) {
+        $(".loader").fadeOut("slow");  
         if (response.ok) {
           toast.success("¡Se guardó la Exploracion con Éxito!");
           return response.json();
         }
       })
       .catch(function (error) {
+        $(".loader").fadeOut("slow");  
         toast.error("Error al guardar. Intente nuevamente.");
         console.log(
           "Hubo un problema con la petición Fetch:" + error.message
@@ -355,7 +363,7 @@ class AddExploracion extends React.Component {
         })
         .then(function (response) {
           //aca ya tengo la exploracion, tengo que obtener los archivos de autorizacion y quitar el candidato a eliminar
-
+          $(".loader").removeAttr("style");
           //elimino archivo del array
           var archivos = response.exploracionId.archAutorizaciones;
           var contador = 0;
@@ -401,7 +409,7 @@ class AddExploracion extends React.Component {
                   return response.json();
                 })
                 .then(function (response) {
-
+                  $(".loader").fadeOut("slow");  
                   if ((response.msg).trim() === 'OK') {
                     console.log('ok');
                     toast.success("¡Se eliminó el Archivo con Éxito!");
@@ -412,6 +420,7 @@ class AddExploracion extends React.Component {
                     toast.error("¡Se produjo un error al eliminar archivo!");
                   }
                 }.bind(this)).catch(function (error) {
+                  $(".loader").fadeOut("slow");  
                   toast.error("Error al eliminar. Intente nuevamente.");
                   console.log('Hubo un problema con la petición Fetch (3):' + error.message);
                 });
@@ -419,12 +428,14 @@ class AddExploracion extends React.Component {
 
             }.bind(this))
             .catch(function (error) {
+              $(".loader").fadeOut("slow");  
               toast.error("Error al Actualizar Exploracion. Intente nuevamente.");
               console.log('Hubo un problema con la petición Fetch (2):' + error.message);
             });
 
         }.bind(this))
         .catch(function (error) {
+          $(".loader").fadeOut("slow");  
           toast.error("Error al consultar. Intente nuevamente.");
           console.log('Hubo un problema con la petición Fetch (1):' + error.message);
         });
@@ -485,6 +496,7 @@ class AddExploracion extends React.Component {
         .then(function (response) {
           //aca ya tengo la exploracion, tengo que obtener los archivos de imagenes y quitar el candidato a eliminar
 
+          $(".loader").removeAttr("style");
           //elimino archivo del array
           var archivos = response.exploracionId.imagenesExploracion;
           var contador = 0;
@@ -530,7 +542,7 @@ class AddExploracion extends React.Component {
                   return response.json();
                 })
                 .then(function (response) {
-
+                  $(".loader").fadeOut("slow");  
                   if ((response.msg).trim() === 'OK') {
                     console.log('ok');
                     toast.success("¡Se eliminó el Archivo con Éxito!");
@@ -541,6 +553,7 @@ class AddExploracion extends React.Component {
                     toast.error("¡Se produjo un error al eliminar archivo!");
                   }
                 }.bind(this)).catch(function (error) {
+                  $(".loader").fadeOut("slow");  
                   toast.error("Error al eliminar. Intente nuevamente.");
                   console.log('Hubo un problema con la petición Fetch (3):' + error.message);
                 });
@@ -548,12 +561,14 @@ class AddExploracion extends React.Component {
 
             }.bind(this))
             .catch(function (error) {
+              $(".loader").fadeOut("slow");  
               toast.error("Error al Actualizar Exploracion. Intente nuevamente.");
               console.log('Hubo un problema con la petición Fetch (2):' + error.message);
             });
 
         }.bind(this))
         .catch(function (error) {
+          $(".loader").fadeOut("slow");  
           toast.error("Error al consultar. Intente nuevamente.");
           console.log('Hubo un problema con la petición Fetch (1):' + error.message);
         });
@@ -588,6 +603,7 @@ class AddExploracion extends React.Component {
 
         }
         else {
+          $(".loader").removeAttr("style");
           document.getElementById('subirArch').setAttribute('disabled', 'disabled');
           fetch(urlApi+'/exploracionId/' + this.state.exploracionId, {
             method: 'get',
@@ -640,7 +656,7 @@ class AddExploracion extends React.Component {
                     }
                   })
                     .then(response => {
-                      console.log(response);
+                      $(".loader").fadeOut("slow");  
                       if (response.statusText === "OK") {
                         this.setState({ archivoAut: null, showSuccess: true, showError: false, urlArchivo: urlArchivo + this.state.exploracionId + '/' + nameFile });
                         this.setState({ tableArchivosAut: this.renderTableArchivosAut() })
@@ -658,6 +674,7 @@ class AddExploracion extends React.Component {
 
                     })
                     .catch(error => {
+                      $(".loader").fadeOut("slow");  
                       this.setState({ showSuccess: false, showError: true });
                       console.log(error);
                     });
@@ -667,6 +684,7 @@ class AddExploracion extends React.Component {
 
                 }.bind(this))
                 .catch(function (error) {
+                  $(".loader").fadeOut("slow");  
                   toast.error("Error al Actualizar Exploracion. Intente nuevamente.");
                   console.log('Hubo un problema con la petición Fetch (1):' + error.message);
                 });
@@ -674,6 +692,7 @@ class AddExploracion extends React.Component {
 
             }.bind(this))
             .catch(function (error) {
+              $(".loader").fadeOut("slow");  
               toast.error("Error al consultar. Intente nuevamente.");
               console.log('Hubo un problema con la petición Fetch (2):' + error.message);
             });
@@ -737,6 +756,7 @@ class AddExploracion extends React.Component {
 
         }
         else {
+          $(".loader").removeAttr("style");
           document.getElementById('subirImg').setAttribute('disabled', 'disabled');
           fetch(urlApi+'/exploracionId/' + this.state.exploracionId, {
             method: 'get',
@@ -789,7 +809,7 @@ class AddExploracion extends React.Component {
                     }
                   })
                     .then(response => {
-                      console.log(response);
+                      $(".loader").fadeOut("slow");  
                       if (response.statusText === "OK") {
                         this.setState({ imagen: null, showSuccessf: true, showErrorf: false, urlArchivo: urlArchivo + this.state.exploracionId + '/' + nameFile });
                         this.setState({ tableImagenes: this.renderTableImagenes() })
@@ -807,6 +827,7 @@ class AddExploracion extends React.Component {
 
                     })
                     .catch(error => {
+                      $(".loader").fadeOut("slow");  
                       this.setState({ showSuccess: false, showError: true });
                       console.log(error);
                     });
@@ -816,6 +837,7 @@ class AddExploracion extends React.Component {
 
                 }.bind(this))
                 .catch(function (error) {
+                  $(".loader").fadeOut("slow");  
                   toast.error("Error al Actualizar Exploracion. Intente nuevamente.");
                   console.log('Hubo un problema con la petición Fetch (1):' + error.message);
                 });
@@ -823,6 +845,7 @@ class AddExploracion extends React.Component {
 
             }.bind(this))
             .catch(function (error) {
+              $(".loader").fadeOut("slow");  
               toast.error("Error al consultar. Intente nuevamente.");
               console.log('Hubo un problema con la petición Fetch (2):' + error.message);
             });
@@ -853,6 +876,7 @@ class AddExploracion extends React.Component {
         <div className="row">
           <div className="col-md-12">
             <div id="contenido" align="left" className="container">
+            <div className="loader" style={{ display: 'none' }}></div>
               <br />
               <h3 className="page-header" align="left">
                 <FontAwesomeIcon icon={faMapMarked} /> Nueva Exploración

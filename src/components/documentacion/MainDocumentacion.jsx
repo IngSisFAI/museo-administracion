@@ -10,6 +10,8 @@ import Menu from "./../Menu"
 import Cookies from 'universal-cookie';
 import axios from "axios";
 import $ from 'jquery';
+import Select from 'react-select';
+
 
 const cookies = new Cookies();
 
@@ -17,6 +19,8 @@ const cookies = new Cookies();
 const urlApi = process.env.REACT_APP_API_HOST;
 const urlArchivo = process.env.REACT_APP_URL_DOCUMENTACION;
 const rutaDocumentacion = process.env.REACT_APP_RUTA_DOCUMENTACION;
+
+const optionsTipo = [{ label: 'Nota Enviada', value: 'Nota Enviada' }, { label: 'Nota Recibida', value: 'Nota Recibida' }]
 
 
 
@@ -60,7 +64,6 @@ class MainDocumentacion extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      personas: [],
       documentacion: [],
       modalAgregar: false,
       modalEditar: false,
@@ -68,7 +71,10 @@ class MainDocumentacion extends React.Component {
       selectedtipoDoc: '',
       comentarios: '',
       archivo: null,
-      validated: false
+      validated: false,
+      nombreArchivo: '',
+      idDocumento: '',
+      op: 'I'
     }
     this.reemplazar = this.reemplazar.bind(this);
 
@@ -94,7 +100,7 @@ class MainDocumentacion extends React.Component {
         .then(res => res.json())
         .then(
           (result) => {
-            console.log(result);
+            //console.log(result);
             this.setState({
               documentacion: result.documentacion
             });
@@ -107,59 +113,90 @@ class MainDocumentacion extends React.Component {
 
 
   eliminar(id) {
-    var resultPersonas = [];
-    const destino = "/var/www/museo-administracion/html/images/personas/" + id + '/';
 
-    fetch('http://museo.fi.uncoma.edu.ar:3006/api/persona/' + id, {
+    $(".loader").removeAttr("style");
+
+    var resultDocumentacion = [];
+    const ruta = rutaDocumentacion + id + '/';
+
+
+    fetch(urlApi + '/documentacion/' + id, {
       method: 'DELETE',
+      headers: {
+        'Authorization': 'Bearer ' + cookies.get('token')
+      }
     })
       .then(function (response) {
         if (response.ok) {
-          console.log("¡Se eliminó a la persona con Éxito!");
+          console.log("¡Se eliminó la documentación con Éxito!");
 
         }
       }).then(function (res) {
-        fetch('http://museo.fi.uncoma.edu.ar:3006/api/deleteDirectorio', {
+
+        fetch(urlApi + '/deleteDirectorio', {
           method: 'get',
           headers: {
             'Content-Type': undefined,
-            'path': destino
+            'path': ruta,
+            'Authorization': 'Bearer ' + cookies.get('token')
           }
+        }).then(response => {
+          return response.json();
         })
           .then(function (response) {
-            if (response.ok) {
-              console.log('Se eliminaron los archivos con exito.');
-              toast.success("¡Se eliminó la Persona con Éxito!");
-
-            }
-          })
-          .then(function () {
-            fetch('http://museo.fi.uncoma.edu.ar:3006/api/persona')
-              .then(res => res.json())
-              .then(
-                function (result) {
-                  resultPersonas = result.personas
-                }).catch(error => {
-                  console.log("Error:" + error.message)
-                });
-
-          }
-
-
-          )
-          .catch(function (error) {
-            toast.error("Error al eliminar. Intente nuevamente.");
-            console.log('Hubo un problema con la petición Fetch:' + error.message);
+            toast.success("¡Se eliminó la Exploración con Éxito!");
+          }).catch(error => {
+            $(".loader").fadeOut("slow");
+            console.log("Error al eliminar archivo:", error)
           });
+
+
+      })
+      .then(function () {
+        fetch(urlApi + '/documentacion', {
+          method: 'GET',
+          headers: {
+            'Authorization': 'Bearer ' + cookies.get('token')
+          }
+        })
+          .then(response => {
+            return response.json();
+          })
+          .then(
+            function (result) {
+              $(".loader").fadeOut("slow");
+              if (typeof result.documentacion !== 'undefined') {
+
+                resultDocumentacion = result.documentacion
+
+              } else {
+                $(".loader").fadeOut("slow");
+                cookies.remove("id", { path: "/" });
+                cookies.remove("nombre", { path: "/" });
+                cookies.remove("apellido", { path: "/" });
+                cookies.remove("user", { path: "/" });
+                cookies.remove("password", { path: "/" });
+                cookies.remove("permiso", { path: "/" });
+                cookies.remove("token", { path: "/" });
+                window.location.href = "/";
+              }
+
+
+            }).catch(error => {
+              $(".loader").fadeOut("slow");
+              console.log("Error al consultar personas:", error)
+            });
+
 
       })
       .catch(function (error) {
+        $(".loader").fadeOut("slow");
         toast.error("Error al eliminar. Intente nuevamente (1).");
         console.log('Hubo un problema con la petición Fetch:' + error.message);
       });
 
     setTimeout(() => {
-      this.setState({ personas: resultPersonas });
+      this.setState({ documentacion: resultDocumentacion });
     }, 2000);
 
 
@@ -173,17 +210,17 @@ class MainDocumentacion extends React.Component {
   };
 
   cerrarModalAgregar = () => {
-    this.setState({ modalAgregar: false, archivo: null, anio: '', selectedtipoDoc: null, comentarios: '' });
+    this.setState({ modalAgregar: false, archivo: null, anio: '', selectedtipoDoc: null, comentarios: '', op: 'I' });
   };
 
   handleAnioChange = evt => {
     this.setState({ anio: evt.target.value });
   };
 
-  handleTipoDocChange = (selectedtipodoc) => {
-    let index = selectedtipodoc.target.selectedIndex
-    console.log(selectedtipodoc.target.options[index].text)
-    this.setState({ selectedtipodoc: selectedtipodoc.target.options[index].text });
+
+
+  handleTipoDocChange = (selectedtipoDoc) => {
+    this.setState({ selectedtipoDoc });
   };
 
   handleComentariosChange = (evt) => {
@@ -253,6 +290,7 @@ class MainDocumentacion extends React.Component {
     }
   };
 
+
   insertar = (event) => {
 
     const form = event.currentTarget;
@@ -261,77 +299,132 @@ class MainDocumentacion extends React.Component {
       event.stopPropagation();
     }
     else {
-      $(".loader").removeAttr("style");
-      var file = this.state.archivo
-      var nameFile = (file[0].name).replace(/\s+/g, "_");
-      nameFile = this.reemplazar(nameFile);
-      var data = {
-        "tipoDocumentacion": this.state.selectedtipodoc,
-        "nombre": nameFile,
-        "anio": this.state.anio,
-        "comentarios": this.state.comentarios
+     
+      if (this.state.selectedtipoDoc === null || this.state.selectedtipoDoc === '') {
+        toast.error('Ingrese un Tipo.');
       }
+      else {
+        var tipo=this.state.selectedtipoDoc.value
+        var op = this.state.op;
 
-      fetch(urlApi + "/saveDocumentacion", {
-        method: "post",
-        body: JSON.stringify(data),
-        headers: {
-          "Content-Type": "application/json",
-          'Authorization': 'Bearer ' + cookies.get('token')
-        },
-      })
-        .then(res => res.json())
-        .then(function (response) {
+        if (op === "I") {
 
-          if (typeof response.documentacion === 'undefined') {
-            toast.error("Error al guardar. Intente nuevamente.");
+          $(".loader").removeAttr("style");
+          var file = this.state.archivo
+          var nameFile = (file[0].name).replace(/\s+/g, "_");
+          nameFile = this.reemplazar(nameFile);
+          var data = {
+            "tipoDocumentacion": tipo,
+            "nombre": nameFile,
+            "anio": this.state.anio,
+            "comentarios": this.state.comentarios
           }
-          else {
-            var destino = rutaDocumentacion + response.documentacion._id;
-            const data = new FormData();
-            data.append("file", file[0]);
 
+          fetch(urlApi + "/saveDocumentacion", {
+            method: "post",
+            body: JSON.stringify(data),
+            headers: {
+              "Content-Type": "application/json",
+              'Authorization': 'Bearer ' + cookies.get('token')
+            },
+          })
+            .then(res => res.json())
+            .then(function (response) {
 
-            axios.post(urlApi + "/uploadArchivo", data, {
-              headers: {
-                "Content-Type": undefined,
-                path: destino,
-                "newfilename": '',
-                'Authorization': 'Bearer ' + cookies.get('token')
-              }
-            }).then(response => {
-
-              $(".loader").fadeOut("slow");
-              if (response.statusText === "OK") {
-                toast.success("¡Se guardó el Documento con Éxito!");
-                setTimeout(() => {
-                  window.location.reload();
-                }, 1500);
-
+              if (typeof response.documentacion === 'undefined') {
+                toast.error("Error al guardar. Intente nuevamente.");
               }
               else {
-                toast.error("No se pudo subir el archivo al servidor. Intente nuevamente.");
+                var destino = rutaDocumentacion + response.documentacion._id;
+                const data = new FormData();
+                data.append("file", file[0]);
+
+
+                axios.post(urlApi + "/uploadArchivo", data, {
+                  headers: {
+                    "Content-Type": undefined,
+                    path: destino,
+                    "newfilename": '',
+                    'Authorization': 'Bearer ' + cookies.get('token')
+                  }
+                }).then(response => {
+
+                  $(".loader").fadeOut("slow");
+                  if (response.statusText === "OK") {
+                    toast.success("¡Se guardó el Documento con Éxito!");
+                    setTimeout(() => {
+                      window.location.reload();
+                    }, 1200);
+
+                  }
+                  else {
+                    toast.error("No se pudo subir el archivo al servidor. Intente nuevamente.");
+                  }
+
+
+                })
+                  .catch(error => {
+                    this.setState({ showSuccess: false, showError: true });
+                    console.log(error);
+                  });
               }
 
-
             })
-              .catch(error => {
-                this.setState({ showSuccess: false, showError: true });
-                console.log(error);
-              });
+            .catch(function (error) {
+              $(".loader").fadeOut("slow");
+              toast.error("Error al guardar. Intente nuevamente.");
+              console.log(
+                "Hubo un problema con la petición Fetch:",
+                error.message
+              );
+            });
+        }
+        else {
+          //edito
+          $(".loader").removeAttr("style");
+          var data = {
+            "tipoDocumentacion": tipo,
+            "anio": this.state.anio,
+            "comentarios": this.state.comentarios
           }
 
-        })
-        .catch(function (error) {
-          $(".loader").fadeOut("slow");
-          toast.error("Error al guardar. Intente nuevamente.");
-          console.log(
-            "Hubo un problema con la petición Fetch:",
-            error.message
-          );
-        });
+          fetch(urlApi + "/updateDocumentacion/" + this.state.idDocumento, {
+            method: "put",
+            body: JSON.stringify(data),
+            headers: {
+              "Content-Type": "application/json",
+              'Authorization': 'Bearer ' + cookies.get('token')
+            },
+          })
+            .then(res => res.json())
+            .then(function (response) {
+              $(".loader").fadeOut("slow");
+              if (typeof response.documentacion === 'undefined') {
+                toast.error("Error al guardar. Intente nuevamente.");
+              }
+              else {
+
+                toast.success("¡Se Actualizó el Documento con Éxito!");
+                setTimeout(() => {
+                  window.location.reload();
+                }, 1200);
+
+              }
+
+            })
+            .catch(function (error) {
+              $(".loader").fadeOut("slow");
+              toast.error("Error al guardar. Intente nuevamente.");
+              console.log(
+                "Hubo un problema con la petición Fetch:",
+                error.message
+              );
+            });
 
 
+
+        }
+      }
 
     }
 
@@ -340,15 +433,38 @@ class MainDocumentacion extends React.Component {
   }
 
   cerrarModalEditar = () => {
-    this.setState({ modalEditar: false, archivo: null, anio: '', selectedtipoDoc: null, comentarios: '' });
+    this.setState({ modalEditar: false, archivo: null, anio: '', selectedtipoDoc: null, comentarios: '', nombreArchivo: '', idDocumento: '', op: 'I' });
   };
 
   mostrarModalEditar = (id) => {
-    alert("Falta Editar e Eliminar, en Exploracion agregar Loader a todas las acciones?");
 
-    this.setState({
-      modalEditar: true,
-    });
+
+    fetch(urlApi + '/documentacionId/' + id, {
+      method: 'GET',
+      headers: {
+        'Authorization': 'Bearer ' + cookies.get('token')
+      }
+    })
+      .then(res => res.json())
+      .then(
+        (result) => {
+
+          var tipoSelect= {label:result.documentacionId.tipoDocumentacion, value: result.documentacionId.tipoDocumentacion};
+          this.setState({
+            modalEditar: true,
+            anio: result.documentacionId.anio,
+            selectedtipoDoc: tipoSelect,
+            comentarios: result.documentacionId.comentarios,
+            nombreArchivo: result.documentacionId.nombre,
+            idDocumento: id,
+            op: 'U'
+          });
+
+        }).catch(error => {
+          console.log("Error")
+        });
+
+
   };
 
   reemplazar(cadena) {
@@ -378,6 +494,7 @@ class MainDocumentacion extends React.Component {
 
   render() {
     const { validated } = this.state;
+    const { selectedtipoDoc } = this.state;
     return (
 
       <>
@@ -417,10 +534,8 @@ class MainDocumentacion extends React.Component {
                     <iframe
                       width="100%"
                       height="315"
-                      src= {urlArchivo+rowData._id+'/'+rowData.nombre}
+                      src={urlArchivo + rowData._id + '/' + rowData.nombre}
                       frameborder="0"
-                      allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
-                      allowfullscreen
                     />
                   )
                 }}
@@ -441,7 +556,7 @@ class MainDocumentacion extends React.Component {
                     tooltip: 'Eliminar Documento',
                     onClick: (event, rowData) => {
                       // Do save operation
-                      if (window.confirm('¿Está seguro de eliminar el afiliado seleccionado?')) {
+                      if (window.confirm('¿Está seguro de eliminar el documento seleccionado?')) {
                         this.eliminar(rowData._id);
 
                       }
@@ -496,20 +611,17 @@ class MainDocumentacion extends React.Component {
 
                   <Form.Group className="col-sm-8" controlId="tipoDoc">
                     <Form.Label>Tipo Documento:</Form.Label>
-                    <Form.Control
-                      as="select"
+
+
+                    <Select
+                      placeholder={"Seleccione Opción"}
+                      options={optionsTipo}
                       onChange={this.handleTipoDocChange}
-                      required
-                    >
-                      <option value="">{"Seleccione Opción"}</option>
-                      <option key={1} value={"Nota Enviada"}>{"Nota Enviada"}</option>
-                      <option key={2} value={"Nota Recibida"}>{"Nota Recibida"}</option>
+                      value={selectedtipoDoc}
+                      isClearable
+                    />
 
-                    </Form.Control>
 
-                    <Form.Control.Feedback type="invalid">
-                      Por favor, seleccione opción.
-                    </Form.Control.Feedback>
                   </Form.Group>
 
                 </Form.Row>
@@ -591,16 +703,14 @@ class MainDocumentacion extends React.Component {
 
                   <Form.Group className="col-sm-8" controlId="tipoDoc">
                     <Form.Label>Tipo Documento:</Form.Label>
-                    <Form.Control
-                      as="select"
+                    <Select
+                      placeholder={"Seleccione Opción"}
+                      options={optionsTipo}
                       onChange={this.handleTipoDocChange}
-                      required
-                    >
-                      <option value="">{"Seleccione Opción"}</option>
-                      <option key={1} value={"Nota Enviada"}>{"Nota Enviada"}</option>
-                      <option key={2} value={"Nota Recibida"}>{"Nota Recibida"}</option>
+                      value={selectedtipoDoc}
+                      isClearable
+                    />
 
-                    </Form.Control>
 
                     <Form.Control.Feedback type="invalid">
                       Por favor, seleccione opción.
@@ -612,18 +722,11 @@ class MainDocumentacion extends React.Component {
                 <Form.Row >
                   <Form.Group className="col-sm-12" >
                     <Form.Label>Archivo:</Form.Label>
-                    <input type="file" id="archivo" className="form-control" accept="application/pdf" onChange={this.filehandleChange.bind(this)} required />
+                    <br />
+                    <a href={urlArchivo + this.state.idDocumento + '/' + this.state.nombreArchivo} disabled target="_blank">{this.state.nombreArchivo}</a>
                   </Form.Group>
                 </Form.Row>
-                <Form.Row >
-                  <Form.Group className="col-sm-8" controlId="listFile">
-                    <Table border="0">
-                      <tbody>
-                        {this.renderTableData()}
-                      </tbody>
-                    </Table>
-                  </Form.Group>
-                </Form.Row>
+
 
                 <Form.Row>
                   <Form.Group className="col-sm-12" controlId="Comentarios">

@@ -9,6 +9,7 @@ import { Link } from "react-router-dom";
 import Moment from "moment";
 import Menu from "./../Menu";
 import Cookies from "universal-cookie";
+import $ from 'jquery';
 
 const cookies = new Cookies();
 
@@ -70,6 +71,7 @@ class MainExploraciones extends React.Component {
         var longitud = (data.exploracionId.idExcavaciones).length
         //verifico primero si tiene excavaciones asociadas, si tiene imposible eliminar.
         if (longitud == 0) {
+          $(".loader").removeAttr("style");
           fetch(urlApi + '/exploracion/' + id, {
             method: 'DELETE',
             headers: {
@@ -96,6 +98,7 @@ class MainExploraciones extends React.Component {
                 return response.json();
               })
                 .then(function (response) {
+                  $(".loader").fadeOut("slow");
                   toast.success("¡Se eliminó la Exploración con Éxito!");
                   setTimeout(() => {
                     window.location.href = "/exploraciones";
@@ -106,6 +109,7 @@ class MainExploraciones extends React.Component {
 
             })
             .catch(function (error) {
+              $(".loader").fadeOut("slow");
               toast.error("Error al eliminar. Intente nuevamente.");
               console.log('Hubo un problema con la petición Fetch:' + error.message);
             });
@@ -121,41 +125,7 @@ class MainExploraciones extends React.Component {
       })
 
   }
-  /*eliminar(id) { //Falta que elimine el dircetorio
-
-    fetch(urlApi+"/exploracionId/"+id)
-      .then(response => response.json())
-      .then(data => {
-            var longitud=(data.exploracionId.idExcavaciones).length
-            if(longitud==0){
-              //se puede eliminar la exploración
-                fetch(urlApi+"/exploracion/" + id, {
-                  method: "delete",
-                })
-                  .then(function (response) {
-                    if (response.ok) {
-                      toast.success("¡Se eliminó la Exploración con Éxito!");
-                      setTimeout(() => {
-                        window.location.href = "/exploraciones";
-                      }, 1500);
-                    }
-                  })
-                  .catch(function (error) {
-                    toast.error("Error al eliminar. Intente nuevamente.");
-                    console.log("Hubo un problema con la petición Fetch:" + error.message);
-                  });
-            }
-            else{
-              toast.error("Existen Excavaciones asociadas a la Exploración.");
-            }
-          
-      })
-      .catch(function (error) {
-        console.log(error);
-      })    
-
-
-  }*/
+  
 
 
   render() {
@@ -174,6 +144,7 @@ class MainExploraciones extends React.Component {
           />
           <Form.Row>
             <div id="contenido" align="left" className="container">
+              <div className="loader" style={{ display: 'none' }}></div>
               <legend>
                 {" "}
                 <FontAwesomeIcon icon={faMapMarked} /> Gestión de Exploraciones
