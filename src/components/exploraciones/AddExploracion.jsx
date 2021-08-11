@@ -66,7 +66,8 @@ class AddExploracion extends React.Component {
       showErrorf: false,
       tableImagenes: null,
       listImages: [],
-      foto: null
+      foto: null,
+      imagen:null
     };
     this.reemplazar = this.reemplazar.bind(this);
   }
@@ -737,6 +738,8 @@ class AddExploracion extends React.Component {
     const MAXIMO_TAMANIO_BYTES = 5000000;
     const types = ['image/jpg', 'image/jpeg', 'image/jpe','image/png','image/gif', 'image/bpm', 'image/tif','image/tiff'];
     var file = this.state.imagen
+
+    console.log(file)
 
     if (file !== null && file.length !== 0) {
       var nameFile = (file[0].name).replace(/\s+/g, "_");

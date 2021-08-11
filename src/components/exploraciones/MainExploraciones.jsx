@@ -10,6 +10,7 @@ import Moment from "moment";
 import Menu from "./../Menu";
 import Cookies from "universal-cookie";
 import $ from 'jquery';
+import CustomDatePicker from "./../customDatePicker";
 
 const cookies = new Cookies();
 
@@ -174,8 +175,8 @@ class MainExploraciones extends React.Component {
                     title: "Fecha Inicio",
                     field: "fechaInicio",
                     type: "date",
-                    render: (rowData) =>
-                      Moment(rowData.fechaInicio).add(1, "days").format("DD/MM/YYYY"),
+                    dateSetting: { locale: "en-GB" },
+                    filterComponent: (props) => <CustomDatePicker {...props} />,
                   },
                 ]}
                 data={this.state.exploraciones}
