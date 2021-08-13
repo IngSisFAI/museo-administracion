@@ -6,7 +6,6 @@ import { ToastContainer, toast, Slide } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { Form, Button } from "react-bootstrap";
 import { Link } from "react-router-dom";
-import Moment from "moment";
 import Menu from "./../Menu";
 import Cookies from "universal-cookie";
 import $ from 'jquery';
