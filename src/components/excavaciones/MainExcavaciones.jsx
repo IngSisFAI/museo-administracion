@@ -246,13 +246,7 @@ class MainExcavaciones extends React.Component {
                       }
                     },
                   },
-                  {
-                    icon: "view_column",
-                    tooltip: "Subir Archivos",
-                    onClick: (event, rowData) => {
-                      this.props.history.push(`/multimedia/${rowData._id}`);
-                    },
-                  },
+        
                 ]}
                 options={{
                   filtering: true,

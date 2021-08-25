@@ -1,14 +1,16 @@
 import React from "react";
-import { Form, Button, Tabs, Tab, Table, Modal } from "react-bootstrap";
+import { Form, Button, Tabs, Tab, Table, Modal, Alert } from "react-bootstrap";
 import { ToastContainer, toast, Slide } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faSave, faReply, faCompass, faTrash, faPlus, faShare, faEdit, faTimesCircle } from "@fortawesome/free-solid-svg-icons";
+import { faSave, faReply, faCompass, faTrash, faPlus, faShare, faEdit, faTimesCircle, faUpload } from "@fortawesome/free-solid-svg-icons";
 import { Link } from "react-router-dom";
 import Select from "react-select";
 import CrearExcavacion from "../../areaGeospatial/CrearExcavacion";
 import Menu from "./../Menu";
 import Cookies from "universal-cookie";
+import $ from 'jquery';
+import axios from "axios";
 
 const cookies = new Cookies();
 
@@ -16,6 +18,11 @@ const cookies = new Cookies();
 const urlApi = process.env.REACT_APP_API_HOST;
 const urlArchivo = process.env.REACT_APP_URL_EXCAVACIONES;
 const rutaExcavaciones = process.env.REACT_APP_RUTA_EXCAVACIONES;
+
+
+const optHallazgo = [{ "value": "Fortuito", "label": "Fortuito" },
+{ "value": "Denuncia", "label": "Denuncia" },
+{ "value": "Exploración", "label": "Exploración" }]
 
 
 class AddExcavacion extends React.Component {
@@ -34,9 +41,9 @@ class AddExcavacion extends React.Component {
       selectedProvincia: null,
       ciudades: [],
       selectedCiudad: null,
-      nombre: "",
+      nombreArea: "",
       descripcion: "",
-      codigo: "",
+      codigoCampo: "",
       fechaInicio: "",
       fechaTermino: "",
       motivoBaja: "",
@@ -97,6 +104,15 @@ class AddExcavacion extends React.Component {
       piezasIdModal: [],
       selectedPiezaM: null,
       key: 'dbasicos',
+      selectedHallazgo: null,
+      archivoDenuncia: null,
+      excavacionId: '',
+      op: 'I',
+      listArchivosDen: [],
+      urlArchivo: '',
+      showSuccess: false,
+      showError: false,
+      tableArchivosDen: null,
     };
   }
 
@@ -161,13 +177,13 @@ class AddExcavacion extends React.Component {
     this.setState({ muestraHome: evt.target.checked });
   }
 
-  handleNombreChange = (evt) => {
-    this.setState({ nombre: evt.target.value });
+  handleNombreAreaChange = (evt) => {
+    this.setState({ nombreArea: evt.target.value });
   };
 
 
-  handleCodigoChange = (evt) => {
-    this.setState({ codigo: evt.target.value });
+  handleCodigoCampoChange = (evt) => {
+    this.setState({ codigoCampo: evt.target.value });
   };
 
   handleFinicioChange = (evt) => {
@@ -190,6 +206,10 @@ class AddExcavacion extends React.Component {
 
   handleDirectorChange = (selectedDirector) => {
     this.setState({ selectedDirector });
+  };
+
+  handleHallazgoChange = (selectedHallazgo) => {
+    this.setState({ selectedHallazgo });
   };
 
   handleProfesionalesChange = (selectedProfesional) => {
@@ -230,113 +250,113 @@ class AddExcavacion extends React.Component {
     this.setState({ nroBochon: evt.target.value });
   };
 
-  handleSubmit = (event) => {
-    const form = event.currentTarget;
-    event.preventDefault();
-    if (form.checkValidity() === false) {
-      event.stopPropagation();
-      if (
-        this.state.selectedExploracion == "" ||
-        this.state.selectedExploracion == null
-      ) {
-        toast.error("Ingrese datos obligatorios. Seleccione una Exploración!");
-      } else {
-        toast.error("Ingrese datos obligatorios.");
-      }
-    } else {
-      if (
-        this.state.selectedExploracion == "" ||
-        this.state.selectedExploracion == null
-      ) {
-        toast.error("Seleccione una Exploración!");
-      } else {
-        var idDirector = "";
-        var nameDirector = "";
-        if (this.state.selectedDirector !== null) {
-          idDirector = this.state.selectedDirector.value;
-          nameDirector = this.state.selectedDirector.label;
-        }
-
-        var idColector = "";
-        if (this.state.selectedColector !== null) {
-          idColector = this.state.selectedColector.value;
-        }
-
-        var idPaleontologo = "";
-        if (this.state.selectedPaleontologo !== null) {
-          idPaleontologo = this.state.selectedPaleontologo.value;
-        }
-
-        var idExploracion = "";
-        if (this.state.selectedExploracion !== null) {
-          idExploracion = this.state.selectedExploracion.value;
-        }
-
-        var idCountry = "";
-
-        if (this.state.selectedPais !== null) {
-          idCountry = this.state.selectedPais.value;
-        }
-
-        var idProv = "";
-        if (this.state.selectedProvincia !== null) {
-          idProv = this.state.selectedProvincia.value;
-        }
-
-        var idCity = "";
-        if (this.state.selectedCiudad !== null) {
-          idCity = this.state.selectedCiudad.value;
-        }
-
-        var data = {
-          nombre: this.state.nombre,
-          descripcion: this.state.descripcion,
-          codigo: this.state.codigo,
-          fechaInicio: this.state.fechaInicio,
-          fechaBaja: this.state.fbaja,
-          motivoBaja: this.state.motivoBaja,
-          directorId: idDirector,
-          director: nameDirector,
-          colector: idColector,
-          paleontologo: idPaleontologo,
-          idArea: this.state.idAreaExcavacion,
-          puntoGPS: this.state.puntoGpsExcavacion,
-          muestraHome: this.state.muestra,
-          idExploracion: idExploracion,
-          idPais: idCountry,
-          idProvincia: idProv,
-          idCiudad: idCity,
-          muestraHome: this.state.muestraHome,
-          bochonesEncontrados: []
-        };
-
-        fetch("http://museo.fi.uncoma.edu.ar:3006/api/excavacion", {
-          method: "post",
-          body: JSON.stringify(data),
-          headers: {
-            "Content-Type": "application/json",
-          },
-        })
-          .then(function (response) {
-            if (response.ok) {
-              toast.success("¡Se guardó la Excavacion con Éxito!");
-              setTimeout(() => {
-                window.location.replace("/excavaciones");
-              }, 1500);
-            }
-          })
-          .catch(function (error) {
-            toast.error("Error al guardar. Intente nuevamente.");
-            console.log(
-              "Hubo un problema con la petición Fetch:",
-              error.message
-            );
-          });
-      }
-    }
-
-    this.setState({ validated: true });
-  };
+  /* handleSubmit = (event) => {
+     const form = event.currentTarget;
+     event.preventDefault();
+     if (form.checkValidity() === false) {
+       event.stopPropagation();
+       if (
+         this.state.selectedExploracion == "" ||
+         this.state.selectedExploracion == null
+       ) {
+         toast.error("Ingrese datos obligatorios. Seleccione una Exploración!");
+       } else {
+         toast.error("Ingrese datos obligatorios.");
+       }
+     } else {
+       if (
+         this.state.selectedExploracion == "" ||
+         this.state.selectedExploracion == null
+       ) {
+         toast.error("Seleccione una Exploración!");
+       } else {
+         var idDirector = "";
+         var nameDirector = "";
+         if (this.state.selectedDirector !== null) {
+           idDirector = this.state.selectedDirector.value;
+           nameDirector = this.state.selectedDirector.label;
+         }
+ 
+         var idColector = "";
+         if (this.state.selectedColector !== null) {
+           idColector = this.state.selectedColector.value;
+         }
+ 
+         var idPaleontologo = "";
+         if (this.state.selectedPaleontologo !== null) {
+           idPaleontologo = this.state.selectedPaleontologo.value;
+         }
+ 
+         var idExploracion = "";
+         if (this.state.selectedExploracion !== null) {
+           idExploracion = this.state.selectedExploracion.value;
+         }
+ 
+         var idCountry = "";
+ 
+         if (this.state.selectedPais !== null) {
+           idCountry = this.state.selectedPais.value;
+         }
+ 
+         var idProv = "";
+         if (this.state.selectedProvincia !== null) {
+           idProv = this.state.selectedProvincia.value;
+         }
+ 
+         var idCity = "";
+         if (this.state.selectedCiudad !== null) {
+           idCity = this.state.selectedCiudad.value;
+         }
+ 
+         var data = {
+           nombre: this.state.nombre,
+           descripcion: this.state.descripcion,
+           codigo: this.state.codigo,
+           fechaInicio: this.state.fechaInicio,
+           fechaBaja: this.state.fbaja,
+           motivoBaja: this.state.motivoBaja,
+           directorId: idDirector,
+           director: nameDirector,
+           colector: idColector,
+           paleontologo: idPaleontologo,
+           idArea: this.state.idAreaExcavacion,
+           puntoGPS: this.state.puntoGpsExcavacion,
+           muestraHome: this.state.muestra,
+           idExploracion: idExploracion,
+           idPais: idCountry,
+           idProvincia: idProv,
+           idCiudad: idCity,
+           muestraHome: this.state.muestraHome,
+           bochonesEncontrados: []
+         };
+ 
+         fetch("http://museo.fi.uncoma.edu.ar:3006/api/excavacion", {
+           method: "post",
+           body: JSON.stringify(data),
+           headers: {
+             "Content-Type": "application/json",
+           },
+         })
+           .then(function (response) {
+             if (response.ok) {
+               toast.success("¡Se guardó la Excavacion con Éxito!");
+               setTimeout(() => {
+                 window.location.replace("/excavaciones");
+               }, 1500);
+             }
+           })
+           .catch(function (error) {
+             toast.error("Error al guardar. Intente nuevamente.");
+             console.log(
+               "Hubo un problema con la petición Fetch:",
+               error.message
+             );
+           });
+       }
+     }
+ 
+     this.setState({ validated: true });
+   };*/
 
   handleBlur = (evt) => {
     fetch(
@@ -358,19 +378,24 @@ class AddExcavacion extends React.Component {
 
   filehandleChange = (event) => {
 
-    const files = event.target.files;
-    var arrayFiles = this.state.archivosD;
+    const file = event.target.files;
+    const name = file[0].name;
+    this.setState({ archivoDenuncia: file });
 
 
-    Array.from(files).forEach(file => {
-      var key = Math.floor(Math.random() * 1000);
-      file.id = key;
-      arrayFiles.push(file)
-    })
-    this.setState({ archivosD: arrayFiles });
-
-    console.log('SALIDA::', arrayFiles)
-    //aca deberiamos mover el archivo a la carpeta 
+    /* const files = event.target.files;
+     var arrayFiles = this.state.archivosD;
+ 
+ 
+     Array.from(files).forEach(file => {
+       var key = Math.floor(Math.random() * 1000);
+       file.id = key;
+       arrayFiles.push(file)
+     })
+     this.setState({ archivosD: arrayFiles });
+ 
+     console.log('SALIDA::', arrayFiles)
+     //aca deberiamos mover el archivo a la carpeta */
 
   }
 
@@ -396,85 +421,100 @@ class AddExcavacion extends React.Component {
   handleForm1 = (event) => {
 
     const form = document.getElementById("form1");
+    var op = this.state.op;
     event.preventDefault();
     if (form.checkValidity() === false) {
       event.stopPropagation();
     } else {
 
-      /*var data={
-        "nombreArea": this.state.nombreArea,
-        "codigoCampo": this.state.codigoCampo,
-        "fechaInicio": this.state.fechaInicio,
-        "fechaTermino": this.state.fechaTermino,
-        "director": this.state.director,
-        "directorId": this.state.directorId, 
-        "auxiliares": this.state.auxiliaresId,
-        "profesionales": this.state.profesionalesId,
-        "muestraHome": this.state.muestraHome,
-        "tipoHallazgo": this.state.tipoHallazgo,
-        "archivoDenuncia": this.state.archivoDenuncia, 
-        "idExploracion": this.state.exploracionId,
-        "datosGeologicos": this.state.datosGeologicos,
-        "datosTaxonomicos": this.state.datosTaxonomicos,
-        "idArea": "",
-        "puntoGps": {},
-        "idCiudad":"",
-        "idProvincia": "",
-        "idPais": "",
-        "bochonesEncontrados": [],
-        "fotosExcavacion": [],
-        "videosExcavacion": []
 
-      }*/
+      if (op === "I") {
 
-      var data = {
-        "nombreArea": this.state.nombreArea,
-        "codigoCampo": this.state.codigoCampo,
-        "fechaInicio": this.state.fechaInicio,
-        "fechaTermino": this.state.fechaTermino,
-        "director": this.state.director,
-        "directorId": this.state.directorId,
-        "auxiliares": this.state.auxiliaresId,
-        "profesionales": this.state.profesionalesId,
-        "muestraHome": this.state.muestraHome,
-        "tipoHallazgo": "",
-        "archivoDenuncia": "",
-        "idExploracion": "",
-        "datosGeologicos": "",
-        "datosTaxonomicos": "",
-        "idArea": "",
-        "puntoGps": {},
-        "idCiudad": "",
-        "idProvincia": "",
-        "idPais": "",
-        "bochonesEncontrados": [],
-        "fotosExcavacion": [],
-        "videosExcavacion": []
+        var data = {
+          "nombreArea": this.state.nombreArea,
+          "codigoCampo": this.state.codigoCampo,
+          "fechaInicio": this.state.fechaInicio,
+          "fechaTermino": this.state.fechaTermino,
+          "director": this.state.director,
+          "directorId": this.state.directorId,
+          "auxiliares": this.state.auxiliaresId,
+          "profesionales": this.state.profesionalesId,
+          "muestraHome": this.state.muestraHome,
+          "tipoHallazgo": "",
+          "archivoDenuncia": "",
+          "idExploracion": "",
+          "datosGeologicos": "",
+          "datosTaxonomicos": "",
+          "idCiudad": "",
+          "idProvincia": "",
+          "idPais": "",
+          "bochonesEncontrados": [],
+          "fotosExcavacion": [],
+          "videosExcavacion": []
+
+        }
+
+        fetch(urlApi + "/excavacion", {
+          method: "post",
+          body: JSON.stringify(data),
+          headers: {
+            "Content-Type": "application/json",
+            'Authorization': 'Bearer ' + cookies.get('token')
+          },
+        })
+          .then(function (response) {
+            if (response.ok) {
+              console.log("¡Se guardó la Excavacion con Éxito!");
+              return response.json();
+            }
+          })
+          .then(function (data) {
+            this.setState({ tabh: false, key: 'dhallazgo', op: 'U', excavacionId: data.excavacion._id });
+          }.bind(this))
+          .catch(function (error) {
+            toast.error("Error al guardar. Intente nuevamente.");
+            console.log(
+              "Hubo un problema con la petición Fetch:",
+              error.message
+            );
+          });
 
       }
+      else {
 
-      fetch(urlApi + "/excavacion", {
-        method: "post",
-        body: JSON.stringify(data),
-        headers: {
-          "Content-Type": "application/json",
-          'Authorization': 'Bearer ' + cookies.get('token')
-        },
-      })
-        .then(function (response) {
-          if (response.ok) {
-            console.log("¡Se guardó la Excavacion con Éxito!");
-            this.setState({ tabh: false, key: 'dhallazgo' });
+        var data = {
+          "nombreArea": this.state.nombreArea,
+          "codigoCampo": this.state.codigoCampo,
+          "fechaInicio": this.state.fechaInicio,
+          "fechaTermino": this.state.fechaTermino,
+          "director": this.state.director,
+          "directorId": this.state.directorId,
+          "auxiliares": this.state.auxiliaresId,
+          "profesionales": this.state.profesionalesId,
+          "muestraHome": this.state.muestraHome
+        }
+        fetch(urlApi + '/excavacion/' + this.state.excavacionId, {
+          method: 'put',
+          body: JSON.stringify(data),
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + cookies.get('token')
           }
         })
-        .catch(function (error) {
-          toast.error("Error al guardar. Intente nuevamente.");
-          console.log(
-            "Hubo un problema con la petición Fetch:",
-            error.message
-          );
-        });
+          .then(function (response) {
+            if (response.ok) {
+              console.log("¡Se actualizaron los datos de la Excavación con Éxito!");
 
+            }
+          }).catch(function (error) {
+            toast.error("Error al guardar. Intente nuevamente.");
+            console.log(
+              "Hubo un problema con la petición Fetch:",
+              error.message
+            );
+          });
+
+      }
     }
     this.setState({ validateddb: true });
   }
@@ -749,22 +789,338 @@ class AddExcavacion extends React.Component {
   };
 
 
+
   eliminarArchivoDenuncia = (dato) => {
-    //aca tambien hay que eliminar en la BD y traer los prestamos
+    var destino = rutaExcavaciones + this.state.excavacionId + "/" + dato;
     var opcion = window.confirm("¿Está seguro que deseas eliminar el Archivo?");
     if (opcion == true) {
-      var contador = 0;
-      var arreglo = this.state.archivosD;
-      arreglo.map((registro) => {
-        if (dato.id == registro.id) {
-          arreglo.splice(contador, 1);
+
+      fetch(urlApi + '/excavacionId/' + this.state.excavacionId, {
+        method: 'get',
+        headers: {
+          'Authorization': 'Bearer ' + cookies.get('token')
         }
-        contador++;
+      })
+        .then(response => {
+          return response.json();
+        })
+        .then(function (response) {
+          //aca ya tengo la excavacion, tengo que obtener los archivos de autorizacion y quitar el candidato a eliminar
+          $(".loader").removeAttr("style");
+          //elimino archivo del array
+          var archivos = response.excavacionId.archivosDenuncia;
+          var contador = 0;
+          archivos.map((registro) => {
+            if (dato == registro) {
+              archivos.splice(contador, 1);
+            }
+            contador++;
+          });
+
+          var dataDen = {
+            "archivosDenuncia": archivos
+
+          }
+
+          //Actualizo la Exploracion
+          fetch(urlApi + '/excavacion/' + this.state.excavacionId, {
+            method: 'put',
+            body: JSON.stringify(dataDen),
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer ' + cookies.get('token')
+            }
+          })
+            .then(function (response) {
+              if (response.ok) {
+                console.log("¡Se actualizaron los datos de la Excavación con Éxito!");
+                this.setState({ listArchivosDen: archivos });
+
+              }
+            }.bind(this))
+            .then(function (response) {
+              //Elimino Archivo del Server
+              fetch(urlApi + '/deleteArchivo', {
+                method: 'get',
+                headers: {
+                  'Content-Type': undefined,
+                  'path': destino,
+                  'Authorization': 'Bearer ' + cookies.get('token')
+                }
+              })
+                .then(response => {
+                  return response.json();
+                })
+                .then(function (response) {
+                  $(".loader").fadeOut("slow");
+                  if ((response.msg).trim() === 'OK') {
+                    console.log('ok');
+                    toast.success("¡Se eliminó el Archivo con Éxito!");
+                    this.setState({ archivoDen: null, tableArchivosDen: this.renderTableArchivosDen() })
+
+                  } else {
+                    console.log('error');
+                    toast.error("¡Se produjo un error al eliminar archivo!");
+                  }
+                }.bind(this)).catch(function (error) {
+                  $(".loader").fadeOut("slow");
+                  toast.error("Error al eliminar. Intente nuevamente.");
+                  console.log('Hubo un problema con la petición Fetch (3):' + error.message);
+                });
+
+
+            }.bind(this))
+            .catch(function (error) {
+              $(".loader").fadeOut("slow");
+              toast.error("Error al Actualizar Exploracion. Intente nuevamente.");
+              console.log('Hubo un problema con la petición Fetch (2):' + error.message);
+            });
+
+        }.bind(this))
+        .catch(function (error) {
+          $(".loader").fadeOut("slow");
+          toast.error("Error al consultar. Intente nuevamente.");
+          console.log('Hubo un problema con la petición Fetch (1):' + error.message);
+        });
+
+
+
+    }
+
+  };
+
+  subirDenuncia = () => {
+
+    const MAXIMO_TAMANIO_BYTES = 5000000;
+    const types = ['application/pdf'];
+    var file = this.state.archivoDenuncia
+
+    if (file !== null && file.length !== 0) {
+      var nameFile = (file[0].name).replace(/\s+/g, "_");
+      nameFile = this.reemplazar(nameFile);
+      var size = file[0].size;
+      var type = file[0].type;
+
+      if (size > MAXIMO_TAMANIO_BYTES) {
+        var tamanio = 5000000 / 1000000;
+        toast.error("El archivo seleccionado supera los " + tamanio + 'Mb. permitidos.');
+        document.getElementById('filesAut').value = '';
+      }
+      else {
+        if (!types.includes(type)) {
+          toast.error("El archivo seleccionado tiene una extensión inválida.");
+          document.getElementById('filesAut').value = '';
+
+        }
+        else {
+          $(".loader").removeAttr("style");
+          document.getElementById('subirArch').setAttribute('disabled', 'disabled');
+          fetch(urlApi + '/excavacionId/' + this.state.excavacionId, {
+            method: 'get',
+            headers: {
+              'Authorization': 'Bearer ' + cookies.get('token')
+            }
+          })
+            .then(response => {
+              return response.json();
+            })
+            .then(function (response) {
+
+              var listArchivosDen = response.excavacionId.archivosDenuncia;
+              listArchivosDen.push(nameFile);
+
+              var dataDen = {
+                "archivosDenuncia": listArchivosDen,
+              };
+
+              //Primero Actualizo la Exploracion
+              fetch(urlApi + '/excavacion/' + this.state.excavacionId, {
+                method: 'put',
+                body: JSON.stringify(dataDen),
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': 'Bearer ' + cookies.get('token')
+                }
+              })
+                .then(function (response) {
+                  if (response.ok) {
+                    console.log("¡Se actualizaron los datos de la Excavación con Éxito!");
+                    this.setState({ listArchivosDen: listArchivosDen });
+
+                  }
+                }.bind(this))
+                .then(function (response) {
+                  //segundo subo archivo al server
+
+                  const destino = rutaExcavaciones + this.state.excavacionId;
+                  const data = new FormData();
+                  data.append("file", file[0]);
+
+
+                  axios.post(urlApi + "/uploadArchivo", data, {
+                    headers: {
+                      "Content-Type": undefined,
+                      path: destino,
+                      "newfilename": '',
+                      'Authorization': 'Bearer ' + cookies.get('token')
+                    }
+                  })
+                    .then(response => {
+                      $(".loader").fadeOut("slow");
+                      if (response.statusText === "OK") {
+                        this.setState({ archivoDenuncia: null, showSuccess: true, showError: false, urlArchivo: urlArchivo + this.state.excavacionId + '/' + nameFile });
+                        this.setState({ tableArchivosDen: this.renderTableArchivosDen() })
+                        document.getElementById('filesAut').value = '';
+                      }
+                      else {
+                        this.setState({ showSuccess: false, showError: true });
+                      }
+                      document.getElementById('subirArch').removeAttribute('disabled');
+
+                      setTimeout(() => {
+                        this.setState({ showSuccess: false, showError: false });
+                      }, 5000);
+
+
+                    })
+                    .catch(error => {
+                      $(".loader").fadeOut("slow");
+                      this.setState({ showSuccess: false, showError: true });
+                      console.log(error);
+                    });
+
+
+
+
+                }.bind(this))
+                .catch(function (error) {
+                  $(".loader").fadeOut("slow");
+                  toast.error("Error al Actualizar Exploracion. Intente nuevamente.");
+                  console.log('Hubo un problema con la petición Fetch (1):' + error.message);
+                });
+
+
+            }.bind(this))
+            .catch(function (error) {
+              $(".loader").fadeOut("slow");
+              toast.error("Error al consultar. Intente nuevamente.");
+              console.log('Hubo un problema con la petición Fetch (2):' + error.message);
+            });
+
+        }
+
+      }
+
+    } else {
+      toast.error("Seleccione un Archivo.");
+    }
+  }
+
+  reemplazar(cadena) {
+
+    var chars = {
+
+      "á": "a", "é": "e", "í": "i", "ó": "o", "ú": "u",
+
+      "à": "a", "è": "e", "ì": "i", "ò": "o", "ù": "u", "ñ": "n",
+
+      "Á": "A", "É": "E", "Í": "I", "Ó": "O", "Ú": "U",
+
+      "À": "A", "È": "E", "Ì": "I", "Ò": "O", "Ù": "U", "Ñ": "N",
+
+      "ä": "a", "ë": "e", "ï": "i", "ö": "o", "ü": "u",
+
+      "Ä": "A", "Ä": "A", "Ë": "E", "Ï": "I", "Ö": "O", "Ü": "U"
+    }
+
+    var expr = /[áàéèíìóòúùñäëïöü]/ig;
+
+    var res = cadena.replace(expr, function (e) { return chars[e] });
+
+    return res;
+
+  }
+
+  renderTableArchivosDen() {
+
+
+    return this.state.listArchivosDen.map((file, index) => {
+
+      return (
+        <tr key={index}>
+          <td>
+            <Button variant="danger" type="button" id="eliminarArch" onClick={() => this.eliminarArchivoDenuncia(file)}>
+              <FontAwesomeIcon icon={faTrash} />
+            </Button>
+          </td>
+          <td>
+            <a href={urlArchivo + this.state.excavacionId + '/' + file} disabled target="_blank">{file}</a>
+          </td>
+
+        </tr>
+      )
+    })
+
+
+
+  }
+
+  handleForm4 = (event) => {
+    $(".loader").removeAttr("style");
+
+    var exploracionId = "";
+    if (this.state.selectedExploracion !== "") {
+      var exploracionId = this.state.selectedExploracion.value;
+    }
+
+    var hallazgo = "";
+    if (this.state.selectedHallazgo !== null) {
+      var hallazgo = this.state.selectedHallazgo.value;
+    }
+
+
+    var data = {
+      "nombreArea": this.state.nombreArea,
+      "codigoCampo": this.state.codigoCampo,
+      "fechaInicio": this.state.fechaInicio,
+      "fechaTermino": this.state.fechaTermino,
+      "director": this.state.director,
+      "directorId": this.state.directorId,
+      "auxiliares": this.state.auxiliaresId,
+      "profesionales": this.state.profesionalesId,
+      "muestraHome": this.state.muestraHome,
+      "tipoHallazgo": hallazgo,
+      "idExploracion": exploracionId,
+      "datosGeologicos": this.state.geologicos,
+      "datosTaxonomicos": this.state.taxonomicos,
+       "idArea": this.state.idAreaExcavacion,
+       "puntoGPS": this.state.puntoGpsExcavacion,
+    }
+
+    fetch(urlApi + "/excavacion/" + this.state.excavacionId, {
+      method: "put",
+      body: JSON.stringify(data),
+      headers: {
+        "Content-Type": "application/json",
+        'Authorization': 'Bearer ' + cookies.get('token')
+      },
+    })
+      .then(function (response) {
+        $(".loader").fadeOut("slow");
+        if (response.ok) {
+          toast.success("¡Se guardó la Excavación con Éxito!");
+        }
+      })
+      .catch(function (error) {
+        $(".loader").fadeOut("slow");
+        toast.error("Error al guardar. Intente nuevamente.");
+        console.log(
+          "Hubo un problema con la petición Fetch:" + error.message
+        );
       });
 
-      this.setState({ archivosD: arreglo });
-    }
-  };
+
+  }
 
 
 
@@ -810,6 +1166,8 @@ class AddExcavacion extends React.Component {
       value: opt.idPieza,
     }));
 
+    const { selectedHallazgo } = this.state;
+
 
 
 
@@ -819,11 +1177,22 @@ class AddExcavacion extends React.Component {
         <div className="row">
           <div className="col-md-12">
             <div id="contenido" align="left" className="container">
+              <div className="loader" style={{ display: 'none' }}></div>
               <br />
               <h3 className="page-header" align="left">
-                <FontAwesomeIcon icon={faCompass} /> Nueva Excavación
+                <FontAwesomeIcon icon={faCompass} /> Nueva Excavación (Faltan dos tabs, fotos y videos)
               </h3>
               <hr />
+
+              <ToastContainer
+                      position="top-right"
+                      autoClose={5000}
+                      transition={Slide}
+                      hideProgressBar={true}
+                      newestOnTop={true}
+                      closeOnClick
+                      pauseOnHover
+                    />
 
 
               <Tabs id="tabEjemplar" activeKey={this.state.key} onSelect={this.handleSelect}>
@@ -838,9 +1207,9 @@ class AddExcavacion extends React.Component {
                           <Form.Label>Nombre del Área:</Form.Label>
                           <Form.Control
                             type="text"
-                            placeholder="Ingrese Nombre"
+                            placeholder="Ingrese Nombre Area"
                             required
-                            onChange={this.handleNombreChange}
+                            onChange={this.handleNombreAreaChange}
                             value={this.state.nombre}
                           />
                           <Form.Control.Feedback type="invalid">
@@ -848,19 +1217,7 @@ class AddExcavacion extends React.Component {
                           </Form.Control.Feedback>
                         </Form.Group>
                       </Form.Row>
-                      {/*
-                  <Form.Row>
-                    <Form.Group className="col-sm-12" controlId="descripcion">
-                      <Form.Label>Descripción:</Form.Label>
-                      <Form.Control
-                        type="text"
-                        placeholder="Ingrese Descripción"
-                        onChange={this.handleDescChange}
-                        value={this.state.descripcion}
-                      />
-                    </Form.Group>
-                  </Form.Row>
-   */}
+                     
 
                       <Form.Row>
                         <Form.Group className="col-sm-6" controlId="codigo">
@@ -869,8 +1226,8 @@ class AddExcavacion extends React.Component {
                             type="text"
                             placeholder="Ingrese Código"
                             required
-                            onChange={this.handleCodigoChange}
-                            value={this.state.codigo}
+                            onChange={this.handleCodigoCampoChange}
+                            value={this.state.codigoCampo}
                             onBlur={this.handleBlur}
                           />
                           <Form.Control.Feedback type="invalid">
@@ -942,15 +1299,6 @@ class AddExcavacion extends React.Component {
                           />
                         </Form.Group>
 
-                        {/*      <Form.Group className="col-sm-4" controlId="motivoBaja">
-                      <Form.Label>Motivo Baja:</Form.Label>
-                      <Form.Control
-                        as="textarea"
-                        rows={3}
-                        value={this.state.motivoBaja}
-                        onChange={this.handleMotivoChange}
-                      />
-                     </Form.Group> */}
 
                       </Form.Row>
                       <Form.Group controlId="muestra">
@@ -968,6 +1316,12 @@ class AddExcavacion extends React.Component {
                         <Button variant="outline-secondary" type="button" id="siguiente1" onClick={this.handleForm1}>
                           Siguiente <FontAwesomeIcon icon={faShare} />
                         </Button>
+                        &nbsp;&nbsp;
+                        <Link to="/excavaciones">
+                          <Button variant="outline-danger" type="button" id="cancela">
+                            <FontAwesomeIcon icon={faTimesCircle} /> Cancelar
+                          </Button>
+                        </Link>
                       </Form.Row>
                       <br />
 
@@ -980,42 +1334,58 @@ class AddExcavacion extends React.Component {
                   <Form id="form2" noValidate validated={validatedh}>
                     <Form.Row >
 
-                      <Form.Group className="col-sm-12" controlId="tipoHallazgo">
+                      <Form.Group className="col-sm-8" controlId="tipoHallazgo">
                         <br />
                         <Form.Label>Tipo Hallazgo:</Form.Label>
 
-                        <Form.Control
-                          as="select"
-                          onChange={this.handleColeccionesChange}
-                          required
-                        >
-                          <option value="">Seleccione Opción</option>
-                          <option value="1">Fortuito</option>
-                          <option value="2">Denuncia</option>
-                          <option value="3">Exploración</option>
 
 
-                        </Form.Control>
-                        <Form.Control.Feedback type="invalid">
-                          Por favor, ingrese Tipo.
-                        </Form.Control.Feedback>
+                        <Select
+                          placeholder={"Seleccione..."}
+                          options={optHallazgo}
+                          onChange={this.handleHallazgoChange}
+                          value={selectedHallazgo}
+                          isClearable
+                        />
+
 
                       </Form.Group>
 
                     </Form.Row>
                     <Form.Label>Si seleccionó Denuncia, adjunte archivo(s) a continuación de la misma:</Form.Label>
                     <Form.Row>
-                      <Form.Group className="col-sm-8" controlId="filesAut">
+                      <Form.Group className="col-sm-8">
                         <label>Archivo:</label>
-                        <input type="file" className="form-control" onChange={this.filehandleChange.bind(this)} />
+                        <input type="file" className="form-control" id="filesAut" onChange={this.filehandleChange.bind(this)} />
                       </Form.Group>
+                    </Form.Row>
 
+                    <Form.Row>
+                      <Form.Group className="col-sm-2" >
+                        <Button variant="primary" type="button" id="subirArch" onClick={() => this.subirDenuncia()} >
+                          <FontAwesomeIcon icon={faUpload} /> Subir
+                        </Button>
+                      </Form.Group>
+                      <Form.Group className="col-sm-6">
+                        <Alert show={this.state.showSuccess} variant="success">
+                          <p>
+                            Se subió el archivo con Éxito!!
+                          </p>
+                        </Alert>
+
+                        <Alert show={this.state.showError} variant="danger">
+                          <p>
+                            El archivo no se pudo subir. Intente nuevamente.
+                          </p>
+                        </Alert>
+                      </Form.Group>
+                    </Form.Row>
+
+                    <Form.Row>
                       <Form.Group className="col-sm-8" controlId="filesAut">
                         <Table border="0">
                           <tbody>
-
-                            {this.renderTableDataDenuncia()}
-
+                            {this.state.tableArchivosDen}
                           </tbody>
 
                         </Table>
@@ -1054,12 +1424,12 @@ class AddExcavacion extends React.Component {
                     </Form.Row>
 
                     <br />
-
+     
                     <CrearExcavacion
                       idExploracion={this.state.selectedExploracion.value}
                       setIdAreaExcavacion={this.setIdAreaExcavacion}
                       setPuntoGpsExcavacion={this.setPuntoGpsExcavacion}
-                    />
+                      /> 
                     <br />
 
                     <Form.Row >
@@ -1104,7 +1474,7 @@ class AddExcavacion extends React.Component {
                     <hr />
                     <Form.Row>
                       <Form.Group className="mx-sm-3 mb-2">
-                        <Button variant="primary" type="submit" id="guardar">
+                        <Button variant="primary" type="button" id="guardar" onClick={this.handleForm4}>
                           <FontAwesomeIcon icon={faSave} /> Guardar
                         </Button>
                         &nbsp;&nbsp;
