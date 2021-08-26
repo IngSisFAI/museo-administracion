@@ -3,7 +3,7 @@ import { Form, Button, Tabs, Tab, Table, Modal, Alert } from "react-bootstrap";
 import { ToastContainer, toast, Slide } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faSave, faReply, faCompass, faTrash, faPlus, faShare, faEdit, faTimesCircle, faUpload } from "@fortawesome/free-solid-svg-icons";
+import { faSave, faReply, faCompass, faTrash, faPlus, faShare, faEdit, faTimesCircle, faUpload, faPuzzlePiece } from "@fortawesome/free-solid-svg-icons";
 import { Link } from "react-router-dom";
 import Select from "react-select";
 import CrearExcavacion from "../../areaGeospatial/CrearExcavacion";
@@ -66,9 +66,13 @@ class AddExcavacion extends React.Component {
       validatedtax: false,
       geologicos: '',
       taxonomicos: '',
-      tabpiezas: true,
+      tabpiezas: false,
       validatedpiezas: false,
-      tabbochon: true,
+      tabfotos: false,
+      validatedfotos: false,
+      tabpvideos: false,
+      validatedvideos: false,
+      tabbochon: false,
       validatedbochon: false,
       nombrePieza: '',
       identificador: '',
@@ -113,6 +117,15 @@ class AddExcavacion extends React.Component {
       showSuccess: false,
       showError: false,
       tableArchivosDen: null,
+      showSuccessFoto: false,
+      showErrorFoto: false,
+      showSuccessVideo: false,
+      showErrorVideo: false,
+      archivoVideo: null, 
+      archivoFoto: null,
+      listArchivosFotos: [],
+      listArchivosVideo: [],
+      tableArchivosFotos: null,
     };
   }
 
@@ -382,21 +395,6 @@ class AddExcavacion extends React.Component {
     const name = file[0].name;
     this.setState({ archivoDenuncia: file });
 
-
-    /* const files = event.target.files;
-     var arrayFiles = this.state.archivosD;
- 
- 
-     Array.from(files).forEach(file => {
-       var key = Math.floor(Math.random() * 1000);
-       file.id = key;
-       arrayFiles.push(file)
-     })
-     this.setState({ archivosD: arrayFiles });
- 
-     console.log('SALIDA::', arrayFiles)
-     //aca deberiamos mover el archivo a la carpeta */
-
   }
 
   renderTableDataDenuncia() {
@@ -445,6 +443,8 @@ class AddExcavacion extends React.Component {
           "idExploracion": "",
           "datosGeologicos": "",
           "datosTaxonomicos": "",
+          "idArea": this.state.idAreaExcavacion,
+          "puntoGps": this.state.puntoGpsExcavacion,
           "idCiudad": "",
           "idProvincia": "",
           "idPais": "",
@@ -791,7 +791,7 @@ class AddExcavacion extends React.Component {
 
 
   eliminarArchivoDenuncia = (dato) => {
-    var destino = rutaExcavaciones + this.state.excavacionId + "/" + dato;
+    var destino = rutaExcavaciones +'Denuncias/'+ this.state.excavacionId + "/" + dato;
     var opcion = window.confirm("¿Está seguro que deseas eliminar el Archivo?");
     if (opcion == true) {
 
@@ -952,7 +952,7 @@ class AddExcavacion extends React.Component {
                 .then(function (response) {
                   //segundo subo archivo al server
 
-                  const destino = rutaExcavaciones + this.state.excavacionId;
+                  const destino = rutaExcavaciones +'Denuncias/'+ this.state.excavacionId;
                   const data = new FormData();
                   data.append("file", file[0]);
 
@@ -968,7 +968,7 @@ class AddExcavacion extends React.Component {
                     .then(response => {
                       $(".loader").fadeOut("slow");
                       if (response.statusText === "OK") {
-                        this.setState({ archivoDenuncia: null, showSuccess: true, showError: false, urlArchivo: urlArchivo + this.state.excavacionId + '/' + nameFile });
+                        this.setState({ archivoDenuncia: null, showSuccess: true, showError: false, urlArchivo: urlArchivo + 'Denuncias/'+this.state.excavacionId + '/' + nameFile });
                         this.setState({ tableArchivosDen: this.renderTableArchivosDen() })
                         document.getElementById('filesAut').value = '';
                       }
@@ -1054,7 +1054,31 @@ class AddExcavacion extends React.Component {
             </Button>
           </td>
           <td>
-            <a href={urlArchivo + this.state.excavacionId + '/' + file} disabled target="_blank">{file}</a>
+            <a href={urlArchivo + 'Denuncias/'+this.state.excavacionId + '/' + file} disabled target="_blank">{file}</a>
+          </td>
+
+        </tr>
+      )
+    })
+
+
+
+  }
+
+  renderTableArchivosFotos() {
+
+
+    return this.state.listArchivosFotos.map((file, index) => {
+
+      return (
+        <tr key={index}>
+          <td>
+            <Button variant="danger" type="button" id="eliminarArch" onClick={() => this.eliminarArchivoFoto(file)}>
+              <FontAwesomeIcon icon={faTrash} />
+            </Button>
+          </td>
+          <td>
+            <a href={urlArchivo +'Fotos/'+ this.state.excavacionId + '/' + file} disabled target="_blank">{file}</a>
           </td>
 
         </tr>
@@ -1093,8 +1117,8 @@ class AddExcavacion extends React.Component {
       "idExploracion": exploracionId,
       "datosGeologicos": this.state.geologicos,
       "datosTaxonomicos": this.state.taxonomicos,
-       "idArea": this.state.idAreaExcavacion,
-       "puntoGPS": this.state.puntoGpsExcavacion,
+      "idArea": this.state.idAreaExcavacion,
+      "puntoGPS": this.state.puntoGpsExcavacion,
     }
 
     fetch(urlApi + "/excavacion/" + this.state.excavacionId, {
@@ -1122,6 +1146,277 @@ class AddExcavacion extends React.Component {
 
   }
 
+  filesImagehandleChange= (event) => {
+    const file = event.target.files;
+    const name = file[0].name;
+    this.setState({ archivoFoto: file });
+
+  }
+
+  filesVideohandleChange= (event) => {
+    const file = event.target.files;
+    const name = file[0].name;
+    this.setState({ archivoVideo: file });
+  }
+
+  subirFoto = () => {
+
+    const MAXIMO_TAMANIO_BYTES = 5000000;
+    const types = ['image/gif', 'image/png', 'image/jpg', 'image/jpeg','image/bmp', 'image/webp'];
+    var file = this.state.archivoFoto
+
+    if (file !== null && file.length !== 0) {
+      var nameFile = (file[0].name).replace(/\s+/g, "_");
+      nameFile = this.reemplazar(nameFile);
+      var size = file[0].size;
+      var type = file[0].type;
+
+      if (size > MAXIMO_TAMANIO_BYTES) {
+        var tamanio = 5000000 / 1000000;
+        toast.error("El archivo seleccionado supera los " + tamanio + 'Mb. permitidos.');
+        document.getElementById('fileFoto').value = '';
+      }
+      else {
+        if (!types.includes(type)) {
+          toast.error("El archivo seleccionado tiene una extensión inválida.");
+          document.getElementById('fileFoto').value = '';
+
+        }
+        else {
+          $(".loader").removeAttr("style");
+          document.getElementById('subirFoto').setAttribute('disabled', 'disabled');
+          fetch(urlApi + '/excavacionId/' + this.state.excavacionId, {
+            method: 'get',
+            headers: {
+              'Authorization': 'Bearer ' + cookies.get('token')
+            }
+          })
+            .then(response => {
+              return response.json();
+            })
+            .then(function (response) {
+
+              var listArchivosFotos = response.excavacionId.fotosExcavacion;
+              listArchivosFotos.push(nameFile);
+
+              console.log('LAS FOTOS::', listArchivosFotos);
+
+              var dataFoto = {
+                "fotosExcavacion": listArchivosFotos,
+              };
+
+              //Primero Actualizo la Excavacion
+              fetch(urlApi + '/excavacion/' + this.state.excavacionId, {
+                method: 'put',
+                body: JSON.stringify(dataFoto),
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': 'Bearer ' + cookies.get('token')
+                }
+              })
+                .then(function (response) {
+                  if (response.ok) {
+                    console.log("¡Se actualizaron los datos de la Excavación con Éxito!");
+                    this.setState({ listArchivosFotos: listArchivosFotos });
+
+                  }
+                }.bind(this))
+                .then(function (response) {
+                  //segundo subo archivo al server
+
+                  const destino = rutaExcavaciones+'Fotos/' + this.state.excavacionId;
+                  const data = new FormData();
+                  data.append("file", file[0]);
+
+
+                  axios.post(urlApi + "/uploadArchivo", data, {
+                    headers: {
+                      "Content-Type": undefined,
+                      path: destino,
+                      "newfilename": '',
+                      'Authorization': 'Bearer ' + cookies.get('token')
+                    }
+                  })
+                    .then(response => {
+                      $(".loader").fadeOut("slow");
+                      if (response.statusText === "OK") {
+                        this.setState({ archivoFoto: null, showSuccessFoto: true, showErrorFoto: false, urlArchivo: urlArchivo+'Fotos/' + this.state.excavacionId + '/' + nameFile });
+                        this.setState({ tableArchivosFotos: this.renderTableArchivosFotos() })
+                        document.getElementById('fileFoto').value = '';
+                      }
+                      else {
+                        this.setState({ showSuccessFoto: false, showErrorFoto: true });
+                      }
+                      document.getElementById('subirFoto').removeAttribute('disabled');
+
+                      setTimeout(() => {
+                        this.setState({ showSuccessFoto: false, showErrorFoto: false });
+                      }, 5000);
+
+
+                    })
+                    .catch(error => {
+                      $(".loader").fadeOut("slow");
+                      this.setState({ showSuccessFoto: false, showErrorFoto: true });
+                      console.log(error);
+                    });
+
+
+
+
+                }.bind(this))
+                .catch(function (error) {
+                  $(".loader").fadeOut("slow");
+                  toast.error("Error al Actualizar Exploracion. Intente nuevamente.");
+                  console.log('Hubo un problema con la petición Fetch (1):' + error.message);
+                });
+
+
+            }.bind(this))
+            .catch(function (error) {
+              $(".loader").fadeOut("slow");
+              toast.error("Error al consultar. Intente nuevamente.");
+              console.log('Hubo un problema con la petición Fetch (2):' + error.message);
+            });
+
+        }
+
+      }
+
+    } else {
+      toast.error("Seleccione un Archivo.");
+    }
+  }
+
+  subirVideo = () => {
+
+    const MAXIMO_TAMANIO_BYTES = 5000000;
+    const types = ['application/pdf'];
+    var file = this.state.archivoDenuncia
+
+    if (file !== null && file.length !== 0) {
+      var nameFile = (file[0].name).replace(/\s+/g, "_");
+      nameFile = this.reemplazar(nameFile);
+      var size = file[0].size;
+      var type = file[0].type;
+
+      if (size > MAXIMO_TAMANIO_BYTES) {
+        var tamanio = 5000000 / 1000000;
+        toast.error("El archivo seleccionado supera los " + tamanio + 'Mb. permitidos.');
+        document.getElementById('filesAut').value = '';
+      }
+      else {
+        if (!types.includes(type)) {
+          toast.error("El archivo seleccionado tiene una extensión inválida.");
+          document.getElementById('filesAut').value = '';
+
+        }
+        else {
+          $(".loader").removeAttr("style");
+          document.getElementById('subirArch').setAttribute('disabled', 'disabled');
+          fetch(urlApi + '/excavacionId/' + this.state.excavacionId, {
+            method: 'get',
+            headers: {
+              'Authorization': 'Bearer ' + cookies.get('token')
+            }
+          })
+            .then(response => {
+              return response.json();
+            })
+            .then(function (response) {
+
+              var listArchivosDen = response.excavacionId.archivosDenuncia;
+              listArchivosDen.push(nameFile);
+
+              var dataDen = {
+                "archivosDenuncia": listArchivosDen,
+              };
+
+              //Primero Actualizo la Exploracion
+              fetch(urlApi + '/excavacion/' + this.state.excavacionId, {
+                method: 'put',
+                body: JSON.stringify(dataDen),
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': 'Bearer ' + cookies.get('token')
+                }
+              })
+                .then(function (response) {
+                  if (response.ok) {
+                    console.log("¡Se actualizaron los datos de la Excavación con Éxito!");
+                    this.setState({ listArchivosDen: listArchivosDen });
+
+                  }
+                }.bind(this))
+                .then(function (response) {
+                  //segundo subo archivo al server
+
+                  const destino = rutaExcavaciones + this.state.excavacionId;
+                  const data = new FormData();
+                  data.append("file", file[0]);
+
+
+                  axios.post(urlApi + "/uploadArchivo", data, {
+                    headers: {
+                      "Content-Type": undefined,
+                      path: destino,
+                      "newfilename": '',
+                      'Authorization': 'Bearer ' + cookies.get('token')
+                    }
+                  })
+                    .then(response => {
+                      $(".loader").fadeOut("slow");
+                      if (response.statusText === "OK") {
+                        this.setState({ archivoDenuncia: null, showSuccess: true, showError: false, urlArchivo: urlArchivo + this.state.excavacionId + '/' + nameFile });
+                        this.setState({ tableArchivosDen: this.renderTableArchivosDen() })
+                        document.getElementById('filesAut').value = '';
+                      }
+                      else {
+                        this.setState({ showSuccess: false, showError: true });
+                      }
+                      document.getElementById('subirArch').removeAttribute('disabled');
+
+                      setTimeout(() => {
+                        this.setState({ showSuccess: false, showError: false });
+                      }, 5000);
+
+
+                    })
+                    .catch(error => {
+                      $(".loader").fadeOut("slow");
+                      this.setState({ showSuccess: false, showError: true });
+                      console.log(error);
+                    });
+
+
+
+
+                }.bind(this))
+                .catch(function (error) {
+                  $(".loader").fadeOut("slow");
+                  toast.error("Error al Actualizar Exploracion. Intente nuevamente.");
+                  console.log('Hubo un problema con la petición Fetch (1):' + error.message);
+                });
+
+
+            }.bind(this))
+            .catch(function (error) {
+              $(".loader").fadeOut("slow");
+              toast.error("Error al consultar. Intente nuevamente.");
+              console.log('Hubo un problema con la petición Fetch (2):' + error.message);
+            });
+
+        }
+
+      }
+
+    } else {
+      toast.error("Seleccione un Archivo.");
+    }
+  }
+
+
+
 
 
 
@@ -1134,6 +1429,8 @@ class AddExcavacion extends React.Component {
     const { validatedtax } = this.state;
     const { validatedpiezas } = this.state;
     const { validatedbochon } = this.state;
+    const { validatedfotos} = this.state;
+    const { validatedvideos } = this.state;
 
     const { selectedAuxiliar } = this.state;
     let optAuxiliares = this.state.auxiliares.map((opt) => ({
@@ -1167,6 +1464,7 @@ class AddExcavacion extends React.Component {
     }));
 
     const { selectedHallazgo } = this.state;
+ 
 
 
 
@@ -1180,19 +1478,19 @@ class AddExcavacion extends React.Component {
               <div className="loader" style={{ display: 'none' }}></div>
               <br />
               <h3 className="page-header" align="left">
-                <FontAwesomeIcon icon={faCompass} /> Nueva Excavación (Faltan dos tabs, fotos y videos)
+                <FontAwesomeIcon icon={faCompass} /> Nueva Excavación (Falta guardar al director, la foto de la exc es una dupla)
               </h3>
               <hr />
 
               <ToastContainer
-                      position="top-right"
-                      autoClose={5000}
-                      transition={Slide}
-                      hideProgressBar={true}
-                      newestOnTop={true}
-                      closeOnClick
-                      pauseOnHover
-                    />
+                position="top-right"
+                autoClose={5000}
+                transition={Slide}
+                hideProgressBar={true}
+                newestOnTop={true}
+                closeOnClick
+                pauseOnHover
+              />
 
 
               <Tabs id="tabEjemplar" activeKey={this.state.key} onSelect={this.handleSelect}>
@@ -1217,7 +1515,7 @@ class AddExcavacion extends React.Component {
                           </Form.Control.Feedback>
                         </Form.Group>
                       </Form.Row>
-                     
+
 
                       <Form.Row>
                         <Form.Group className="col-sm-6" controlId="codigo">
@@ -1424,12 +1722,12 @@ class AddExcavacion extends React.Component {
                     </Form.Row>
 
                     <br />
-     
+
                     <CrearExcavacion
                       idExploracion={this.state.selectedExploracion.value}
                       setIdAreaExcavacion={this.setIdAreaExcavacion}
                       setPuntoGpsExcavacion={this.setPuntoGpsExcavacion}
-                      /> 
+                    />
                     <br />
 
                     <Form.Row >
@@ -1573,20 +1871,7 @@ class AddExcavacion extends React.Component {
                         />
                       </Form.Group>
                     </Form.Row>
-                    <Form.Row>
 
-                      <Form.Group className="col-sm-12" controlId="piezasAsoc">
-                        <Form.Label>Piezas Asociadas:</Form.Label>
-                        <Select
-                          placeholder={"Seleccione..."}
-                          options={optPiezas}
-                          onChange={this.handlePiezasChange}
-                          value={selectedPieza}
-                          isClearable
-                          isMulti
-                        />
-                      </Form.Group>
-                    </Form.Row>
                     <Form.Row>
                       <Form.Group className="col-sm-12" controlId="infoAdicional">
                         <Form.Label>Información Adicional:</Form.Label>
@@ -1601,6 +1886,10 @@ class AddExcavacion extends React.Component {
                       <Form.Group className="mx-sm-3 mb-2">
                         <Button variant="primary" type="button" id="guardarBochon" onClick={() => this.insertarBochon()}>
                           <FontAwesomeIcon icon={faPlus} /> Agregar
+                        </Button>
+                        &nbsp; &nbsp; &nbsp;
+                        <Button variant="success" type="button" id="piezasAsoc" disabled>
+                          <FontAwesomeIcon icon={faPuzzlePiece} /> Piezas Asociadas
                         </Button>
                       </Form.Group>
                     </Form.Row>
@@ -1620,6 +1909,116 @@ class AddExcavacion extends React.Component {
                           {this.renderTableDataBochones()}
                         </tbody>
                       </Table>
+                    </Form.Row>
+
+                  </Form>
+                </Tab>
+
+                <Tab eventKey="dfotos" title="Fotos" disabled={this.state.tabfotos}>
+                  <Form id="form7" noValidate validated={validatedfotos}>
+                      <legend>Fotos</legend>
+                      <hr/>
+
+                      <Form.Row>
+                      <Form.Group className="col-sm-8">
+                        <label>Archivos:</label>
+                        <input type="file" className="form-control" id="fileFoto" accept="image/*" onChange={this.filesImagehandleChange.bind(this)} />
+                      </Form.Group>
+                    </Form.Row>
+
+                      <Form.Row>
+                      <Form.Group className="col-sm-2" >
+                        <Button variant="primary" type="button" id="subirFoto" onClick={() => this.subirFoto()} >
+                          <FontAwesomeIcon icon={faUpload} /> Subir
+                        </Button>
+                      </Form.Group>
+                      <Form.Group className="col-sm-6">
+                        <Alert show={this.state.showSuccessFoto} variant="success">
+                          <p>
+                            Se subió el archivo con Éxito!!
+                          </p>
+                        </Alert>
+
+                        <Alert show={this.state.showErrorFoto} variant="danger">
+                          <p>
+                            El archivo no se pudo subir. Intente nuevamente.
+                          </p>
+                        </Alert>
+                      </Form.Group>
+                    </Form.Row>
+
+                    <Form.Row>
+                      <Form.Group className="col-sm-8" controlId="archivospdf">
+
+                        <Table striped bordered hover responsive>
+                          <thead className="thead-dark">
+                            <tr>
+                              <th>Acción</th>
+                              <th>Nombre</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {this.state.tableArchivosFotos}
+                          </tbody>
+                        </Table>
+
+
+                      </Form.Group>
+                    </Form.Row>
+
+                  </Form>
+                </Tab>
+
+                <Tab eventKey="dvideos" title="Videos" disabled={this.state.tabvideos}>
+                  <Form id="form8" noValidate validated={validatedvideos}>
+                  <legend>Videos</legend>
+                      <hr/>
+
+                      <Form.Row>
+                      <Form.Group className="col-sm-8">
+                        <label>Archivos:</label>
+                        <input type="file" className="form-control" id="fileVideo" accept="video/*" onChange={this.filesVideohandleChange.bind(this)} />
+                      </Form.Group>
+                    </Form.Row>
+
+                      <Form.Row>
+                      <Form.Group className="col-sm-2" >
+                        <Button variant="primary" type="button" id="subirArch" onClick={() => this.subirVideo()} >
+                          <FontAwesomeIcon icon={faUpload} /> Subir
+                        </Button>
+                      </Form.Group>
+                      <Form.Group className="col-sm-6">
+                        <Alert show={this.state.showSuccessVideo} variant="success">
+                          <p>
+                            Se subió el archivo con Éxito!!
+                          </p>
+                        </Alert>
+
+                        <Alert show={this.state.showErrorVideo} variant="danger">
+                          <p>
+                            El archivo no se pudo subir. Intente nuevamente.
+                          </p>
+                        </Alert>
+                      </Form.Group>
+                    </Form.Row>
+
+                    <Form.Row>
+                      <Form.Group className="col-sm-8" controlId="archivospdf">
+
+                        <Table striped bordered hover responsive>
+                          <thead className="thead-dark">
+                            <tr>
+                              <th>Acción</th>
+                              <th>Nombre</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {/*this.state.tableArchivosAut*/}
+                          </tbody>
+                        </Table>
+
+
+                      </Form.Group>
                     </Form.Row>
 
                   </Form>

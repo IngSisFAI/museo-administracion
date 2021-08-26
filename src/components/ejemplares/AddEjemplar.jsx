@@ -84,7 +84,7 @@ class AddEjemplar extends React.Component {
                 tabgeo: true,
                 tabtax: true,
                 validatedtax: false,
-                tabarea: true,
+                tabarea: false,
                 validatedarea: false,
                 tabpres: false,
                 validatedpres: false,
