@@ -72,7 +72,7 @@ class AddExcavacion extends React.Component {
       validatedfotos: false,
       tabvideos: true,
       validatedvideos: false,
-      tabbochon: false,
+      tabbochon: true,
       validatedbochon: false,
       nombrePieza: '',
       identificador: '',
@@ -121,12 +121,15 @@ class AddExcavacion extends React.Component {
       showErrorFoto: false,
       showSuccessVideo: false,
       showErrorVideo: false,
-      archivoVideo: null, 
+      archivoVideo: null,
       archivoFoto: null,
       descripcionFoto: '',
       listArchivosFotos: [],
       listArchivosVideo: [],
       tableArchivosFotos: null,
+      ejemplares: [],
+      selectedEjemplar: null,
+      piezas: []
     };
   }
 
@@ -172,6 +175,28 @@ class AddExcavacion extends React.Component {
 
         }).catch(function (error) {
           toast.error("Error al consultar. Intente nuevamente.");
+          console.log(
+            "Hubo un problema con la petición Fetch:",
+            error.message
+          );
+        });
+
+      fetch(urlApi + '/ejemplares', {
+        method: 'GET',
+        headers: {
+          'Authorization': 'Bearer ' + cookies.get('token')
+        }
+      })
+        .then((response) => {
+          return response.json()
+        })
+        .then((result) => {
+          this.setState({
+            ejemplares: result.ejemplares
+          });
+
+        }).catch(function (error) {
+          toast.error("Error al consultar Ejemplares. Intente nuevamente.");
           console.log(
             "Hubo un problema con la petición Fetch:",
             error.message
@@ -234,6 +259,42 @@ class AddExcavacion extends React.Component {
 
   handleExploracionesChange = (selectedExploracion) => {
     this.setState({ selectedExploracion });
+  };
+
+  handleEjemplarChange = (selectedEjemplar) => {
+    this.setState({ selectedEjemplar });
+    console.log("selected:", selectedEjemplar);
+    if (selectedEjemplar !== null) {
+      fetch(urlApi + '/piezasEjemplar/' + selectedEjemplar.value, {
+        method: 'GET',
+        headers: {
+          'Authorization': 'Bearer ' + cookies.get('token')
+        }
+      })
+        .then((response) => {
+          return response.json()
+        })
+        .then((result) => {
+          this.setState({
+            piezas: result.piezas, selectedPieza: null
+          });
+
+        }).catch(function (error) {
+          toast.error("Error al consultar Piezas. Intente nuevamente.");
+          console.log(
+            "Hubo un problema con la petición Fetch:",
+            error.message
+          );
+        });
+
+
+    }
+    else {
+      this.setState({
+        piezas: [], selectedPieza: null
+      });
+
+    }
   };
 
   handleGeologicosChange = (evt) => {
@@ -372,23 +433,23 @@ class AddExcavacion extends React.Component {
      this.setState({ validated: true });
    };*/
 
-  handleBlur = (evt) => {
-    fetch(
-      "http://museo.fi.uncoma.edu.ar:3006/api/excavacionFiltroCode/" +
-      evt.target.value
-    )
-      .then((response) => {
-        return response.json();
-      })
-      .then((excavacions) => {
-        console.log(excavacions.excavaciones.length);
-        if (excavacions.excavaciones.length > 0) {
-          toast.error("Existe Excavación con ese Código. Ingrese uno nuevo.");
-          this.setState({ codigo: "" });
-          document.getElementById("codigo").focus();
-        }
-      });
-  };
+  /* handleBlur = (evt) => {
+     fetch(
+       "http://museo.fi.uncoma.edu.ar:3006/api/excavacionFiltroCode/" +
+       evt.target.value
+     )
+       .then((response) => {
+         return response.json();
+       })
+       .then((excavacions) => {
+         console.log(excavacions.excavaciones.length);
+         if (excavacions.excavaciones.length > 0) {
+           toast.error("Existe Excavación con ese Código. Ingrese uno nuevo.");
+           this.setState({ codigo: "" });
+           document.getElementById("codigo").focus();
+         }
+       });
+   };*/
 
   filehandleChange = (event) => {
 
@@ -428,11 +489,11 @@ class AddExcavacion extends React.Component {
 
 
       if (op === "I") {
-        var directorName="";
-        var directorId="";
-        if(this.state.selectedDirector!==null){
-          directorName=this.state.selectedDirector.label;
-          directorId=this.state.selectedDirector.value        
+        var directorName = "";
+        var directorId = "";
+        if (this.state.selectedDirector !== null) {
+          directorName = this.state.selectedDirector.label;
+          directorId = this.state.selectedDirector.value
         }
 
         var data = {
@@ -489,11 +550,11 @@ class AddExcavacion extends React.Component {
       }
       else {
 
-        var directorName="";
-        var directorId="";
-        if(this.state.selectedDirector!==null){
-          directorName=this.state.selectedDirector.label;
-          directorId=this.state.selectedDirector.value        
+        var directorName = "";
+        var directorId = "";
+        if (this.state.selectedDirector !== null) {
+          directorName = this.state.selectedDirector.label;
+          directorId = this.state.selectedDirector.value
         }
 
         var data = {
@@ -565,7 +626,7 @@ class AddExcavacion extends React.Component {
       this.setState({ tabtax: false, key: 'dtax' });
 
     }
-    this.setState({ validatedgeo: true, tabpiezas: false, tabbochon: false, tabfotos: false, tabvideos:false });
+    this.setState({ validatedgeo: true, tabpiezas: false, tabbochon: false, tabfotos: false, tabvideos: false });
   }
 
   handleAntForm3 = (event) => {
@@ -680,21 +741,88 @@ class AddExcavacion extends React.Component {
     this.setState({ piezasId: piezas, piezasNames: names });
   };
 
-  insertarBochon = () => {
+  insertarBochon = (event) => {
+
+    const form = document.getElementById("form6");
+    event.preventDefault();
+    if (form.checkValidity() === false) {
+      event.stopPropagation();
+    } else {
+      if (this.state.selectedEjemplar !== null) {
+
+        if (this.state.selectedPieza !== null) {
+
+          var data = {
+            "nombre": "",
+            "codigoCampo": this.state.codigoCampoB,
+            "nroBochon": this.state.nroBochon,
+            "preparador": "",
+            "preparadorID": "",
+            "tipoPreparacion": "",
+            "acidosAplicados": [],
+            "ejemplarAsociado": this.state.selectedEjemplar.value,
+            "excavacionId": this.state.excavacionId,
+            "piezasId": this.state.piezasId,
+            "piezasNames": this.state.piezasNames,
+            "infoAdicional": this.state.infoAdicional
+          }
+
+          fetch(urlApi + "/bochon", {
+            method: "post",
+            body: JSON.stringify(data),
+            headers: {
+              "Content-Type": "application/json",
+              'Authorization': 'Bearer ' + cookies.get('token')
+            },
+          })
+            .then(function (response) {
+              if (response.ok) {
+                toast.success("¡Se guardó el Bochón con Éxito!");
+                return response.json();
+              }
+            })
+            .then(function (data) {
+              this.setState({ codigoCampoB:"",nroBochon:"",selectedEjemplar:null,piezasId:[], piezasNames:[], selectedPieza: null, infoAdicional:""});
+            }.bind(this))
+            .catch(function (error) {
+              toast.error("Error al guardar. Intente nuevamente.");
+              console.log(
+                "Hubo un problema con la petición Fetch:",
+                error.message
+              );
+            });
+
+
+
+        }
+        else {
+          toast.error("¡Debe Seleccionar al menos una pieza!");
+        }
+
+
+      }
+      else {
+        toast.error("¡Debe Seleccionar un Ejemplar!");
+      }
+
+    }
+    this.setState({ validatedbochon: true });
+
+
 
     //aca guardaria en BD y haria un select luego de los prestamos asociados al ejemplar y lo cargamos en el array prestamos
-    var bochones = this.state.bochones
-    var bochon = {
-      "idBochon": Math.floor(Math.random() * 100),
-      "codigoCampoM": this.state.codigoCampo,
-      "nroBochonM": this.state.nroBochon,
-      "infoAdicionalM": this.state.infoAdicional,
-      "piezasAsociadasM": this.state.piezasId,
-      "piezasAsociadasNamesM": this.state.piezasNames
-    }
-    bochones.push(bochon)
-    this.setState({ bochones: bochones, codigoCampo: '', nroBochon: '', infoAdicional: '', piezasId: [], selectedPieza: null, piezasNames: [] })
-
+    /* var bochones = this.state.bochones
+     var bochon = {
+       "idBochon": Math.floor(Math.random() * 100),
+       "codigoCampoM": this.state.codigoCampo,
+       "nroBochonM": this.state.nroBochon,
+       "infoAdicionalM": this.state.infoAdicional,
+       "piezasAsociadasM": this.state.piezasId,
+       "piezasAsociadasNamesM": this.state.piezasNames
+     }
+     bochones.push(bochon)
+     this.setState({ bochones: bochones, codigoCampo: '', nroBochon: '', infoAdicional: '', piezasId: [], selectedPieza: null, piezasNames: [] })
+ */
   }
 
   renderTableDataBochones() {
@@ -805,7 +933,7 @@ class AddExcavacion extends React.Component {
 
 
   eliminarArchivoDenuncia = (dato) => {
-    var destino = rutaExcavaciones +'Denuncias/'+ this.state.excavacionId + "/" + dato;
+    var destino = rutaExcavaciones + 'Denuncias/' + this.state.excavacionId + "/" + dato;
     var opcion = window.confirm("¿Está seguro que deseas eliminar el Archivo?");
     if (opcion == true) {
 
@@ -966,7 +1094,7 @@ class AddExcavacion extends React.Component {
                 .then(function (response) {
                   //segundo subo archivo al server
 
-                  const destino = rutaExcavaciones +'Denuncias/'+ this.state.excavacionId;
+                  const destino = rutaExcavaciones + 'Denuncias/' + this.state.excavacionId;
                   const data = new FormData();
                   data.append("file", file[0]);
 
@@ -982,7 +1110,7 @@ class AddExcavacion extends React.Component {
                     .then(response => {
                       $(".loader").fadeOut("slow");
                       if (response.statusText === "OK") {
-                        this.setState({ archivoDenuncia: null, showSuccess: true, showError: false, urlArchivo: urlArchivo + 'Denuncias/'+this.state.excavacionId + '/' + nameFile });
+                        this.setState({ archivoDenuncia: null, showSuccess: true, showError: false, urlArchivo: urlArchivo + 'Denuncias/' + this.state.excavacionId + '/' + nameFile });
                         this.setState({ tableArchivosDen: this.renderTableArchivosDen() })
                         document.getElementById('filesAut').value = '';
                       }
@@ -1068,7 +1196,7 @@ class AddExcavacion extends React.Component {
             </Button>
           </td>
           <td>
-            <a href={urlArchivo + 'Denuncias/'+this.state.excavacionId + '/' + file} disabled target="_blank">{file}</a>
+            <a href={urlArchivo + 'Denuncias/' + this.state.excavacionId + '/' + file} disabled target="_blank">{file}</a>
           </td>
 
         </tr>
@@ -1092,7 +1220,7 @@ class AddExcavacion extends React.Component {
             </Button>
           </td>
           <td>
-            <a href={urlArchivo +'Fotos/'+ this.state.excavacionId + '/' + file.nombre} disabled target="_blank">{file.nombre}</a>
+            <a href={urlArchivo + 'Fotos/' + this.state.excavacionId + '/' + file.nombre} disabled target="_blank">{file.nombre}</a>
           </td>
           <td>
             {file.descripcion}
@@ -1119,7 +1247,7 @@ class AddExcavacion extends React.Component {
             </Button>
           </td>
           <td>
-            <a href={urlArchivo +'Videos/'+ this.state.excavacionId + '/' + file} disabled target="_blank">{file}</a>
+            <a href={urlArchivo + 'Videos/' + this.state.excavacionId + '/' + file} disabled target="_blank">{file}</a>
           </td>
         </tr>
       )
@@ -1187,14 +1315,14 @@ class AddExcavacion extends React.Component {
 
   }
 
-  filesImagehandleChange= (event) => {
+  filesImagehandleChange = (event) => {
     const file = event.target.files;
     const name = file[0].name;
     this.setState({ archivoFoto: file });
 
   }
 
-  filesVideohandleChange= (event) => {
+  filesVideohandleChange = (event) => {
     const file = event.target.files;
     const name = file[0].name;
     this.setState({ archivoVideo: file });
@@ -1203,7 +1331,7 @@ class AddExcavacion extends React.Component {
   subirFoto = () => {
 
     const MAXIMO_TAMANIO_BYTES = 5000000;
-    const types = ['image/gif', 'image/png', 'image/jpg', 'image/jpeg','image/bmp', 'image/webp'];
+    const types = ['image/gif', 'image/png', 'image/jpg', 'image/jpeg', 'image/bmp', 'image/webp'];
     var file = this.state.archivoFoto
 
     if (file !== null && file.length !== 0) {
@@ -1238,11 +1366,11 @@ class AddExcavacion extends React.Component {
             .then(function (response) {
 
               var listArchivosFotos = response.excavacionId.fotosExcavacion;
-              var fotoSubir={
-                              "nombre":nameFile, 
-                              "descripcion": this.state.descripcionFoto
-                            }
-              
+              var fotoSubir = {
+                "nombre": nameFile,
+                "descripcion": this.state.descripcionFoto
+              }
+
               listArchivosFotos.push(fotoSubir);
 
               console.log('LAS FOTOS::', listArchivosFotos);
@@ -1270,7 +1398,7 @@ class AddExcavacion extends React.Component {
                 .then(function (response) {
                   //segundo subo archivo al server
 
-                  const destino = rutaExcavaciones+'Fotos/' + this.state.excavacionId;
+                  const destino = rutaExcavaciones + 'Fotos/' + this.state.excavacionId;
                   const data = new FormData();
                   data.append("file", file[0]);
 
@@ -1286,7 +1414,7 @@ class AddExcavacion extends React.Component {
                     .then(response => {
                       $(".loader").fadeOut("slow");
                       if (response.statusText === "OK") {
-                        this.setState({ archivoFoto: null, descripcionFoto:"", showSuccessFoto: true, showErrorFoto: false, urlArchivo: urlArchivo+'Fotos/' + this.state.excavacionId + '/' + nameFile });
+                        this.setState({ archivoFoto: null, descripcionFoto: "", showSuccessFoto: true, showErrorFoto: false, urlArchivo: urlArchivo + 'Fotos/' + this.state.excavacionId + '/' + nameFile });
                         this.setState({ tableArchivosFotos: this.renderTableArchivosFotos() })
                         document.getElementById('fileFoto').value = '';
                       }
@@ -1335,8 +1463,8 @@ class AddExcavacion extends React.Component {
   }
 
 
-  eliminarArchivoFoto= (dato) => {
-    var destino = rutaExcavaciones +'Fotos/'+ this.state.excavacionId + "/" + dato;
+  eliminarArchivoFoto = (dato) => {
+    var destino = rutaExcavaciones + 'Fotos/' + this.state.excavacionId + "/" + dato;
     var opcion = window.confirm("¿Está seguro que deseas eliminar el Archivo?");
     if (opcion == true) {
 
@@ -1436,7 +1564,7 @@ class AddExcavacion extends React.Component {
   subirVideo = () => {
 
     const MAXIMO_TAMANIO_BYTES = 10000000;
-    const types = ['video/x-msvideo','video/mpeg','video/ogg','video/x-flv','video/mp4','video/x-ms-wmv','video/quicktime','video/3gpp','video/MP2T'];
+    const types = ['video/x-msvideo', 'video/mpeg', 'video/ogg', 'video/x-flv', 'video/mp4', 'video/x-ms-wmv', 'video/quicktime', 'video/3gpp', 'video/MP2T'];
     var file = this.state.archivoVideo
 
     if (file !== null && file.length !== 0) {
@@ -1496,7 +1624,7 @@ class AddExcavacion extends React.Component {
                 .then(function (response) {
                   //segundo subo archivo al server
 
-                  const destino = rutaExcavaciones+'Videos/'+ this.state.excavacionId;
+                  const destino = rutaExcavaciones + 'Videos/' + this.state.excavacionId;
                   const data = new FormData();
                   data.append("file", file[0]);
 
@@ -1512,7 +1640,7 @@ class AddExcavacion extends React.Component {
                     .then(response => {
                       $(".loader").fadeOut("slow");
                       if (response.statusText === "OK") {
-                        this.setState({ archivoVideo: null, showSuccessVideo: true, showErrorVideo: false, urlArchivo: urlArchivo +'Videos/'+this.state.excavacionId + '/' + nameFile });
+                        this.setState({ archivoVideo: null, showSuccessVideo: true, showErrorVideo: false, urlArchivo: urlArchivo + 'Videos/' + this.state.excavacionId + '/' + nameFile });
                         this.setState({ tableArchivosVideos: this.renderTableArchivosVideos() })
                         document.getElementById('filesVideo').value = '';
                       }
@@ -1560,8 +1688,8 @@ class AddExcavacion extends React.Component {
     }
   }
 
-  eliminarArchivoVideo= (dato) => {
-    var destino = rutaExcavaciones +'Videos/'+ this.state.excavacionId + "/" + dato;
+  eliminarArchivoVideo = (dato) => {
+    var destino = rutaExcavaciones + 'Videos/' + this.state.excavacionId + "/" + dato;
     var opcion = window.confirm("¿Está seguro que deseas eliminar el Archivo?");
     if (opcion == true) {
 
@@ -1673,7 +1801,7 @@ class AddExcavacion extends React.Component {
     const { validatedtax } = this.state;
     const { validatedpiezas } = this.state;
     const { validatedbochon } = this.state;
-    const { validatedfotos} = this.state;
+    const { validatedfotos } = this.state;
     const { validatedvideos } = this.state;
 
     const { selectedAuxiliar } = this.state;
@@ -1701,16 +1829,22 @@ class AddExcavacion extends React.Component {
     }));
 
     const { selectedPieza } = this.state;
-    const { selectedPiezaM } = this.state;
     let optPiezas = this.state.piezas.map((opt) => ({
-      label: '(' + opt.identificadorPieza + ') ' + opt.nombrePieza,
-      value: opt.idPieza,
+      label: opt.identificador,
+      value: opt._id,
     }));
 
     const { selectedHallazgo } = this.state;
- 
+
+    const { selectedEjemplar } = this.state;
+    let optEjemplares = this.state.ejemplares.map((opt) => ({
+      label: opt.sigla + ' (' + opt.tipoColeccion + ')',
+      value: opt._id,
+    }));
 
 
+
+    const { selectedPiezaM } = this.state; //BORRAR
 
 
     return (
@@ -1770,7 +1904,6 @@ class AddExcavacion extends React.Component {
                             required
                             onChange={this.handleCodigoCampoChange}
                             value={this.state.codigoCampo}
-                            onBlur={this.handleBlur}
                           />
                           <Form.Control.Feedback type="invalid">
                             Por favor, ingrese Código.
@@ -2034,7 +2167,7 @@ class AddExcavacion extends React.Component {
                   </Form>
                 </Tab>
 
-           
+
 
                 <Tab eventKey="dbochones" title="Bochones" disabled={this.state.tabbochon}>
                   <Form id="form6" noValidate validated={validatedbochon}>
@@ -2046,7 +2179,11 @@ class AddExcavacion extends React.Component {
                           type="text"
                           value={this.state.codigoCampoB}
                           onChange={this.handleCodCampoChange}
+                          required
                         />
+                        <Form.Control.Feedback type="invalid">
+                          Por favor, ingrese Cód. Campo.
+                        </Form.Control.Feedback>
                       </Form.Group>
 
                       <Form.Group className="col-sm-6" controlId="nroBochon">
@@ -2055,21 +2192,26 @@ class AddExcavacion extends React.Component {
                           type="text"
                           value={this.state.nroBochon}
                           onChange={this.handleNroBochonChange}
+                          required
                         />
+                        <Form.Control.Feedback type="invalid">
+                          Por favor, ingrese Nro. Bochón.
+                        </Form.Control.Feedback>
                       </Form.Group>
                     </Form.Row>
 
-               
+
 
                     <Form.Row>
                       <Form.Group className="col-sm-12" controlId="ejemplarAsociado">
                         <Form.Label>Ejemplar:</Form.Label>
                         <Select
                           placeholder={"Seleccione Ejemplar"}
-                          options={optExploraciones}
-                          onChange={this.handleExploracionesChange}
-                          value={selectedExploracion}
+                          options={optEjemplares}
+                          onChange={this.handleEjemplarChange}
+                          value={selectedEjemplar}
                           required
+                          isClearable
                         />
                       </Form.Group>
                     </Form.Row>
@@ -2079,10 +2221,11 @@ class AddExcavacion extends React.Component {
                         <Form.Label>Piezas Asociadas:</Form.Label>
                         <Select
                           placeholder={"Seleccione Piezas"}
-                          options={optExploraciones}
-                          onChange={this.handleExploracionesChange}
-                          value={selectedExploracion}
+                          options={optPiezas}
+                          onChange={this.handlePiezasChange}
+                          value={selectedPieza}
                           isMulti
+                          isClearable
                         />
                       </Form.Group>
                     </Form.Row>
@@ -2102,10 +2245,10 @@ class AddExcavacion extends React.Component {
 
                     <Form.Row>
                       <Form.Group className="mx-sm-3 mb-2">
-                        <Button variant="primary" type="button" id="guardarBochon" onClick={() => this.insertarBochon()}>
+                        <Button variant="primary" type="button" id="guardarBochon" onClick={this.insertarBochon}>
                           <FontAwesomeIcon icon={faPlus} /> Agregar
                         </Button>
-                     
+
                       </Form.Group>
                     </Form.Row>
 
@@ -2118,7 +2261,7 @@ class AddExcavacion extends React.Component {
                             <th>Nro. Bochon</th>
                             <th>Ejemplar</th>
                             <th>Piezas Asociadas</th>
-                            <th>Información Adicional</th>             
+                            <th>Información Adicional</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -2132,18 +2275,18 @@ class AddExcavacion extends React.Component {
 
                 <Tab eventKey="dfotos" title="Fotos" disabled={this.state.tabfotos}>
                   <Form id="form7" noValidate validated={validatedfotos}>
-                      <legend>Fotos</legend>
-                      <hr/>
+                    <legend>Fotos</legend>
+                    <hr />
 
-                      <Form.Row>
+                    <Form.Row>
                       <Form.Group className="col-sm-12">
                         <label>Archivos:</label>
                         <input type="file" className="form-control" id="fileFoto" accept="image/*" onChange={this.filesImagehandleChange.bind(this)} />
                       </Form.Group>
                     </Form.Row>
-                    
+
                     <Form.Row>
-                    <Form.Group className="col-sm-12" controlId="descripcionFoto">
+                      <Form.Group className="col-sm-12" controlId="descripcionFoto">
                         <Form.Label>Descripción Breve:</Form.Label>
                         <small>(Para accesibilidad de la Web)</small>
                         <Form.Control
@@ -2154,7 +2297,7 @@ class AddExcavacion extends React.Component {
                       </Form.Group>
                     </Form.Row>
 
-                      <Form.Row>
+                    <Form.Row>
                       <Form.Group className="col-sm-2" >
                         <Button variant="primary" type="button" id="subirFoto" onClick={() => this.subirFoto()} >
                           <FontAwesomeIcon icon={faUpload} /> Subir
@@ -2200,17 +2343,17 @@ class AddExcavacion extends React.Component {
 
                 <Tab eventKey="dvideos" title="Videos" disabled={this.state.tabvideos}>
                   <Form id="form8" noValidate validated={validatedvideos}>
-                  <legend>Videos</legend>
-                      <hr/>
+                    <legend>Videos</legend>
+                    <hr />
 
-                      <Form.Row>
+                    <Form.Row>
                       <Form.Group className="col-sm-8">
                         <label>Archivos:</label>
                         <input type="file" className="form-control" id="filesVideo" accept="video/*" onChange={this.filesVideohandleChange.bind(this)} />
                       </Form.Group>
                     </Form.Row>
 
-                      <Form.Row>
+                    <Form.Row>
                       <Form.Group className="col-sm-2" >
                         <Button variant="primary" type="button" id="subirVideo" onClick={() => this.subirVideo()} >
                           <FontAwesomeIcon icon={faUpload} /> Subir
