@@ -459,24 +459,6 @@ class AddExcavacion extends React.Component {
 
   }
 
-  renderTableDataDenuncia() {
-
-    return this.state.archivosD.map((file, index) => {
-
-      return (
-        <tr key={index}>
-          <td>
-            <Button variant="danger" type="button" id="eliminarOD" onClick={() => this.eliminarArchivoDenuncia(file)}>
-              <FontAwesomeIcon icon={faTrash} />
-            </Button>
-          </td>
-          <td>{file.name}</td>
-
-        </tr>
-      )
-    })
-
-  }
 
   handleForm1 = (event) => {
 
@@ -751,7 +733,7 @@ class AddExcavacion extends React.Component {
       if (this.state.selectedEjemplar !== null) {
 
         if (this.state.selectedPieza !== null) {
-
+          $(".loader").removeAttr("style");
           var data = {
             "nombre": "",
             "codigoCampo": this.state.codigoCampoB,
@@ -778,21 +760,53 @@ class AddExcavacion extends React.Component {
             .then(function (response) {
               if (response.ok) {
                 toast.success("¡Se guardó el Bochón con Éxito!");
+                $(".loader").fadeOut("slow");
                 return response.json();
+
               }
             })
-            .then(function (data) {
-              this.setState({ codigoCampoB:"",nroBochon:"",selectedEjemplar:null,piezasId:[], piezasNames:[], selectedPieza: null, infoAdicional:""});
+            .then(function () {
+
+              fetch(urlApi + '/bochon/'+this.state.excavacionId, {
+                method: 'GET',
+                headers: {
+                  'Authorization': 'Bearer ' + cookies.get('token')
+                }
+              })
+                .then((response) => {
+                  return response.json()
+                })
+                .then(result => {
+                       
+                  this.setState({
+                    bochones: result.bochones
+                  });
+                  this.setState({ codigoCampoB: "", nroBochon: "", selectedEjemplar: null, piezasId: [], piezasNames: [], selectedPieza: null, infoAdicional: "" });
+                  return result;
+                
+
+                })
+                .then(function(data){
+                  this.setState({tablaBochones: this.renderTableBochones()})
+                }.bind(this))
+                .catch(function (error) {
+                  toast.error("Error al consultar Ejemplares. Intente nuevamente.");
+                  console.log(
+                    "Hubo un problema con la petición Fetch:",
+                    error.message
+                  );
+                });
+
+
             }.bind(this))
             .catch(function (error) {
+              $(".loader").fadeOut("slow");
               toast.error("Error al guardar. Intente nuevamente.");
               console.log(
                 "Hubo un problema con la petición Fetch:",
                 error.message
               );
             });
-
-
 
         }
         else {
@@ -825,12 +839,13 @@ class AddExcavacion extends React.Component {
  */
   }
 
-  renderTableDataBochones() {
+  renderTableBochones() {
+    
 
-    return this.state.bochones.map((bochon) => {
+    return this.state.bochones.map((bochon, index) => {
 
       return (
-        <tr key={bochon.idBochon}>
+        <tr key={index}>
           <td><Button variant="secondary" type="button" id="editar" onClick={() => this.mostrarModalActualizarBochon(bochon)}>
             <FontAwesomeIcon icon={faEdit} />
           </Button>
@@ -838,14 +853,36 @@ class AddExcavacion extends React.Component {
             <Button variant="danger" type="button" id="eliminar" onClick={() => this.eliminarBochon(bochon)}>
               <FontAwesomeIcon icon={faTrash} />
             </Button></td>
-          <td>{bochon.codigoCampoM}</td>
-          <td>{bochon.nroBochonM}</td>
-          <td>{(bochon.piezasAsociadasNamesM).toString()}</td>
-          <td>{bochon.infoAdicionalM}</td>
+          <td>{bochon.codigoCampo}</td>
+          <td>{bochon.nroBochon}</td>
+          <td>{bochon.ejemplarAsociado[0].sigla}</td>
+          <td>{bochon.piezasNames.toString()}</td>
+          <td>{bochon.infoAdicional}</td>
 
         </tr>
       )
     })
+
+
+  /*  return this.state.bochones.map((bochon) => {
+
+      return (
+        <tr key={bochon._id}>
+          <td><Button variant="secondary" type="button" id="editar" onClick={() => this.mostrarModalActualizarBochon(bochon)}>
+            <FontAwesomeIcon icon={faEdit} />
+          </Button>
+            &nbsp;
+            <Button variant="danger" type="button" id="eliminar" onClick={() => this.eliminarBochon(bochon)}>
+              <FontAwesomeIcon icon={faTrash} />
+            </Button></td>
+          <td>{bochon.codigoCampo}</td>
+          <td>{bochon.nroBochon}</td>
+          <td>{ }</td>
+          <td>{bochon.infoAdicional}</td>
+
+        </tr>
+      )
+    })*/
 
 
 
@@ -2265,7 +2302,7 @@ class AddExcavacion extends React.Component {
                           </tr>
                         </thead>
                         <tbody>
-                          {this.renderTableDataBochones()}
+                          {this.state.tablaBochones}
                         </tbody>
                       </Table>
                     </Form.Row>
