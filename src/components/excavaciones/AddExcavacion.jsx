@@ -776,7 +776,7 @@ class AddExcavacion extends React.Component {
     const formx = document.getElementById("form9");
     e.preventDefault();
     if (formx.checkValidity() === false) {
-
+      toast.error("¡Verique datos obligatorios!");
       e.stopPropagation();
 
     } else {
