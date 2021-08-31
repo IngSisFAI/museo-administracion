@@ -21,7 +21,6 @@ import EditExploracion from "./components/exploraciones/EditExploracion";
 import Excavaciones from "./components/excavaciones/MainExcavaciones";
 import AddExcavacion from "./components/excavaciones/AddExcavacion";
 import EditExcavacion from "./components/excavaciones/EditExcavacion";
-import Multimedia from "./components/excavaciones/MultimediaExcavacion";
 
 // Datos DatosGeograficos
 import ObtenerExploraciones from "./areaGeospatial/ObtenerExploraciones";
@@ -66,7 +65,6 @@ class App extends Component {
           <Route path="/excavaciones" component={Excavaciones} />
           <Route path="/addExcavacion" component={AddExcavacion} />
           <Route path="/editExcavacion/:id" component={EditExcavacion} />
-          <Route path="/multimedia/:id" component={Multimedia} />
 
           <Route path="/ejemplares" component={Ejemplares} />
           <Route path="/addEjemplar" component={AddEjemplar} />

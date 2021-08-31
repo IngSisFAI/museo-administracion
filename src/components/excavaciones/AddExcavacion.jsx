@@ -375,6 +375,8 @@ class AddExcavacion extends React.Component {
 
 
       if (op === "I") {
+
+        $(".loader").removeAttr("style");
         var directorName = "";
         var directorId = "";
         if (this.state.selectedDirector !== null) {
@@ -419,6 +421,7 @@ class AddExcavacion extends React.Component {
           .then(function (response) {
             if (response.ok) {
               console.log("¡Se guardó la Excavacion con Éxito!");
+              $(".loader").fadeOut("slow");
               return response.json();
             }
           })
@@ -426,6 +429,7 @@ class AddExcavacion extends React.Component {
             this.setState({ tabh: false, key: 'dhallazgo', op: 'U', excavacionId: data.excavacion._id });
           }.bind(this))
           .catch(function (error) {
+            $(".loader").fadeOut("slow");
             toast.error("Error al guardar. Intente nuevamente.");
             console.log(
               "Hubo un problema con la petición Fetch:",
@@ -434,8 +438,8 @@ class AddExcavacion extends React.Component {
           });
 
       }
-      else {
-
+      else { //op=U
+        $(".loader").removeAttr("style");  
         var directorName = "";
         var directorId = "";
         if (this.state.selectedDirector !== null) {
@@ -465,9 +469,14 @@ class AddExcavacion extends React.Component {
           .then(function (response) {
             if (response.ok) {
               console.log("¡Se actualizaron los datos de la Excavación con Éxito!");
+              $(".loader").fadeOut("slow");
+              return response.json();
 
             }
-          }).catch(function (error) {
+          })
+          .then(function(data){ this.setState({key: 'dhallazgo' });}.bind(this))
+          .catch(function (error) {
+            $(".loader").fadeOut("slow");
             toast.error("Error al guardar. Intente nuevamente.");
             console.log(
               "Hubo un problema con la petición Fetch:",
@@ -1469,7 +1478,7 @@ class AddExcavacion extends React.Component {
 
               listArchivosFotos.push(fotoSubir);
 
-              console.log('LAS FOTOS::', listArchivosFotos);
+            //  console.log('LAS FOTOS::', listArchivosFotos);
 
               var dataFoto = {
                 "fotosExcavacion": listArchivosFotos,

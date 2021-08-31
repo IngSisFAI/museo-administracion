@@ -45,7 +45,7 @@ class MainExcavaciones extends React.Component {
           });
         })
         .catch((error) => {
-          console.log("Error");
+          console.log("Error:", error);
         });
     }
   }
