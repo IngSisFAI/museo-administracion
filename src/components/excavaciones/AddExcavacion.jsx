@@ -3,7 +3,7 @@ import { Form, Button, Tabs, Tab, Table, Modal, Alert } from "react-bootstrap";
 import { ToastContainer, toast, Slide } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faSave, faReply, faCompass, faTrash, faPlus, faShare, faEdit, faTimesCircle, faUpload, faPuzzlePiece } from "@fortawesome/free-solid-svg-icons";
+import { faSave, faReply, faCompass, faTrash, faPlus, faShare, faEdit, faTimesCircle, faUpload } from "@fortawesome/free-solid-svg-icons";
 import { Link } from "react-router-dom";
 import Select from "react-select";
 import CrearExcavacion from "../../areaGeospatial/CrearExcavacion";
@@ -1985,7 +1985,7 @@ class AddExcavacion extends React.Component {
                             placeholder="Ingrese Nombre Area"
                             required
                             onChange={this.handleNombreAreaChange}
-                            value={this.state.nombre}
+                            value={this.state.nombreArea}
                           />
                           <Form.Control.Feedback type="invalid">
                             Por favor, ingrese Nombre.
@@ -2061,7 +2061,11 @@ class AddExcavacion extends React.Component {
                             type="date"
                             value={this.state.fechaInicio}
                             onChange={this.handleFinicioChange}
+                            required
                           />
+                           <Form.Control.Feedback type="invalid">
+                            Por favor, ingrese Fecha.
+                          </Form.Control.Feedback>
                         </Form.Group>
 
                         <Form.Group className="col-sm-6" controlId="fbaja">
