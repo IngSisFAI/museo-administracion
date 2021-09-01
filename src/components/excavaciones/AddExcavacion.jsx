@@ -114,7 +114,8 @@ class AddExcavacion extends React.Component {
       piezasM: [],
       piezasMNames: [],
       bochonMId: '',
-      validatedMBochon: false
+      validatedMBochon: false,
+      idExploracionCrear:''
     };
   }
 
@@ -245,6 +246,9 @@ class AddExcavacion extends React.Component {
   handleExploracionesChange = (selectedExploracion) => {
     this.setState({ selectedExploracionAnt: this.state.selectedExploracion });
     this.setState({ selectedExploracion });
+    this.setState({ idExploracionCrear:selectedExploracion.value });
+
+    
   };
 
   handleEjemplarChange = (selectedEjemplar) => {
@@ -601,7 +605,7 @@ class AddExcavacion extends React.Component {
                 listBochones: listB
               });
 
-              fetch(urlApi + '/bochon/' + this.state.excavacionId, {
+              fetch(urlApi + '/bochonExca/' + this.state.excavacionId, {
                 method: 'GET',
                 headers: {
                   'Authorization': 'Bearer ' + cookies.get('token')
@@ -615,7 +619,7 @@ class AddExcavacion extends React.Component {
                   this.setState({
                     bochones: result.bochones
                   });
-                  this.setState({ codigoCampoB: "", nroBochon: "", selectedEjemplar: null, piezasId: [], piezasNames: [], selectedPieza: null, infoAdicional: "" });
+                  this.setState({ codigoCampoB: "", nroBochon: "", piezasId: [], piezasNames: [], selectedPieza: null, infoAdicional: "" });
                   return result;
 
 
@@ -642,6 +646,34 @@ class AddExcavacion extends React.Component {
 
                       }
                     }.bind(this))
+                   /* .then(function () {
+
+                      var datosE = {
+                        "perteneceExca": this.state.excavacionId
+                      }
+
+                      fetch(urlApi + '/ejemplar/' + this.state.selectedEjemplar.value, {
+                        method: 'put',
+                        body: JSON.stringify(datosE),
+                        headers: {
+                          'Content-Type': 'application/json',
+                          'Authorization': 'Bearer ' + cookies.get('token')
+                        }
+                      })
+                        .then(function (response) {
+                          if (response.ok) {
+                            console.log("¡Se actualizaron los datos del Ejemplar con Éxito!");
+
+                          }
+                        })
+                        .then(function () {
+                          this.setState({ selectedEjemplar: null })
+                        }.bind(this))
+                        .catch(function (error) {
+                          console.log("Error: ", error);
+                        })
+
+                    }.bind(this))/*/
                     .catch(function (error) {
                       console.log(
                         "Hubo un problema con la petición Fetch:",
@@ -651,6 +683,7 @@ class AddExcavacion extends React.Component {
 
 
                 }.bind(this))
+               
                 .catch(function (error) {
                   toast.error("Error al consultar Bochones. Intente nuevamente.");
                   console.log(
@@ -835,7 +868,7 @@ class AddExcavacion extends React.Component {
                 listBochones: listB
               });
 
-              fetch(urlApi + '/bochon/' + this.state.excavacionId, {
+              fetch(urlApi + '/bochonExca/' + this.state.excavacionId, {
                 method: 'GET',
                 headers: {
                   'Authorization': 'Bearer ' + cookies.get('token')
@@ -980,7 +1013,7 @@ class AddExcavacion extends React.Component {
                 }
               })
                 .then(function (response) {
-                  console.log('PASA CON ', response);
+               
                   if (response.ok) {
                     toast.success("¡Se eliminó al Bochon con Éxito!");
                   }
@@ -996,7 +1029,7 @@ class AddExcavacion extends React.Component {
             .then(function () {
               //Actualizo la lista de bochones
 
-              fetch(urlApi + '/bochon/' + this.state.excavacionId, {
+              fetch(urlApi + '/bochonExca/' + this.state.excavacionId, {
                 method: 'GET',
                 headers: {
                   'Authorization': 'Bearer ' + cookies.get('token')
@@ -2055,6 +2088,11 @@ class AddExcavacion extends React.Component {
       value: opt._id,
     }));
 
+
+    const { idExploracionCrear } = this.state;
+
+  
+
     const { selectedPieza } = this.state;
     let optPiezas = this.state.piezas.map((opt) => ({
       label: opt.identificador,
@@ -2335,11 +2373,11 @@ class AddExcavacion extends React.Component {
 
                     <br />
 
-                    {/*   <CrearExcavacion
-                      idExploracion={this.state.selectedExploracion.value}
+                       <CrearExcavacion
+                      idExploracion={idExploracionCrear}
                       setIdAreaExcavacion={this.setIdAreaExcavacion}
                       setPuntoGpsExcavacion={this.setPuntoGpsExcavacion}
-                    /> */}
+                    /> 
                     <br />
 
                     <Form.Row >

@@ -114,6 +114,8 @@ class EditExcavacion extends React.Component {
       piezasMNames: [],
       bochonMId: '',
       validatedMBochon: false,
+      idExploracionModificar:"",
+      puntoGps:{}
     };
 
   }
@@ -142,7 +144,7 @@ class EditExcavacion extends React.Component {
         console.log('Ha ocurrido un error:', error)
       });
 
-    fetch(urlApi + '/bochon', {
+    fetch(urlApi + '/bochonExca/'+this.props.match.params.id, {
       method: 'GET',
       headers: {
         'Authorization': 'Bearer ' + cookies.get('token')
@@ -260,10 +262,9 @@ class EditExcavacion extends React.Component {
 
             var exploracionSelect = []
             var exploracionS = null
-            console.log('exploraciones:', this.state.exploraciones)
+           
             if (excavacions.excavacionId.idExploracion !== null && excavacions.excavacionId.idExploracion !== '') {
               exploracionSelect = this.state.exploraciones.filter(option => option._id === excavacions.excavacionId.idExploracion)
-              console.log('exploracionSelect:', exploracionSelect)
               if (exploracionSelect !== []) {
                 exploracionS = {
                   label: exploracionSelect[0].nombreArea,
@@ -292,7 +293,8 @@ class EditExcavacion extends React.Component {
               listArchivosFotos: excavacions.excavacionId.fotosExcavacion,
               listArchivosVideo: excavacions.excavacionId.videosExcavacion,
               profesionalesId: excavacions.excavacionId.profesionales,
-              auxiliaresId: excavacions.excavacionId.auxiliares
+              auxiliaresId: excavacions.excavacionId.auxiliares,
+              puntoGPS:excavacions.excavacionId.puntoGPS 
             })
 
             this.setState({
@@ -363,6 +365,7 @@ class EditExcavacion extends React.Component {
   handleExploracionesChange = (selectedExploracion) => {
     this.setState({ selectedExploracionAnt: this.state.selectedExploracion });
     this.setState({ selectedExploracion });
+    this.setState({ idExploracionModificar:selectedExploracion.value });
   };
 
   handleEjemplarChange = (selectedEjemplar) => {
@@ -654,7 +657,7 @@ class EditExcavacion extends React.Component {
                 listBochones: listB
               });
 
-              fetch(urlApi + '/bochon/' + this.props.match.params.id, {
+              fetch(urlApi + '/bochonExca/' + this.props.match.params.id, {
                 method: 'GET',
                 headers: {
                   'Authorization': 'Bearer ' + cookies.get('token')
@@ -888,7 +891,7 @@ class EditExcavacion extends React.Component {
                 listBochones: listB
               });
 
-              fetch(urlApi + '/bochon/' + this.props.match.params.id, {
+              fetch(urlApi + '/bochonExca/' + this.props.match.params.id, {
                 method: 'GET',
                 headers: {
                   'Authorization': 'Bearer ' + cookies.get('token')
@@ -1033,7 +1036,7 @@ class EditExcavacion extends React.Component {
                 }
               })
                 .then(function (response) {
-                  console.log('PASA CON ', response);
+                  //console.log('PASA CON ', response);
                   if (response.ok) {
                     toast.success("¡Se eliminó al Bochon con Éxito!");
                   }
@@ -1049,7 +1052,7 @@ class EditExcavacion extends React.Component {
             .then(function () {
               //Actualizo la lista de bochones
 
-              fetch(urlApi + '/bochon/' + this.props.match.params.id, {
+              fetch(urlApi + '/bochonExca/' + this.props.match.params.id, {
                 method: 'GET',
                 headers: {
                   'Authorization': 'Bearer ' + cookies.get('token')
@@ -2123,6 +2126,8 @@ class EditExcavacion extends React.Component {
       value: opt._id,
     }));
 
+    const {idExploracionModificar}=this.state;
+
 
 
     return (
@@ -2377,12 +2382,12 @@ class EditExcavacion extends React.Component {
 
                     <br />
 
-                    {/*       <ModificarExcavacion
-                      idExploracion={this.state.selectedExploracion}
+                        <ModificarExcavacion
+                      idExploracion={idExploracionModificar}
                       excavacionId={this.props.match.params.id}
                       setPuntoGpsExcavacion={this.setPuntoGpsExcavacion}
                       setIdAreaExcavacion={this.setIdAreaExcavacion}
-          /> */}
+                       />
 
 
                     <br />
@@ -2727,7 +2732,7 @@ class EditExcavacion extends React.Component {
                     </Form.Row>
 
                     <Form.Row>
-                      <Form.Group className="col-sm-12" controlId="ejemplarAsociadoM">
+                      <Form.Group className="col-sm-12" controlId="ejemplarAsociadoM" >
                         <Form.Label>Ejemplar (*):</Form.Label>
                         <Select
                           placeholder={"Seleccione Ejemplar"}
@@ -2736,6 +2741,7 @@ class EditExcavacion extends React.Component {
                           value={selectedEjemplarM}
                           required
                           isClearable
+                          isDisabled
                         />
                       </Form.Group>
                     </Form.Row>
