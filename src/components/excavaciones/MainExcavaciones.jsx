@@ -53,7 +53,17 @@ class MainExcavaciones extends React.Component {
   eliminar(id) {
 
 
-    fetch("http://museo.fi.uncoma.edu.ar:3006/api/ejemplarExca/" + id)
+  }
+
+  eliminar2(id) {
+
+
+    fetch(urlApi + "/ejemplarExca/" + id, {
+      method: 'GET',
+      headers: {
+        'Authorization': 'Bearer ' + cookies.get('token')
+      }
+    })
       .then(response => response.json())
       .then(datax => {
         var ejemplares = datax.ejemplar;
@@ -62,7 +72,12 @@ class MainExcavaciones extends React.Component {
           toast.error("Imposible eliminar. Existen ejemplares asociados a la Excavación.");
         }
         else {
-          fetch("http://museo.fi.uncoma.edu.ar:3006/api/excavacionId/" + id)
+          fetch(urlApi + "/excavacionId/" + id, {
+            method: 'GET',
+            headers: {
+              'Authorization': 'Bearer ' + cookies.get('token')
+            }
+          })
             .then(response => response.json())
             .then(data => {
               this.setState({ idExploracion: data.excavacionId.idExploracion, bochones: data.excavacionId.bochonesEncontrados });
@@ -77,7 +92,12 @@ class MainExcavaciones extends React.Component {
               }
               else {
 
-                fetch("http://museo.fi.uncoma.edu.ar:3006/api/exploracionId/" + this.state.idExploracion)
+                fetch(urlApi + "/exploracionId/" + this.state.idExploracion, {
+                  method: 'GET',
+                  headers: {
+                    'Authorization': 'Bearer ' + cookies.get('token')
+                  }
+                })
                   .then(response => response.json())
                   .then(data2 => {
 
@@ -89,19 +109,23 @@ class MainExcavaciones extends React.Component {
                     var dataExc = {
                       "idExcavaciones": this.state.arrayExcExploracion
                     }
-                    fetch("http://museo.fi.uncoma.edu.ar:3006/api/exploracion/" + this.state.idExploracion, {
+                    fetch(urlApi + "/exploracion/" + this.state.idExploracion, {
                       method: 'put',
                       body: JSON.stringify(dataExc),
                       headers: {
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + cookies.get('token')
                       }
                     })
                       .then(function (response) {
                         if (response.ok) {
 
                           //Elimino la Excavación ahora
-                          fetch("http://museo.fi.uncoma.edu.ar:3006/api/excavacion/" + id, {
+                          fetch(urlApi + "/excavacion/" + id, {
                             method: "delete",
+                            headers: {
+                              'Authorization': 'Bearer ' + cookies.get('token')
+                            }
                           })
                             .then(function (response) {
                               if (response.ok) {
@@ -109,9 +133,8 @@ class MainExcavaciones extends React.Component {
                               }
                             })
                             .then(function (resp) {
-                              const destino =
-                                "/var/www/museo-administracion/html/images/excavaciones/" + id + "/";
-                              fetch("http://museo.fi.uncoma.edu.ar:3006/api/deleteDirectorio", {
+                              const destino = rutaExcavaciones + 'Fotos/' + id + "/";
+                              fetch(urlApi + "/deleteDirectorio", {
                                 method: "get",
                                 headers: {
                                   "Content-Type": undefined,
@@ -246,7 +269,7 @@ class MainExcavaciones extends React.Component {
                       }
                     },
                   },
-        
+
                 ]}
                 options={{
                   filtering: true,

@@ -11,6 +11,7 @@ import Menu from "./../Menu";
 import Cookies from "universal-cookie";
 import $ from 'jquery';
 import axios from "axios";
+import { Error } from "@material-ui/icons";
 
 const cookies = new Cookies();
 
@@ -42,7 +43,8 @@ class AddExcavacion extends React.Component {
       fechaTermino: "",
       motivoBaja: "",
       muestraHome: false,
-      selectedExploracion: "",
+      selectedExploracion: null,
+      selectedExploracionAnt: null,
       selectedAuxiliar: null,
       selectedDirector: null,
       selectedProfesional: null,
@@ -70,7 +72,7 @@ class AddExcavacion extends React.Component {
       infoAdicional: '',
       piezasAsociadas: [],
       piezas: [],
-      codigoCampoB:'',
+      codigoCampoB: '',
       identificadorPieza: '',
       nombrePieza: '',
       descripcionPieza: '',
@@ -111,8 +113,8 @@ class AddExcavacion extends React.Component {
       piezasMId: [],
       piezasM: [],
       piezasMNames: [],
-      bochonMId:'',
-      validatedMBochon:false,
+      bochonMId: '',
+      validatedMBochon: false
     };
   }
 
@@ -241,6 +243,7 @@ class AddExcavacion extends React.Component {
   };
 
   handleExploracionesChange = (selectedExploracion) => {
+    this.setState({ selectedExploracionAnt: this.state.selectedExploracion });
     this.setState({ selectedExploracion });
   };
 
@@ -439,7 +442,7 @@ class AddExcavacion extends React.Component {
 
       }
       else { //op=U
-        $(".loader").removeAttr("style");  
+        $(".loader").removeAttr("style");
         var directorName = "";
         var directorId = "";
         if (this.state.selectedDirector !== null) {
@@ -474,7 +477,7 @@ class AddExcavacion extends React.Component {
 
             }
           })
-          .then(function(data){ this.setState({key: 'dhallazgo' });}.bind(this))
+          .then(function (data) { this.setState({ key: 'dhallazgo' }); }.bind(this))
           .catch(function (error) {
             $(".loader").fadeOut("slow");
             toast.error("Error al guardar. Intente nuevamente.");
@@ -521,7 +524,7 @@ class AddExcavacion extends React.Component {
       this.setState({ tabtax: false, key: 'dtax' });
 
     }
-    this.setState({ validatedgeo: true,  tabbochon: false, tabfotos: false, tabvideos: false });
+    this.setState({ validatedgeo: true, tabbochon: false, tabfotos: false, tabvideos: false });
   }
 
   handleAntForm3 = (event) => {
@@ -531,7 +534,7 @@ class AddExcavacion extends React.Component {
   }
 
 
-  
+
 
   handlePiezasChange = (selectedPieza) => {
     let piezas = Array.from(selectedPieza, option => option.value);
@@ -749,11 +752,11 @@ class AddExcavacion extends React.Component {
             modalActualizarBochon: true,
             piezasMId: dato.piezasId,
             piezasMNames: dato.piezasNames,
-            bochonMId:dato._id
+            bochonMId: dato._id
           });
 
         }.bind(this))
-        .catch( function(error){   
+        .catch(function (error) {
           console.log('Hubo un problema con la petición Fetch (2):' + error.message);
         })
 
@@ -809,7 +812,7 @@ class AddExcavacion extends React.Component {
             "infoAdicional": this.state.infoAdicionalM
           }
 
-          fetch(urlApi + "/bochon/"+this.state.bochonMId, {
+          fetch(urlApi + "/bochon/" + this.state.bochonMId, {
             method: "put",
             body: JSON.stringify(data),
             headers: {
@@ -1367,13 +1370,13 @@ class AddExcavacion extends React.Component {
     $(".loader").removeAttr("style");
 
     var exploracionId = "";
-    if (this.state.selectedExploracion !== "") {
-      var exploracionId = this.state.selectedExploracion.value;
+    if (this.state.selectedExploracion !== null && this.state.selectedExploracion !== "") {
+      exploracionId = this.state.selectedExploracion.value;
     }
 
     var hallazgo = "";
     if (this.state.selectedHallazgo !== null) {
-      var hallazgo = this.state.selectedHallazgo.value;
+      hallazgo = this.state.selectedHallazgo.value;
     }
 
 
@@ -1395,6 +1398,9 @@ class AddExcavacion extends React.Component {
       "puntoGPS": this.state.puntoGpsExcavacion,
     }
 
+
+
+
     fetch(urlApi + "/excavacion/" + this.state.excavacionId, {
       method: "put",
       body: JSON.stringify(data),
@@ -1404,11 +1410,128 @@ class AddExcavacion extends React.Component {
       },
     })
       .then(function (response) {
-        $(".loader").fadeOut("slow");
+
         if (response.ok) {
-          toast.success("¡Se guardó la Excavación con Éxito!");
+          console.log("¡Se guardó la Excavación con Éxito!");
         }
-      })
+      }).then(function () {
+        if (this.state.selectedExploracion !== null) {
+          fetch(urlApi + "/exploracionId/" + this.state.selectedExploracion.value, {
+            method: 'get',
+            headers: {
+              'Authorization': 'Bearer ' + cookies.get('token')
+            }
+          })
+            .then(response => response.json())
+            .then(data => {
+              var excavaciones = data.exploracionId.idExcavaciones
+              if (!excavaciones.includes(this.state.excavacionId)) {
+                //si no existe en el arreglo lo agrego
+                excavaciones.push(this.state.excavacionId)
+
+                var data = {
+                  "idExcavaciones": excavaciones
+                }
+                fetch(urlApi + "/exploracion/" + this.state.selectedExploracion.value, {
+                  method: "put",
+                  body: JSON.stringify(data),
+                  headers: {
+                    "Content-Type": "application/json",
+                    'Authorization': 'Bearer ' + cookies.get('token')
+                  },
+                })
+                  .then(function (response) {
+                    $(".loader").fadeOut("slow");
+                    if (response.ok) {
+                      console.log("¡Se guardó la Exploracion con Éxito!");
+                      toast.success("¡Se guardó la Excavación con Éxito!");
+                    }
+                  }.bind(this))
+                  .catch(function (error) {
+                    $(".loader").fadeOut("slow");
+                    toast.error("Error al guardar. Intente nuevamente.");
+                    console.log(
+                      "Hubo un problema con la petición Fetch:" + error.message
+                    );
+                  });
+
+              }
+              else {
+                $(".loader").fadeOut("slow");
+              }
+
+
+            })
+            .catch(function (error) {
+              console.log('Error:', Error)
+            })
+
+        }
+
+      }.bind(this))
+      .then(function () {
+        if (this.state.selectedExploracionAnt !== null) {
+          fetch(urlApi + "/exploracionId/" + this.state.selectedExploracionAnt.value, {
+            method: 'get',
+            headers: {
+              'Authorization': 'Bearer ' + cookies.get('token')
+            }
+          })
+            .then(response => response.json())
+            .then(data => {
+              var excavaciones = data.exploracionId.idExcavaciones
+              if (excavaciones.includes(this.state.excavacionId)) {
+
+                //borro de la exploracion anterior la excavacion
+                var contador = 0;
+                excavaciones.map((registro) => {
+                  if (registro === this.state.excavacionId) {
+                    excavaciones.splice(contador, 1);
+                  }
+                  contador++;
+                });
+
+                var data = {
+                  "idExcavaciones": excavaciones
+                }
+                fetch(urlApi + "/exploracion/" + this.state.selectedExploracionAnt.value, {
+                  method: "put",
+                  body: JSON.stringify(data),
+                  headers: {
+                    "Content-Type": "application/json",
+                    'Authorization': 'Bearer ' + cookies.get('token')
+                  },
+                })
+                  .then(function (response) {
+                    $(".loader").fadeOut("slow");
+                    if (response.ok) {
+                      console.log("¡Se guardó la Exploracion con Éxito!");
+                      toast.success("¡Se guardó la Excavación con Éxito!");
+                    }
+                  }.bind(this))
+                  .catch(function (error) {
+                    $(".loader").fadeOut("slow");
+                    toast.error("Error al guardar. Intente nuevamente.");
+                    console.log(
+                      "Hubo un problema con la petición Fetch:" + error.message
+                    );
+                  });
+
+              }
+              else {
+                $(".loader").fadeOut("slow");
+              }
+
+
+            })
+            .catch(function (error) {
+              console.log('Error:', Error)
+            })
+
+        }
+
+
+      }.bind(this))
       .catch(function (error) {
         $(".loader").fadeOut("slow");
         toast.error("Error al guardar. Intente nuevamente.");
@@ -1478,7 +1601,7 @@ class AddExcavacion extends React.Component {
 
               listArchivosFotos.push(fotoSubir);
 
-            //  console.log('LAS FOTOS::', listArchivosFotos);
+              //  console.log('LAS FOTOS::', listArchivosFotos);
 
               var dataFoto = {
                 "fotosExcavacion": listArchivosFotos,
@@ -2072,7 +2195,7 @@ class AddExcavacion extends React.Component {
                             onChange={this.handleFinicioChange}
                             required
                           />
-                           <Form.Control.Feedback type="invalid">
+                          <Form.Control.Feedback type="invalid">
                             Por favor, ingrese Fecha.
                           </Form.Control.Feedback>
                         </Form.Group>
@@ -2212,11 +2335,11 @@ class AddExcavacion extends React.Component {
 
                     <br />
 
-                    <CrearExcavacion
+                    {/*   <CrearExcavacion
                       idExploracion={this.state.selectedExploracion.value}
                       setIdAreaExcavacion={this.setIdAreaExcavacion}
                       setPuntoGpsExcavacion={this.setPuntoGpsExcavacion}
-                    />
+                    /> */}
                     <br />
 
                     <Form.Row >
@@ -2524,81 +2647,81 @@ class AddExcavacion extends React.Component {
                   <Modal.Title>Editar Bochón</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                <Form id="form9" noValidate validated={this.state.validatedMBochon}>
+                  <Form id="form9" noValidate validated={this.state.validatedMBochon}>
 
 
-                  <Form.Row>
-                    <Form.Group className="col-sm-6" controlId="codigoCampoM">
-                      <Form.Label>Código Campo (*):</Form.Label>
-                      <Form.Control
-                        type="text"
-                        name='codigoCampoM'
-                        value={this.state.codigoCampoM}
-                        onChange={this.handleCodCampoMChange}
-                        required 
-                      />
-                         <Form.Control.Feedback type="invalid">
+                    <Form.Row>
+                      <Form.Group className="col-sm-6" controlId="codigoCampoM">
+                        <Form.Label>Código Campo (*):</Form.Label>
+                        <Form.Control
+                          type="text"
+                          name='codigoCampoM'
+                          value={this.state.codigoCampoM}
+                          onChange={this.handleCodCampoMChange}
+                          required
+                        />
+                        <Form.Control.Feedback type="invalid">
                           Por favor, ingrese Nro. Bochón.
                         </Form.Control.Feedback>
-                    </Form.Group>
+                      </Form.Group>
 
-                    <Form.Group className="col-sm-6" controlId="nroBochonM">
-                      <Form.Label>Nro. Bochón (*):</Form.Label>
-                      <Form.Control
-                        type="text"
-                        name='nroBochonM'
-                        value={this.state.nroBochonM}
-                        onChange={this.handleNroBochonMChange}
-                        required 
-                      />
-                    </Form.Group>
-                    <Form.Control.Feedback type="invalid">
-                          Por favor, ingrese Nro. Bochón.
-                        </Form.Control.Feedback>
-                 
-                  </Form.Row>
+                      <Form.Group className="col-sm-6" controlId="nroBochonM">
+                        <Form.Label>Nro. Bochón (*):</Form.Label>
+                        <Form.Control
+                          type="text"
+                          name='nroBochonM'
+                          value={this.state.nroBochonM}
+                          onChange={this.handleNroBochonMChange}
+                          required
+                        />
+                      </Form.Group>
+                      <Form.Control.Feedback type="invalid">
+                        Por favor, ingrese Nro. Bochón.
+                      </Form.Control.Feedback>
 
-                  <Form.Row>
-                    <Form.Group className="col-sm-12" controlId="ejemplarAsociadoM">
-                      <Form.Label>Ejemplar (*):</Form.Label>
-                      <Select
-                        placeholder={"Seleccione Ejemplar"}
-                        options={optEjemplares}
-                        onChange={this.handleEjemplarMChange}
-                        value={selectedEjemplarM}
-                        required
-                        isClearable
-                      />
-                    </Form.Group>
-                  </Form.Row>
+                    </Form.Row>
 
-                  <Form.Row>
-                    <Form.Group className="col-sm-12" controlId="piezasAsociadasM">
-                      <Form.Label>Piezas Asociadas (*):</Form.Label>
-                      <Select
-                        placeholder={"Seleccione Piezas"}
-                        options={optPiezasM}
-                        onChange={this.handlePiezasMChange}
-                        value={selectedPiezaM}
-                        isMulti
-                        isClearable
-                      />
-                    </Form.Group>
-                  </Form.Row>
-                  <Form.Row>
-                    <Form.Group className="col-sm-12" controlId="infoAdicionalM">
-                      <Form.Label>Información Adicional:</Form.Label>
-                      <Form.Control
-                        as='textarea'
-                        name='infoAdicionalM'
-                        onChange={this.handleInfoAdicionalMChange}
-                        value={this.state.infoAdicionalM}
-                      />
-                    </Form.Group>
-                  </Form.Row>
-                  <small>(*) Campos Obligatorios</small>
+                    <Form.Row>
+                      <Form.Group className="col-sm-12" controlId="ejemplarAsociadoM">
+                        <Form.Label>Ejemplar (*):</Form.Label>
+                        <Select
+                          placeholder={"Seleccione Ejemplar"}
+                          options={optEjemplares}
+                          onChange={this.handleEjemplarMChange}
+                          value={selectedEjemplarM}
+                          required
+                          isClearable
+                        />
+                      </Form.Group>
+                    </Form.Row>
 
-                 </Form> 
+                    <Form.Row>
+                      <Form.Group className="col-sm-12" controlId="piezasAsociadasM">
+                        <Form.Label>Piezas Asociadas (*):</Form.Label>
+                        <Select
+                          placeholder={"Seleccione Piezas"}
+                          options={optPiezasM}
+                          onChange={this.handlePiezasMChange}
+                          value={selectedPiezaM}
+                          isMulti
+                          isClearable
+                        />
+                      </Form.Group>
+                    </Form.Row>
+                    <Form.Row>
+                      <Form.Group className="col-sm-12" controlId="infoAdicionalM">
+                        <Form.Label>Información Adicional:</Form.Label>
+                        <Form.Control
+                          as='textarea'
+                          name='infoAdicionalM'
+                          onChange={this.handleInfoAdicionalMChange}
+                          value={this.state.infoAdicionalM}
+                        />
+                      </Form.Group>
+                    </Form.Row>
+                    <small>(*) Campos Obligatorios</small>
+
+                  </Form>
                 </Modal.Body>
                 <Modal.Footer>
                   <Button variant="secondary" onClick={() => this.cerrarModalActualizarBochon()}>

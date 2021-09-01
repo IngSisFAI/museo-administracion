@@ -43,7 +43,8 @@ class EditExcavacion extends React.Component {
       fechaTermino: "",
       motivoBaja: "",
       muestraHome: false,
-      selectedExploracion: "",
+      selectedExploracion: null,
+      selectedExploracionAnt: null,
       selectedAuxiliar: null,
       selectedDirector: null,
       selectedProfesional: null,
@@ -121,6 +122,7 @@ class EditExcavacion extends React.Component {
 
   //antes de cargar el DOM      
   componentWillMount() {
+
     fetch(urlApi + '/personas', {
       method: 'GET',
       headers: {
@@ -199,6 +201,8 @@ class EditExcavacion extends React.Component {
   //una vez cargado en el DOM
   componentDidMount() {
 
+
+
     if (!cookies.get('user') && !cookies.get('password')) {
       window.location.href = '/';
     }
@@ -215,7 +219,7 @@ class EditExcavacion extends React.Component {
           return response.json()
         })
         .then((excavacions) => {
-        
+
 
           var fb = excavacions.excavacionId.fechaTermino;
           if (fb !== null) {
@@ -256,9 +260,10 @@ class EditExcavacion extends React.Component {
 
             var exploracionSelect = []
             var exploracionS = null
+            console.log('exploraciones:', this.state.exploraciones)
             if (excavacions.excavacionId.idExploracion !== null && excavacions.excavacionId.idExploracion !== '') {
               exploracionSelect = this.state.exploraciones.filter(option => option._id === excavacions.excavacionId.idExploracion)
-
+              console.log('exploracionSelect:', exploracionSelect)
               if (exploracionSelect !== []) {
                 exploracionS = {
                   label: exploracionSelect[0].nombreArea,
@@ -356,6 +361,7 @@ class EditExcavacion extends React.Component {
   };
 
   handleExploracionesChange = (selectedExploracion) => {
+    this.setState({ selectedExploracionAnt: this.state.selectedExploracion });
     this.setState({ selectedExploracion });
   };
 
@@ -488,53 +494,53 @@ class EditExcavacion extends React.Component {
     } else {
 
 
-        $(".loader").removeAttr("style");  
-        var directorName = "";
-        var directorId = "";
-        if (this.state.selectedDirector !== null) {
-          directorName = this.state.selectedDirector.label;
-          directorId = this.state.selectedDirector.value
-        }
+      $(".loader").removeAttr("style");
+      var directorName = "";
+      var directorId = "";
+      if (this.state.selectedDirector !== null) {
+        directorName = this.state.selectedDirector.label;
+        directorId = this.state.selectedDirector.value
+      }
 
-        var data = {
-          "nombreArea": this.state.nombreArea,
-          "codigoCampo": this.state.codigoCampo,
-          "fechaInicio": this.state.fechaInicio,
-          "fechaTermino": this.state.fechaTermino,
-          "director": directorName,
-          "directorId": directorId,
-          "auxiliares": this.state.auxiliaresId,
-          "profesionales": this.state.profesionalesId,
-          "muestraHome": this.state.muestraHome
+      var data = {
+        "nombreArea": this.state.nombreArea,
+        "codigoCampo": this.state.codigoCampo,
+        "fechaInicio": this.state.fechaInicio,
+        "fechaTermino": this.state.fechaTermino,
+        "director": directorName,
+        "directorId": directorId,
+        "auxiliares": this.state.auxiliaresId,
+        "profesionales": this.state.profesionalesId,
+        "muestraHome": this.state.muestraHome
+      }
+      fetch(urlApi + '/excavacion/' + this.props.match.params.id, {
+        method: 'put',
+        body: JSON.stringify(data),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + cookies.get('token')
         }
-        fetch(urlApi + '/excavacion/' + this.props.match.params.id, {
-          method: 'put',
-          body: JSON.stringify(data),
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + cookies.get('token')
-          }
-        })
-          .then(function (response) {
-            if (response.ok) {
-              console.log("¡Se actualizaron los datos de la Excavación con Éxito!");
-              $(".loader").fadeOut("slow");
-
-            }
-            
-            return response.json();
-          })
-          .then(function(data){ this.setState({key: 'dhallazgo' });}.bind(this))
-          .catch(function (error) {
+      })
+        .then(function (response) {
+          if (response.ok) {
+            console.log("¡Se actualizaron los datos de la Excavación con Éxito!");
             $(".loader").fadeOut("slow");
-            toast.error("Error al guardar. Intente nuevamente.");
-            console.log(
-              "Hubo un problema con la petición Fetch:",
-              error.message
-            );
-          });
 
-      
+          }
+
+          return response.json();
+        })
+        .then(function (data) { this.setState({ key: 'dhallazgo' }); }.bind(this))
+        .catch(function (error) {
+          $(".loader").fadeOut("slow");
+          toast.error("Error al guardar. Intente nuevamente.");
+          console.log(
+            "Hubo un problema con la petición Fetch:",
+            error.message
+          );
+        });
+
+
     }
     this.setState({ validateddb: true });
   }
@@ -1416,7 +1422,7 @@ class EditExcavacion extends React.Component {
     $(".loader").removeAttr("style");
 
     var exploracionId = "";
-    if (this.state.selectedExploracion !== "") {
+    if (this.state.selectedExploracion !== null && this.state.selectedExploracion !== "") {
       var exploracionId = this.state.selectedExploracion.value;
     }
 
@@ -1455,9 +1461,126 @@ class EditExcavacion extends React.Component {
       .then(function (response) {
         $(".loader").fadeOut("slow");
         if (response.ok) {
-          toast.success("¡Se guardó la Excavación con Éxito!");
+          console.log("¡Se guardó la Excavación con Éxito!");
         }
-      })
+      }).then(function () {
+        if (this.state.selectedExploracion !== null) {
+          fetch(urlApi + "/exploracionId/" + this.state.selectedExploracion.value, {
+            method: 'get',
+            headers: {
+              'Authorization': 'Bearer ' + cookies.get('token')
+            }
+          })
+            .then(response => response.json())
+            .then(data => {
+              var excavaciones = data.exploracionId.idExcavaciones
+              if (!excavaciones.includes(this.props.match.params.id)) {
+                //si no existe en el arreglo lo agrego
+                excavaciones.push(this.props.match.params.id)
+
+                var data = {
+                  "idExcavaciones": excavaciones
+                }
+                fetch(urlApi + "/exploracion/" + this.state.selectedExploracion.value, {
+                  method: "put",
+                  body: JSON.stringify(data),
+                  headers: {
+                    "Content-Type": "application/json",
+                    'Authorization': 'Bearer ' + cookies.get('token')
+                  },
+                })
+                  .then(function (response) {
+                    $(".loader").fadeOut("slow");
+                    if (response.ok) {
+                      console.log("¡Se guardó la Exploracion con Éxito!");
+                      toast.success("¡Se guardó la Excavación con Éxito!");
+                    }
+                  }.bind(this))
+                  .catch(function (error) {
+                    $(".loader").fadeOut("slow");
+                    toast.error("Error al guardar. Intente nuevamente.");
+                    console.log(
+                      "Hubo un problema con la petición Fetch:" + error.message
+                    );
+                  });
+
+              }
+              else {
+                $(".loader").fadeOut("slow");
+              }
+
+
+            })
+            .catch(function (error) {
+              console.log('Error:', Error)
+            })
+
+        }
+
+      }.bind(this))
+      .then(function () {
+        if (this.state.selectedExploracionAnt !== null) {
+          fetch(urlApi + "/exploracionId/" + this.state.selectedExploracionAnt.value, {
+            method: 'get',
+            headers: {
+              'Authorization': 'Bearer ' + cookies.get('token')
+            }
+          })
+            .then(response => response.json())
+            .then(data => {
+              var excavaciones = data.exploracionId.idExcavaciones
+              if (excavaciones.includes(this.props.match.params.id)) {
+
+                //borro de la exploracion anterior la excavacion
+                var contador = 0;
+                excavaciones.map((registro) => {
+                  if (registro === this.props.match.params.id) {
+                    excavaciones.splice(contador, 1);
+                  }
+                  contador++;
+                });
+
+                var data = {
+                  "idExcavaciones": excavaciones
+                }
+                fetch(urlApi + "/exploracion/" + this.state.selectedExploracionAnt.value, {
+                  method: "put",
+                  body: JSON.stringify(data),
+                  headers: {
+                    "Content-Type": "application/json",
+                    'Authorization': 'Bearer ' + cookies.get('token')
+                  },
+                })
+                  .then(function (response) {
+                    $(".loader").fadeOut("slow");
+                    if (response.ok) {
+                      console.log("¡Se guardó la Exploracion con Éxito!");
+                      toast.success("¡Se guardó la Excavación con Éxito!");
+                    }
+                  }.bind(this))
+                  .catch(function (error) {
+                    $(".loader").fadeOut("slow");
+                    toast.error("Error al guardar. Intente nuevamente.");
+                    console.log(
+                      "Hubo un problema con la petición Fetch:" + error.message
+                    );
+                  });
+
+              }
+              else {
+                $(".loader").fadeOut("slow");
+              }
+
+
+            })
+            .catch(function (error) {
+              console.log('Error:', Error)
+            })
+
+        }
+
+
+      }.bind(this))
       .catch(function (error) {
         $(".loader").fadeOut("slow");
         toast.error("Error al guardar. Intente nuevamente.");
@@ -2254,12 +2377,12 @@ class EditExcavacion extends React.Component {
 
                     <br />
 
-                    <ModificarExcavacion
+                    {/*       <ModificarExcavacion
                       idExploracion={this.state.selectedExploracion}
                       excavacionId={this.props.match.params.id}
                       setPuntoGpsExcavacion={this.setPuntoGpsExcavacion}
                       setIdAreaExcavacion={this.setIdAreaExcavacion}
-                    />
+          /> */}
 
 
                     <br />
