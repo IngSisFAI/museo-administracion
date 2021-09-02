@@ -11,6 +11,9 @@ import moment from 'moment'
 
 const cookies = new Cookies();
 
+//Variables Globales
+const urlApi = process.env.REACT_APP_API_HOST;
+
 class Login extends React.Component {
 
   constructor(props) {
@@ -34,7 +37,7 @@ class Login extends React.Component {
   iniciarSesion  = async () => {
 
 
-     await axios.get('http://museo.fi.uncoma.edu.ar:3006/api/validaUsuario/', { params:{"user": this.state.user, "password": md5(this.state.password)}})
+     await axios.get(urlApi+'/validaUsuario/', { params:{"user": this.state.user, "password": md5(this.state.password)}})
            .then( response => {
                return response.data;
            })
