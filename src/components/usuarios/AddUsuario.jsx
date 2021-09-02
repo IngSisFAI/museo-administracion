@@ -11,6 +11,8 @@ import Cookies from 'universal-cookie';
 import md5 from 'md5';
 
 const cookies = new Cookies();
+//Variables Globales
+const urlApi = process.env.REACT_APP_API_HOST;
 
 class AddUsuario extends React.Component {
 
@@ -30,7 +32,7 @@ class AddUsuario extends React.Component {
 
     componentDidMount()
     {
-      if(!cookies.get('username') && !cookies.get('password'))
+      if(!cookies.get('user') && !cookies.get('password'))
       {
           window.location.href='/';
       }
@@ -80,11 +82,12 @@ class AddUsuario extends React.Component {
                 passwordLogin: cookies.get('password')
              };
 
-             fetch("http://museo.fi.uncoma.edu.ar:3006/api/saveUsuario", {
+             fetch(urlApi+"/saveUsuario", {
                     method: "post",
                     body: JSON.stringify(data),
                     headers: {
-                      "Content-Type": "application/json"
+                      "Content-Type": "application/json",
+                      'Authorization': 'Bearer ' + cookies.get('token')
                     }
                   }).then(function(response) {
                       if (response.ok) {
@@ -92,6 +95,7 @@ class AddUsuario extends React.Component {
 
                       }
                     }).then( function (data){
+                       console.log('Data: ', data)
                        if(data.usuario!==[]) {
                         toast.success("¡Se guardó el usuario con Éxito!");
                         setTimeout(() => {
@@ -125,12 +129,19 @@ class AddUsuario extends React.Component {
 
     existeUsuario = () => {
 
-        axios.get("http://museo.fi.uncoma.edu.ar:3006/api/existeUsuario" , {params:{"usuario":this.state.user,"user": cookies.get('user'), "password":cookies.get('password')}})
+        axios.get(urlApi+"/existeUsuario" , {
+          params:{"usuario":this.state.user},
+                  headers: {
+                    "Content-Type": "application/json",
+                    'Authorization': 'Bearer ' + cookies.get('token')
+                  }
+                
+                })
         .then(response => {
           return response.data;
         })
         .then(usuarios => {
-          if (usuarios.usuarios.length > 0) {
+          if (usuarios.usuarios!==null) {
             toast.error("Existe Usuario.");
             this.setState({ user: "" });
            
