@@ -69,106 +69,115 @@ class MainExcavaciones extends React.Component {
         if (longitud > 0) {
           toast.error("Imposible eliminar. Existen bochones asociados a la Excavación.");
         } else {
-          fetch(urlApi + "/exploracionId/" + this.state.idExploracion, {
-            method: 'GET',
-            headers: {
-              'Authorization': 'Bearer ' + cookies.get('token')
-            }
-          })
-            .then(response => response.json())
-            .then(data2 => {
-
-              //Elimino la excavacion del arreglo de excavaciones del Ejemplar Asociado a ella
-              var excavacionesId = data2.exploracionId.idExcavaciones
-              excavacionesId = removeItemFromArr(excavacionesId, id)
-              this.setState({ arrayExcExploracion: excavacionesId });
-
-            })
-            .then(res3 => {
-              var dataExc = {
-                "idExcavaciones": this.state.arrayExcExploracion
+          if (this.state.idExploracion !== "") {
+            fetch(urlApi + "/exploracionId/" + this.state.idExploracion, {
+              method: 'GET',
+              headers: {
+                'Authorization': 'Bearer ' + cookies.get('token')
               }
-              fetch(urlApi + "/exploracion/" + this.state.idExploracion, {
-                method: 'put',
-                body: JSON.stringify(dataExc),
-                headers: {
-                  'Content-Type': 'application/json',
-                  'Authorization': 'Bearer ' + cookies.get('token')
-                }
+            })
+              .then(response => response.json())
+              .then(data2 => {
+
+                //Elimino la excavacion del arreglo de excavaciones del Ejemplar Asociado a ella
+                var excavacionesId = data2.exploracionId.idExcavaciones
+                excavacionesId = removeItemFromArr(excavacionesId, id)
+                this.setState({ arrayExcExploracion: excavacionesId });
+
               })
-                .then(function (response) {
-                  if (response.ok) {
-                    console.log("Se actualizo la Exploracion con exito.")
+              .then(res3 => {
+                var dataExc = {
+                  "idExcavaciones": this.state.arrayExcExploracion
+                }
+                fetch(urlApi + "/exploracion/" + this.state.idExploracion, {
+                  method: 'put',
+                  body: JSON.stringify(dataExc),
+                  headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + cookies.get('token')
                   }
                 })
-                .then(function () {
-                  //Elimino la Excavación ahora
-                  fetch(urlApi + "/excavacion/" + id, {
-                    method: "delete",
-                    headers: {
-                      'Authorization': 'Bearer ' + cookies.get('token')
+                  .then(function (response) {
+                    if (response.ok) {
+                      console.log("Se actualizo la Exploracion con exito.")
                     }
                   })
-                    .then(function (response) {
-                      if (response.ok) {
-                        console.log("¡Se eliminó la Excavación con Éxito!");
+                  .then(function () {
+                    //Elimino la Excavación ahora
+                    fetch(urlApi + "/excavacion/" + id, {
+                      method: "delete",
+                      headers: {
+                        'Authorization': 'Bearer ' + cookies.get('token')
                       }
                     })
-                    .then(function () {
-
-                      //Elimino todos los directorios asociados a la excavacion
-                      //Primero las Fotos
-                      const destinoFotos = rutaExcavaciones + 'Fotos/' + id + "/";
-                      fetch(urlApi + "/deleteDirectorio", {
-                        method: "get",
-                        headers: {
-                          "Content-Type": undefined,
-                          path: destinoFotos,
-                          'Authorization': 'Bearer ' + cookies.get('token')
-                        },
+                      .then(function (response) {
+                        if (response.ok) {
+                          console.log("¡Se eliminó la Excavación con Éxito!");
+                        }
                       })
-                        .then(function (response) {
-                          if (response.ok) {
-                            console.log('Se eliminó directorio fotos.');
-                          }
+                      .then(function () {
+
+                        //Elimino todos los directorios asociados a la excavacion
+                        //Primero las Fotos
+                        const destinoFotos = rutaExcavaciones + 'Fotos/' + id + "/";
+                        fetch(urlApi + "/deleteDirectorio", {
+                          method: "get",
+                          headers: {
+                            "Content-Type": undefined,
+                            path: destinoFotos,
+                            'Authorization': 'Bearer ' + cookies.get('token')
+                          },
                         })
-                        .then(function(){
-                          //Segundo los videos
-                          const destinoVideos = rutaExcavaciones + 'Videos/' + id + "/";
-                          fetch(urlApi + "/deleteDirectorio", {
-                            method: "get",
-                            headers: {
-                              "Content-Type": undefined,
-                              path: destinoVideos,
-                              'Authorization': 'Bearer ' + cookies.get('token')
-                            },
-                          })
                           .then(function (response) {
                             if (response.ok) {
-                              console.log('Se eliminó directorio videos.');
+                              console.log('Se eliminó directorio fotos.');
                             }
                           })
-                          .then(function(){
-                            const destinoDenuncias = rutaExcavaciones + 'Denuncias/' + id + "/";
+                          .then(function () {
+                            //Segundo los videos
+                            const destinoVideos = rutaExcavaciones + 'Videos/' + id + "/";
                             fetch(urlApi + "/deleteDirectorio", {
                               method: "get",
                               headers: {
                                 "Content-Type": undefined,
-                                path: destinoDenuncias,
+                                path: destinoVideos,
                                 'Authorization': 'Bearer ' + cookies.get('token')
                               },
                             })
-                            .then(function (response) {
-                              if (response.ok) {
-                                console.log('Se eliminó directorio Denuncias.');
-                              }
-                            })
-                            .catch(function (error) {
-                              toast.error("Error al eliminar. Intente nuevamente.");
-                              console.log(
-                                "Hubo un problema con la petición Fetch:" + error.message
-                              );
-                            });
+                              .then(function (response) {
+                                if (response.ok) {
+                                  console.log('Se eliminó directorio videos.');
+                                }
+                              })
+                              .then(function () {
+                                const destinoDenuncias = rutaExcavaciones + 'Denuncias/' + id + "/";
+                                fetch(urlApi + "/deleteDirectorio", {
+                                  method: "get",
+                                  headers: {
+                                    "Content-Type": undefined,
+                                    path: destinoDenuncias,
+                                    'Authorization': 'Bearer ' + cookies.get('token')
+                                  },
+                                })
+                                  .then(function (response) {
+                                    if (response.ok) {
+                                      console.log('Se eliminó directorio Denuncias.');
+                                    }
+                                  })
+                                  .catch(function (error) {
+                                    toast.error("Error al eliminar. Intente nuevamente.");
+                                    console.log(
+                                      "Hubo un problema con la petición Fetch:" + error.message
+                                    );
+                                  });
+
+                              })
+                              .catch(function (error) {
+                                toast.error("Error al eliminar. Intente nuevamente.");
+                                console.log(
+                                  "Hubo un problema con la petición Fetch:" + error.message
+                                );
+                              });
 
                           })
                           .catch(function (error) {
@@ -178,36 +187,128 @@ class MainExcavaciones extends React.Component {
                             );
                           });
 
-                        })
-                        .catch(function (error) {
-                          toast.error("Error al eliminar. Intente nuevamente.");
-                          console.log(
-                            "Hubo un problema con la petición Fetch:" + error.message
-                          );
-                        });
-
                         //Cartel de Exito
                         toast.success("¡Se eliminó la Excavación con Éxito!");
                         setTimeout(() => {
-                                    window.location.href = "/excavaciones";
+                          window.location.href = "/excavaciones";
                         }, 1500);
 
+                      })
+                      .catch(function (error) {
+                        toast.error("Error al eliminar. Intente nuevamente.");
+                        console.log("Hubo un problema con la petición Fetch:" + error.message);
+                      });
+
+                  })
+                  .catch(function (error) {
+                    console.log('Error:', error)
+                  })
+
+              })
+              .catch(function (error) {
+                console.log('Error:', error)
+              })
+          }
+          else {
+            //No tiene exploracion asignada
+            //Elimino la Excavación ahora
+            fetch(urlApi + "/excavacion/" + id, {
+              method: "delete",
+              headers: {
+                'Authorization': 'Bearer ' + cookies.get('token')
+              }
+            })
+              .then(function (response) {
+                if (response.ok) {
+                  console.log("¡Se eliminó la Excavación con Éxito!");
+                }
+              })
+              .then(function () {
+
+                //Elimino todos los directorios asociados a la excavacion
+                //Primero las Fotos
+                const destinoFotos = rutaExcavaciones + 'Fotos/' + id + "/";
+                fetch(urlApi + "/deleteDirectorio", {
+                  method: "get",
+                  headers: {
+                    "Content-Type": undefined,
+                    path: destinoFotos,
+                    'Authorization': 'Bearer ' + cookies.get('token')
+                  },
+                })
+                  .then(function (response) {
+                    if (response.ok) {
+                      console.log('Se eliminó directorio fotos.');
+                    }
+                  })
+                  .then(function () {
+                    //Segundo los videos
+                    const destinoVideos = rutaExcavaciones + 'Videos/' + id + "/";
+                    fetch(urlApi + "/deleteDirectorio", {
+                      method: "get",
+                      headers: {
+                        "Content-Type": undefined,
+                        path: destinoVideos,
+                        'Authorization': 'Bearer ' + cookies.get('token')
+                      },
                     })
-                    .catch(function (error) {
-                      toast.error("Error al eliminar. Intente nuevamente.");
-                      console.log("Hubo un problema con la petición Fetch:" + error.message);
-                    });
+                      .then(function (response) {
+                        if (response.ok) {
+                          console.log('Se eliminó directorio videos.');
+                        }
+                      })
+                      .then(function () {
+                        const destinoDenuncias = rutaExcavaciones + 'Denuncias/' + id + "/";
+                        fetch(urlApi + "/deleteDirectorio", {
+                          method: "get",
+                          headers: {
+                            "Content-Type": undefined,
+                            path: destinoDenuncias,
+                            'Authorization': 'Bearer ' + cookies.get('token')
+                          },
+                        })
+                          .then(function (response) {
+                            if (response.ok) {
+                              console.log('Se eliminó directorio Denuncias.');
+                            }
+                          })
+                          .catch(function (error) {
+                            toast.error("Error al eliminar. Intente nuevamente.");
+                            console.log(
+                              "Hubo un problema con la petición Fetch:" + error.message
+                            );
+                          });
 
-                })
-                .catch(function (error) {
-                  console.log('Error:', error)
-                })
+                      })
+                      .catch(function (error) {
+                        toast.error("Error al eliminar. Intente nuevamente.");
+                        console.log(
+                          "Hubo un problema con la petición Fetch:" + error.message
+                        );
+                      });
 
-            })
-            .catch(function (error) {
-              console.log('Error:', error)
-            })
+                  })
+                  .catch(function (error) {
+                    toast.error("Error al eliminar. Intente nuevamente.");
+                    console.log(
+                      "Hubo un problema con la petición Fetch:" + error.message
+                    );
+                  });
 
+                //Cartel de Exito
+                toast.success("¡Se eliminó la Excavación con Éxito!");
+                setTimeout(() => {
+                  window.location.href = "/excavaciones";
+                }, 1500);
+
+              })
+              .catch(function (error) {
+                toast.error("Error al eliminar. Intente nuevamente.");
+                console.log("Hubo un problema con la petición Fetch:" + error.message);
+              });
+
+
+          }
         }
       })
       .catch(function (error) {
@@ -217,7 +318,7 @@ class MainExcavaciones extends React.Component {
 
   }
 
-  eliminar2(id) {
+  /*eliminar2(id) {
 
 
     fetch(urlApi + "/ejemplarExca/" + id, {
@@ -359,7 +460,7 @@ class MainExcavaciones extends React.Component {
 
 
 
-  }
+  }*/
 
   render() {
     return (

@@ -294,7 +294,8 @@ class EditExcavacion extends React.Component {
               listArchivosVideo: excavacions.excavacionId.videosExcavacion,
               profesionalesId: excavacions.excavacionId.profesionales,
               auxiliaresId: excavacions.excavacionId.auxiliares,
-              puntoGPS:excavacions.excavacionId.puntoGPS 
+              puntoGpsExcavacion:excavacions.excavacionId.puntoGPS,
+              idAreaExcavacion: excavacions.excavacionId.idArea,
             })
 
             this.setState({
@@ -1450,7 +1451,7 @@ class EditExcavacion extends React.Component {
       "datosGeologicos": this.state.geologicos,
       "datosTaxonomicos": this.state.taxonomicos,
       "idArea": this.state.idAreaExcavacion,
-      "puntoGPS": this.state.puntoGpsExcavacion,
+      "puntoGps": this.state.puntoGpsExcavacion,
     }
 
     fetch(urlApi + "/excavacion/" + this.props.match.params.id, {

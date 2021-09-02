@@ -95,13 +95,13 @@ export default class CrearExcavacion extends Component {
     );
 
     this.setState({ poligonoExploracion });
-    exploracion.excavaciones.forEach(excavacion => {
+ /*   exploracion.excavaciones.forEach(excavacion => {
       dibujarPoligono(
         excavacion.areaExcavacion.locacion.coordinates[0],
         "green",
         this.state.map
       );
-    });
+    });*/
   };
 
   setearPuntoExcavacion = () => {

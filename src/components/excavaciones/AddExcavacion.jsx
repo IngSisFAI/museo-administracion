@@ -246,7 +246,10 @@ class AddExcavacion extends React.Component {
   handleExploracionesChange = (selectedExploracion) => {
     this.setState({ selectedExploracionAnt: this.state.selectedExploracion });
     this.setState({ selectedExploracion });
-    this.setState({ idExploracionCrear:selectedExploracion.value });
+    if(selectedExploracion!==null){
+      this.setState({ idExploracionCrear:selectedExploracion.value });
+    }
+  
 
     
   };
@@ -1412,6 +1415,7 @@ class AddExcavacion extends React.Component {
       hallazgo = this.state.selectedHallazgo.value;
     }
 
+    console.log('PTO GPS:', this.state.puntoGpsExcavacion );
 
     var data = {
       "nombreArea": this.state.nombreArea,
@@ -1428,7 +1432,7 @@ class AddExcavacion extends React.Component {
       "datosGeologicos": this.state.geologicos,
       "datosTaxonomicos": this.state.taxonomicos,
       "idArea": this.state.idAreaExcavacion,
-      "puntoGPS": this.state.puntoGpsExcavacion,
+      "puntoGps": this.state.puntoGpsExcavacion
     }
 
 
@@ -1499,6 +1503,9 @@ class AddExcavacion extends React.Component {
               console.log('Error:', Error)
             })
 
+        }
+        else{
+          $(".loader").fadeOut("slow");
         }
 
       }.bind(this))
@@ -2367,12 +2374,15 @@ class AddExcavacion extends React.Component {
                           onChange={this.handleExploracionesChange}
                           value={selectedExploracion}
                           required
+                          isClearable
                         />
                       </Form.Group>
                     </Form.Row>
 
                     <br />
 
+
+                  
                        <CrearExcavacion
                       idExploracion={idExploracionCrear}
                       setIdAreaExcavacion={this.setIdAreaExcavacion}
