@@ -5,12 +5,15 @@ import 'react-toastify/dist/ReactToastify.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faSave, faReply, faKey} from '@fortawesome/free-solid-svg-icons'
 import { Link} from 'react-router-dom';
-import axios from "axios";
 import Menu from "./../Menu"
 import Cookies from 'universal-cookie';
 import md5 from 'md5';
 
 const cookies = new Cookies();
+
+//Variables Globales
+const urlApi = process.env.REACT_APP_API_HOST;
+
 
 class ChangePassword extends React.Component {
     constructor(props) {
@@ -26,7 +29,7 @@ class ChangePassword extends React.Component {
 
     componentDidMount(){
 
-        if(!cookies.get('username') && !cookies.get('password'))
+        if(!cookies.get('user') && !cookies.get('password'))
         {
             window.location.href='/';
         }
@@ -73,16 +76,15 @@ class ChangePassword extends React.Component {
     else {
             var data={
                 "id": cookies.get('id'),
-                "password": md5(this.state.newPassword),
-                "userLogin": cookies.get('user'),
-                "passwordLogin": cookies.get('password')
+                "password": md5(this.state.newPassword)
             }
 
-         fetch('http://museo.fi.uncoma.edu.ar:3006/api/editUsuario', {
+         fetch(urlApi+'/editUsuario', {
             method: 'put',
             body: JSON.stringify(data),
             headers:{
-                      'Content-Type': 'application/json'
+                      'Content-Type': 'application/json',
+                      'Authorization': 'Bearer ' + cookies.get('token')
                     }      
             })
             .then(function(response) {
@@ -91,7 +93,7 @@ class ChangePassword extends React.Component {
 
                 }
               }).then( function (data){
-                 if(data.usuario!==[]) {
+                 
                   toast.success("¡Se actualizó la información con Éxito!");
 
                     cookies.remove('id',{path:"/"});
@@ -102,11 +104,7 @@ class ChangePassword extends React.Component {
                     cookies.remove('permiso',{path:"/"});
                   setTimeout(() => {
                       window.location.replace('/');
-                      }, 1500);
-                 }
-                 else{
-                     console.log('Acceso restringido para el usuario logeado.');
-                 }      
+                      }, 1500);   
 
               }).catch(error => {
                       toast.error('Ha ocurrido un problema, Por favor, verifique nuevamente');

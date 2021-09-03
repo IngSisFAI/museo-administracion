@@ -119,8 +119,6 @@ class EditUsuario extends React.Component {
             "apellido": this.state.apellido,
             "user": this.state.user,
             "password": md5(this.state.password),
-            "userLogin": cookies.get('user'),
-            "passwordLogin": cookies.get('password'),
             "permiso": this.state.permiso
           }
 
@@ -132,8 +130,6 @@ class EditUsuario extends React.Component {
             "nombre": this.state.nombre,
             "apellido": this.state.apellido,
             "user": this.state.user,
-            "userLogin": cookies.get('user'),
-            "passwordLogin": cookies.get('password'),
             "permiso": this.state.permiso
           }
 
@@ -154,16 +150,12 @@ class EditUsuario extends React.Component {
 
             }
           }).then(function (data) {
-            if (data.usuario !== []) {
+      
               toast.success("¡Se actualizó la información con Éxito!");
               setTimeout(() => {
                 window.location.replace('/usuarios');
               }, 1500);
-            }
-            else {
-              console.log('Acceso restringido para el usuario logeado.');
-            }
-
+            
           }).catch(error => {
             toast.error('Ha ocurrido un problema, Por favor, verifique nuevamente');
             console.log(error);
