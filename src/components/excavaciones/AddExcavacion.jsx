@@ -115,7 +115,8 @@ class AddExcavacion extends React.Component {
       piezasMNames: [],
       bochonMId: '',
       validatedMBochon: false,
-      idExploracionCrear:''
+      idExploracionCrear:'',
+      tablaBochones:[]
     };
   }
 

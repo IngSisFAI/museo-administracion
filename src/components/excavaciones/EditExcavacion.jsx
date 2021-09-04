@@ -115,7 +115,8 @@ class EditExcavacion extends React.Component {
       bochonMId: '',
       validatedMBochon: false,
       idExploracionModificar:"",
-      puntoGps:{}
+      puntoGps:{},
+      tablaBochones:[]
     };
 
   }
