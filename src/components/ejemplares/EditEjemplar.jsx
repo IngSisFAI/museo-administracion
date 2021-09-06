@@ -1,1081 +1,2627 @@
 import React from "react";
-import { Form, Button } from 'react-bootstrap';
+import { Form, Button, Tabs, Tab, Table, Modal, Alert } from 'react-bootstrap';
 import { ToastContainer, toast, Slide } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faSave, faReply, faPaw} from '@fortawesome/free-solid-svg-icons'
-import { Link} from 'react-router-dom';
+import { faSave, faReply, faPlus, faTrash, faEdit, faShare, faTimesCircle, faUpload, faIdCard } from '@fortawesome/free-solid-svg-icons'
+import { Link } from 'react-router-dom';
 import Select from 'react-select';
-import ModificarExcavacion from '../../areaGeospatial/ModificarExcavacion';
 import Moment from 'moment';
 import Menu from "./../Menu"
 import Cookies from 'universal-cookie';
+import $ from 'jquery';
+import axios from "axios";
 
 const cookies = new Cookies();
 
+//Variables Globales
+const urlApi = process.env.REACT_APP_API_HOST;
+const urlArchivo = process.env.REACT_APP_URL_EJEMPLARES;
+const rutaEjemplares = process.env.REACT_APP_RUTA_EJEMPLARES;
 
-const optTipos = [
-        { value: 'Encontrado', label: 'Encontrado' },
-        { value: 'No Encontrado', label: 'No Encontrado' },
-        
-      ];
-	  
-	  
+
+const optMaterial = [{ "value": "Donación", "label": "Donación" },
+{ "value": "Excavación realizada MUC", "label": "Excavación realizada MUC" },
+{ "value": "Otros", "label": "Otros" }]
+
+
 class EditEjemplar extends React.Component {
-	
-	constructor(props) {
-        super(props);
-        this.state = {
-                nombre:"",
-                nroColeccion:"",
-                fechaColeccion:"",
-                dimensionAlto:"",
-                dimensionAncho:"",
-                peso:"",
-                alimentacion:"",
-                ubicacion:"",
-                descripcion1:"",
-                descripcion1A:"",
-                descripcion2:"",
-                descripcion3:"",
-                formacion:"",
-                grupo:"",
-                subgrupo:"",
-                edad:"",
-                periodo:"",
-                era:"",
-                reino:"",
-                filo:"",
-                clase:"",
-                orden:"",
-                familia:"",
-                genero:"",
-                especie:"",
-                selectedPais:null ,
-                selectedProvincia:null ,
-                selectedCiudad:null,
-                muestraHome: false,
-                selectedExcavacion: null,
-                selectedTipo: null,
-                fbaja:"",
-                motivo:"",
-                ilustracionCompleta:"",
-                descripcionIC:"",
-                periodo2:"",
-                perteneceExca:"",
-                fotos:[],
-                videos:[],
-                paises: [],
-                provincias: [],
-                ciudades: [],
-                excavaciones: [],
-                idExcavacion:"",
-                tipoEjemplar:null,
-                colecciones:[],
-                selectedColeccion:null,
-				paisesArray:[]
-                 
-        }        
-       
-      }
-	  
-	   //Antes de cargar el DOM  
-      //*********************** 
-      componentWillMount() {
 
-        /*  fetch('http://museo.fi.uncoma.edu.ar:3006/api/pais')
-          .then((response) => {
-              return response.json()
-            })
-            .then((countries) => {
-			  var paises=  countries.paises.map((opt) => ({ label: opt.nombre, value: opt._id }) ); 	
-              this.setState({paises: paises, paisesArray: paises })
-            });*/
-
-         fetch('http://museo.fi.uncoma.edu.ar:3006/api/excavacion')
-        .then((response) => {
-            return response.json()
-          })
-          .then((excavacions) => {
-			 
-			 var excavaciones=  excavacions.excavaciones.map((opt) => ({ label: opt.nombre, value: opt._id }) ); 	
-             this.setState({ excavaciones: excavaciones })
-          });
-
-           fetch('http://museo.fi.uncoma.edu.ar:3006/api/coleccion')
-        .then((response) => {
-            return response.json()
-          })
-          .then((collection) => {
-			 var colecciones=  collection.colecciones.map((opt) => ({ label: opt.nombre, value: opt._id }) );  
-            this.setState({ colecciones: colecciones })
-          });
-
-
-      }
-	  
-	  //una vez cargado en el DOM
- //*************************
-  componentDidMount() {
-
-    if(!cookies.get('username') && !cookies.get('password'))
-    {
-        window.location.href='/';
+  constructor(props) {
+    super(props);
+    this.state = {
+      sigla: "",
+      fechaIngreso: "",
+      dimensionAlto: "",
+      dimensionLargo: "",
+      dimensionAncho: "",
+      ubicacion: "",
+      formacion: "",
+      grupo: "",
+      subgrupo: "",
+      edad: "",
+      periodo: "",
+      era: "",
+      reino: "",
+      filo: "",
+      clase: "",
+      orden: "",
+      familia: "",
+      genero: "",
+      especie: "",
+      muestraHome: false,
+      fechaBaja: "",
+      motivoBaja: "",
+      fotos: [],
+      videos: [],
+      colecciones: [],
+      selectedColeccion: null,
+      validated: false,
+      paisesArray: [],
+      preparadores: [],
+      show: false,
+      tabdim: false,
+      key: 'dbasicos',
+      op: 'I',
+      validateddim: false,
+      tabbas: false,
+      validatedgeo: false,
+      tabgeo: false,
+      tabtax: false,
+      validatedtax: false,
+      tabarea: false,
+      validatedarea: false,
+      tabotros: false,
+      validatedotros: false,
+      tabfotos: false,
+      validatedfotos: false,
+      tabvideos: false,
+      validatedvideos: false,
+      prestamos: [],
+      fprestamo: '',
+      fdevolucion: '',
+      investigador: '',
+      institucion: '',
+      archivos: [],
+      archivosOD: [],
+      showSuccessFoto: false,
+      showErrorFoto: false,
+      showSuccessVideo: false,
+      showErrorVideo: false,
+      archivoVideo: null,
+      archivoFoto: null,
+      descripcionFoto: '',
+      listArchivosFotos: [],
+      listArchivosVideo: [],
+      tableArchivosFotos: null,
+      op: 'I',
+      ejemplarId: '',
+      modalActualizarPieza: false,
+      tablaPiezas: [],
+      nombre: '',
+      dimensionAltoM: "",
+      dimensionLargoM: "",
+      dimensionAnchoM: "",
+      nombreM: '',
+      validateddimM: false,
+      piezaMId: '',
+      areaHallazgo: '',
+      selectedMaterial: null,
+      tipoIntervencion: '',
+      autores: '',
+      publicaciones: '',
+      archivoCurriculum: null,
+      listArchivosCV: [],
+      tableArchivosCV: [],
+      showSuccess: false,
+      showError: false,
+      tableBochones:[]
     }
-    else
-    {
-	  
-		 
-		 
-		 
-    fetch('http://museo.fi.uncoma.edu.ar:3006/api/ejemplarId/'+this.props.match.params.id)
-    .then((response) => {
+
+  }
+
+  //Antes de cargar el DOM  
+  //*********************** 
+  componentWillMount() {
+
+    fetch(urlApi + '/coleccion', {
+      method: 'get',
+      headers: {
+        'Authorization': 'Bearer ' + cookies.get('token')
+      }
+    })
+      .then((response) => {
         return response.json()
       })
-      .then((ejemplars) => {
-        
-        // console.log(ejemplars.ejemplarId.tipoEjemplar);
-          var fb= ejemplars.ejemplarId.fechaBaja;
-          if(fb!==null)
-          {
-             fb=(Moment(ejemplars.ejemplarId.fechaBaja).add(1, 'days')).format('YYYY-MM-DD')
-	
-          }
+      .then((collection) => {
+        this.setState({ colecciones: collection.colecciones })
+      })
+      .catch(function (error) {
+        console.log('Error:', error);
+      })
 
-          var fi= ejemplars.ejemplarId.fechaIngresoColeccion;
-          if(fi!==null)
-          {
-             fi=(Moment(ejemplars.ejemplarId.fechaIngresoColeccion).add(1, 'days')).format('YYYY-MM-DD')
-          }
 
-      //  this.traerProvincias(ejemplars.ejemplarId.areaHallazgo.pais)
-		  //  this.traerCiudades(ejemplars.ejemplarId.areaHallazgo.provincia)
-			
-			  var coleccionSelect=[]
-		    var excavacionSelect=[]
-		  /*  var paisSelect=[]
-		    var provinciaSelect=[]
-        var ciudadSelect=[]		 */ 
-		 
-		 
-		  //setTimeout ya que las funciones de provincias y ciudad se ejecutan antes que se seteen los estados
-        setTimeout(() => {
-
-          
-	      if(ejemplars.ejemplarId.nroColeccion!==null && ejemplars.ejemplarId.nroColeccion!=='')
-		  {
-	
-			 coleccionSelect= this.state.colecciones.filter(option => option.value === ejemplars.ejemplarId.nroColeccion)
-		     coleccionSelect=coleccionSelect[0];
-			
-								 
-		  }	
-          
-         
-	      if(ejemplars.ejemplarId.perteneceExca!==null && ejemplars.ejemplarId.perteneceExca!=='')
-		  {
-	
-			 excavacionSelect= this.state.excavaciones.filter(option => option.value === ejemplars.ejemplarId.perteneceExca)
-		     excavacionSelect=excavacionSelect[0];
-			
-								 
-		  }	
-
-         
-	   /*   if(ejemplars.ejemplarId.areaHallazgo.pais!==null && ejemplars.ejemplarId.areaHallazgo.pais!=='')
-		  {
-	
-			 paisSelect= this.state.paises.filter(option => option.value === ejemplars.ejemplarId.areaHallazgo.pais)
-		     paisSelect=paisSelect[0];
-			 
-		
-			
-								 
-		  }	
-			
-			
-          if(ejemplars.ejemplarId.areaHallazgo.provincia!==null && ejemplars.ejemplarId.areaHallazgo.provincia!=='')
-		  {
-	        
-			 provinciaSelect= this.state.provincias.filter(option => option.value === ejemplars.ejemplarId.areaHallazgo.provincia)
-		     provinciaSelect=provinciaSelect[0];
-		  }	
-		  
-		  if(ejemplars.ejemplarId.areaHallazgo.ciudad!==null && ejemplars.ejemplarId.areaHallazgo.ciudad!=='')
-		  {
-	        
-			 ciudadSelect= this.state.ciudades.filter(option => option.value === ejemplars.ejemplarId.areaHallazgo.ciudad)
-		     ciudadSelect=ciudadSelect[0];
-		  }	*/
-          
-
-          this.setState({   tipoEjemplar: ejemplars.ejemplarId.tipoEjemplar,
-                            reino:ejemplars.ejemplarId.taxonReino,
-                            filo:ejemplars.ejemplarId.taxonFilo,
-                            clase:ejemplars.ejemplarId.taxonClase,
-                            orden:ejemplars.ejemplarId.taxonOrden,
-                            familia: ejemplars.ejemplarId.taxonFamilia,
-                            genero:ejemplars.ejemplarId.taxonGenero,
-                            especie:ejemplars.ejemplarId.taxonEspecie,
-                            formacion:ejemplars.ejemplarId.eraGeologica.formacion,
-                            grupo:ejemplars.ejemplarId.eraGeologica.grupo,
-                            subgrupo:ejemplars.ejemplarId.eraGeologica.subgrupo,
-                            edad:ejemplars.ejemplarId.eraGeologica.edad,
-                            periodo:ejemplars.ejemplarId.eraGeologica.periodo,
-                            era:ejemplars.ejemplarId.eraGeologica.era,
-                            ilustracionCompleta:ejemplars.ejemplarId.ilustracionCompleta,
-                            descripcionIC:ejemplars.ejemplarId.descripcionIC,
-                            nroColeccion:ejemplars.ejemplarId.nroColeccion,
-                            dimensionAncho:ejemplars.ejemplarId.dimensionLargo,
-                            dimensionAlto:ejemplars.ejemplarId.dimensionAlto,
-                            peso: ejemplars.ejemplarId.peso,
-                            alimentacion:ejemplars.ejemplarId.alimentacion,
-                            fechaColeccion:fi,
-                            ubicacion:ejemplars.ejemplarId.ubicacionMuseo,
-                            fotos:ejemplars.ejemplarId.fotosEjemplar,
-                            videos:ejemplars.ejemplarId.videosEjemplar,
-                            fbaja: fb, 
-                            motivo: ejemplars.ejemplarId.motivoBaja,
-                            nombre:ejemplars.ejemplarId.nombre,
-                            periodo2:ejemplars.ejemplarId.periodo,
-                            muestraHome: ejemplars.ejemplarId.home,
-                            descripcion1:ejemplars.ejemplarId.descripcion1,
-                            descripcion1A:ejemplars.ejemplarId.descripcion1A,
-                            descripcion2:ejemplars.ejemplarId.descripcion2,
-                            descripcion3: ejemplars.ejemplarId.descripcion3,  
-                            perteneceExca: ejemplars.ejemplarId.perteneceExca,
-							              selectedColeccion:coleccionSelect,
-							              selectedTipo: ejemplars.ejemplarId.tipoEjemplar,
-							              selectedExcavacion: excavacionSelect
-							
-                          
-                        })
-		},2000)	
+    fetch(urlApi + "/personas", {
+      method: 'get',
+      headers: {
+        'Authorization': 'Bearer ' + cookies.get('token')
+      }
+    })
+      .then((response) => {
+        return response.json();
+      })
+      .then((data) => {
+        this.setState({
+          preparadores: data.personas,
+        });
+      }).catch(function (error) {
+        toast.error("Error al guardar. Intente nuevamente.");
+        console.log(
+          "Hubo un problema con la petición Fetch:",
+          error.message
+        );
       });
-    } 
-  }
-  
-   //**** FUNCIONES DE PRECARGA ***/
 
-  /*traerProvincias(idPais)
-  {
-    
-        fetch('http://museo.fi.uncoma.edu.ar:3006/api/provinciaIdPais/'+idPais)
+    fetch(urlApi + '/piezasEjemplar/' + this.props.match.params.id, {
+      method: 'GET',
+      headers: {
+        'Authorization': 'Bearer ' + cookies.get('token')
+      }
+    })
+      .then((response) => {
+        return response.json()
+      })
+      .then(result => {
+        this.setState({
+          piezas: result.piezas
+        });
+        return result;
+
+      })
+      .catch(function (error) {
+        toast.error("Error al guardar. Intente nuevamente.");
+        console.log(
+          "Hubo un problema con la petición Fetch:",
+          error.message
+        );
+      });
+
+    fetch(urlApi + '/bochonEjemplar/' + this.props.match.params.id, {
+      method: 'GET',
+      headers: {
+        'Authorization': 'Bearer ' + cookies.get('token')
+      }
+    })
+      .then((response) => {
+        return response.json()
+      })
+      .then(result => {
+
+          console.log('LOS BOCHONES: ',result.bochones );
+        this.setState({
+          bochones: result.bochones
+        });
+      
+
+      })
+      .catch(function (error) {
+        toast.error("Error al guardar. Intente nuevamente.");
+        console.log(
+          "Hubo un problema con la petición Fetch:",
+          error.message
+        );
+      });
+
+
+
+  }
+
+  //una vez cargado en el DOM
+  //*************************
+  componentDidMount() {
+
+    if (!cookies.get('user') && !cookies.get('password')) {
+      window.location.href = '/';
+    }
+    else {
+
+
+
+
+      fetch(urlApi + '/ejemplarId/' + this.props.match.params.id, {
+        method: 'get',
+        headers: {
+          'Authorization': 'Bearer ' + cookies.get('token')
+        }
+      })
         .then((response) => {
-            return response.json()
-          })
-          .then((estados) => {
-           
-           var provincias =estados.provincias.map((opt) => ({ label: opt.nombre, value: opt._id }) );
-		   this.setState({provincias: provincias});
-    
-          });
+          return response.json()
+        })
+        .then((ejemplars) => {
 
-         
-	
-    
+          // console.log(ejemplars.ejemplarId.tipoEjemplar);
+          var fb = ejemplars.ejemplarId.fechaBaja;
+          if (fb !== null) {
+            fb = (Moment(ejemplars.ejemplarId.fechaBaja).add(1, 'days')).format('YYYY-MM-DD')
+
+          }
+
+          var fi = ejemplars.ejemplarId.fechaIngreso;
+          if (fi !== null) {
+            fi = (Moment(ejemplars.ejemplarId.fechaIngreso).add(1, 'days')).format('YYYY-MM-DD')
+          }
+
+
+
+
+          var materialSelect = null
+          if (ejemplars.ejemplarId.materialIngresadoPor !== null && ejemplars.ejemplarId.materialIngresadoPor !== '') {
+            materialSelect = optMaterial.filter(option => option.value === ejemplars.ejemplarId.materialIngresadoPor)
+            if (materialSelect !== []) { materialSelect = materialSelect[0] }
+            else { materialSelect = null }
+          }
+
+
+
+          setTimeout(() => {
+
+            var coleccionSelect = []
+            var coleccionS = null
+
+            if (ejemplars.ejemplarId.tipoColeccionId !== null && ejemplars.ejemplarId.tipoColeccionId !== '') {
+
+              coleccionSelect = this.state.colecciones.filter(option => option._id === ejemplars.ejemplarId.tipoColeccionId)
+              if (coleccionSelect !== []) {
+                coleccionS = {
+                  label: coleccionSelect[0].nombre,
+                  value: coleccionSelect[0]._id
+                }
+              }
+            }
+
+
+            var preparadorSelect = []
+            var preparadorS = null
+            if (ejemplars.ejemplarId.preparador !== null && ejemplars.ejemplarId.preparador !== '') {
+
+              preparadorSelect = this.state.preparadores.filter(option => option._id === ejemplars.ejemplarId.preparador)
+              if (preparadorSelect !== []) {
+                preparadorS = {
+                  label: preparadorSelect[0].nombres + " " + preparadorSelect[0].apellidos,
+                  value: preparadorSelect[0]._id
+                }
+              }
+            }
+
+
+            this.setState({
+              sigla: ejemplars.ejemplarId.sigla,
+              selectedColeccion: coleccionS,
+              fechaIngreso: fi,
+              fechaBaja: fb,
+              motivoBaja: ejemplars.ejemplarId.motivoBaja,
+              reino: ejemplars.ejemplarId.taxonReino,
+              filo: ejemplars.ejemplarId.taxonFilo,
+              clase: ejemplars.ejemplarId.taxonClase,
+              orden: ejemplars.ejemplarId.taxonOrden,
+              familia: ejemplars.ejemplarId.taxonFamilia,
+              genero: ejemplars.ejemplarId.taxonGenero,
+              especie: ejemplars.ejemplarId.taxonEspecie,
+              formacion: ejemplars.ejemplarId.eraGeologica.formacion,
+              grupo: ejemplars.ejemplarId.eraGeologica.grupo,
+              subgrupo: ejemplars.ejemplarId.eraGeologica.subgrupo,
+              edad: ejemplars.ejemplarId.eraGeologica.edad,
+              periodo: ejemplars.ejemplarId.eraGeologica.periodo,
+              era: ejemplars.ejemplarId.eraGeologica.era,
+              listArchivosFotos: ejemplars.ejemplarId.fotosEjemplar,
+              listArchivosVideo: ejemplars.ejemplarId.videosEjemplar,
+              ubicacion: ejemplars.ejemplarId.ubicacionMuseo,
+              selectedPreparador: preparadorS,
+              tipoIntervencion: ejemplars.ejemplarId.tipoIntervencion,
+              autores: ejemplars.ejemplarId.autores,
+              publicaciones: ejemplars.ejemplarId.publicaciones,
+              selectedMaterial: materialSelect,
+              listArchivosCV: ejemplars.ejemplarId.archivosCurriculum,
+              observacionesAdic: ejemplars.ejemplarId.observacionesAdic,
+              muestraHome: ejemplars.ejemplarId.home,
+              areaHallazgo: ejemplars.ejemplarId.areaHallazgo.nombreArea
+            })
+
+            this.setState({
+              tableArchivosCV: this.renderTableArchivosCV(),
+              tableArchivosFotos: this.renderTableArchivosFotos(),
+              tableArchivosVideos: this.renderTableArchivosVideos(),
+              tablaPiezas: this.renderTablePiezas(),
+              tableBochones: this.renderTableBochones()
+            })
+
+          }, 1500);
+
+
+        });
+    }
   }
-  
-    traerCiudades(idProvincia)
-    { 
-	     fetch('http://museo.fi.uncoma.edu.ar:3006/api/ciudadIdProv/'+idProvincia)
-          .then((response) => {
+
+
+  //Manejadores de cada campo 
+
+  handleShow = evt => {
+    this.setState({ show: true });
+  };
+
+  handleClose = evt => {
+    this.setState({ show: false });
+  };
+
+  handleSiglaChange = evt => {
+    this.setState({ sigla: evt.target.value });
+  };
+
+  handlePreparadorChange = (selectedPreparador) => {
+    this.setState({ selectedPreparador });
+  };
+
+
+  handleTipoChange = (selectedTipo) => {
+    this.setState({ selectedTipo });
+    //  console.log(`Option selected:`, selectedTipo);
+
+  }
+
+
+  handleColeccionesChange = (selectedColeccion) => {
+    this.setState({ selectedColeccion });
+  }
+
+  handleIngresadoPorChange = (selectedMaterial) => {
+    this.setState({ selectedMaterial });
+    // console.log(`Option selected:`, selectedMaterial);
+
+  }
+
+  handleFechaIngresoChange = evt => {
+    this.setState({ fechaIngreso: evt.target.value });
+  };
+
+  handleNombrePiezaChange = evt => {
+    this.setState({ nombre: evt.target.value });
+  };
+
+  handleDimensionLargoChange = evt => {
+    this.setState({ dimensionLargo: evt.target.value });
+  };
+
+  handleDimensionAnchoChange = evt => {
+
+    this.setState({ dimensionAncho: evt.target.value });
+  };
+
+  handleDimensionAltoChange = evt => {
+    this.setState({ dimensionAlto: evt.target.value });
+  };
+
+
+  handleNombrePiezaMChange = evt => {
+    this.setState({ nombreM: evt.target.value });
+  };
+
+  handleDimensionLargoMChange = evt => {
+    this.setState({ dimensionLargoM: evt.target.value });
+  };
+
+  handleDimensionAnchoMChange = evt => {
+
+    this.setState({ dimensionAnchoM: evt.target.value });
+  };
+
+  handleDimensionAltoMChange = evt => {
+    this.setState({ dimensionAltoM: evt.target.value });
+  };
+
+
+  handleUbicacionChange = evt => {
+    this.setState({ ubicacion: evt.target.value });
+  };
+
+  handleTipoIntervencionChange = evt => {
+    this.setState({ tipoIntervencion: evt.target.value });
+  };
+
+  handleAutoresChange = evt => {
+    this.setState({ autores: evt.target.value });
+  };
+
+  handlePublicacionesChange = evt => {
+    this.setState({ publicaciones: evt.target.value });
+  };
+
+  handleObservacionesAdicChange = evt => {
+    this.setState({ observacionesAdic: evt.target.value });
+  };
+
+  handleFormacionChange = evt => {
+    this.setState({ formacion: evt.target.value });
+  };
+
+  handleGrupoChange = evt => {
+    this.setState({ grupo: evt.target.value });
+  };
+
+  handleSubgrupoChange = evt => {
+    this.setState({ subgrupo: evt.target.value });
+  };
+
+  handleEdadChange = evt => {
+    this.setState({ edad: evt.target.value });
+  };
+
+  handlePeriodoChange = evt => {
+    this.setState({ periodo: evt.target.value });
+  };
+
+  handleEraChange = evt => {
+    this.setState({ era: evt.target.value });
+  };
+
+
+  handleReinoChange = evt => {
+    this.setState({ reino: evt.target.value });
+  };
+
+  handleFiloChange = evt => {
+    this.setState({ filo: evt.target.value });
+  };
+
+  handleClaseChange = evt => {
+    this.setState({ clase: evt.target.value });
+  };
+
+  handleOrdenChange = evt => {
+    this.setState({ orden: evt.target.value });
+  };
+
+  handleFamiliaChange = evt => {
+    this.setState({ familia: evt.target.value });
+  };
+
+  handleGeneroChange = evt => {
+    this.setState({ genero: evt.target.value });
+  };
+
+  handleEspecieChange = evt => {
+    this.setState({ especie: evt.target.value });
+  };
+
+  handleFPrestamoChange = evt => {
+    this.setState({ fprestamo: evt.target.value });
+  };
+
+  handleFDevolucionChange = evt => {
+    this.setState({ fdevolucion: evt.target.value });
+  };
+
+  handleInvestigadorChange = evt => {
+    this.setState({ investigador: evt.target.value });
+  };
+
+  handleInstitucionChange = evt => {
+    this.setState({ institucion: evt.target.value });
+  };
+
+  handleAreaHChange = evt => {
+    this.setState({ areaHallazgo: evt.target.value });
+  };
+
+
+
+  handleExcavacionesChange = (selectedExcavacion) => {
+    //  console.log(selectedExcavacion);
+    this.setState({ selectedExcavacion });
+  }
+
+
+  handleMuestraChange(evt) {
+    this.setState({ muestraHome: evt.target.checked });
+  }
+
+  handleFbajaChange = evt => {
+    this.setState({ fechaBaja: evt.target.value });
+  };
+
+  handleMotivoChange = evt => {
+    this.setState({ motivoBaja: evt.target.value });
+  };
+
+
+  filesImagehandleChange = (event) => {
+    const file = event.target.files;
+    const name = file[0].name;
+    this.setState({ archivoFoto: file });
+
+  }
+
+  filesVideohandleChange = (event) => {
+    const file = event.target.files;
+    const name = file[0].name;
+    this.setState({ archivoVideo: file });
+  }
+
+
+  actualizarEjemplar = (event) => {
+    const form = document.getElementById("form7");
+    event.preventDefault();
+    if (form.checkValidity() === false) {
+      event.stopPropagation();
+    } else {
+
+      $(".loader").removeAttr("style");
+      var coleccionName = "";
+      var coleccionId = "";
+      if (this.state.selectedColeccion !== null) {
+        coleccionName = this.state.selectedColeccion.label;
+        coleccionId = this.state.selectedColeccion.value
+      }
+
+      var idPreparador = "";
+      if (this.state.selectedPreparador !== null) {
+        idPreparador = this.state.selectedPreparador.value
+      }
+
+      var idMaterial = "";
+      if (this.state.selectedMaterial !== null) {
+        idMaterial = this.state.selectedMaterial.value
+      }
+
+      var eraGeo = {
+        "formacion": this.state.formacion,
+        "grupo": this.state.grupo,
+        "subgrupo": this.state.subgrupo,
+        "edad": this.state.edad,
+        "periodo": this.state.periodo,
+        "era": this.state.era
+      };
+
+      var areaH = {
+        "nombreArea": this.state.areaHallazgo,
+        "pais": '',
+        "ciudad": '',
+        "provincia": ''
+      };
+
+
+
+      var data = {
+        sigla: this.state.sigla,
+        tipoColeccion: coleccionName,
+        tipoColeccionId: coleccionId,
+        fechaIngreso: this.state.fechaIngreso,
+        fechaBaja: this.state.fechaBaja,
+        motivoBaja: this.state.motivoBaja,
+        taxonReino: this.state.reino,
+        taxonFilo: this.state.filo,
+        taxonClase: this.state.clase,
+        taxonOrden: this.state.orden,
+        taxonFamilia: this.state.familia,
+        taxonGenero: this.state.genero,
+        taxonEspecie: this.state.especie,
+        eraGeologica: eraGeo,
+        ubicacionMuseo: this.state.ubicacion,
+        preparador: idPreparador,
+        materialIngresadoPor: idMaterial,
+        tipoIntervencion: this.state.tipoIntervencion,
+        autores: this.state.autores,
+        publicaciones: this.state.publicaciones,
+        observacionesAdic: this.state.observacionesAdic,
+        home: this.state.muestraHome,
+        areaHallazgo: areaH
+      }
+
+      fetch(urlApi + '/ejemplar/' + this.props.match.params.id, {
+        method: 'put',
+        body: JSON.stringify(data),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + cookies.get('token')
+        }
+      })
+        .then(function (response) {
+          if (response.ok) {
+            toast.success("¡Se actualizaron los datos del Ejemplar con Éxito!");
+            $(".loader").fadeOut("slow");
+            return response.json();
+
+          }
+        })
+        .catch(function (error) {
+          $(".loader").fadeOut("slow");
+          toast.error("Error al guardar. Intente nuevamente.");
+          console.log(
+            "Hubo un problema con la petición Fetch:",
+            error.message
+          );
+        });
+
+
+    }
+
+    this.setState({ validatedotros: true });
+
+
+  }
+
+
+  handleForm1 = (event) => {
+    const form = document.getElementById("form1");
+    event.preventDefault();
+    if (form.checkValidity() === false) {
+      event.stopPropagation();
+    } else {
+
+
+      $(".loader").removeAttr("style");
+      var coleccionName = "";
+      var coleccionId = "";
+      if (this.state.selectedColeccion !== null) {
+        coleccionName = this.state.selectedColeccion.label;
+        coleccionId = this.state.selectedColeccion.value
+      }
+
+      var data = {
+        sigla: this.state.sigla,
+        tipoColeccion: coleccionName,
+        tipoColeccionId: coleccionId,
+        fechaIngreso: this.state.fechaIngreso,
+        fechaBaja: this.state.fechaBaja,
+        motivoBaja: this.state.motivoBaja
+      }
+
+      fetch(urlApi + '/ejemplar/' + this.props.match.params.id, {
+        method: 'put',
+        body: JSON.stringify(data),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + cookies.get('token')
+        }
+      })
+        .then(function (response) {
+          if (response.ok) {
+            console.log("¡Se actualizaron los datos del Ejemplar con Éxito!");
+            $(".loader").fadeOut("slow");
+            return response.json();
+
+          }
+        })
+        .then(function (data) { this.setState({ key: 'ddimensiones' }); }.bind(this))
+        .catch(function (error) {
+          $(".loader").fadeOut("slow");
+          toast.error("Error al guardar. Intente nuevamente.");
+          console.log(
+            "Hubo un problema con la petición Fetch:",
+            error.message
+          );
+        });
+
+
+
+    }
+    this.setState({ validated: true });
+  }
+
+  handleSelect = (key) => {
+    this.setState({ key: key });
+  }
+
+  handleForm2 = (event) => {
+    this.setState({ tabgeo: false, key: 'dgeologicos' });
+  }
+
+  handleAntForm2 = (event) => {
+
+    this.setState({ tabbas: false, key: 'dbasicos' });
+
+  }
+
+  handleForm3 = (event) => {
+    const form = document.getElementById("form3");
+    event.preventDefault();
+    if (form.checkValidity() === false) {
+      event.stopPropagation();
+    } else {
+      this.setState({ tabtax: false, key: 'dtaxonomicos' });
+    }
+    this.setState({ validatedgeo: true });
+  }
+
+  handleAntForm3 = (event) => {
+
+    this.setState({ tabdim: false, key: 'ddimensiones' });
+
+  }
+
+  handleForm4 = (event) => {
+    const form = document.getElementById("form4");
+    event.preventDefault();
+    if (form.checkValidity() === false) {
+      event.stopPropagation();
+    } else {
+      this.setState({ tabarea: false, key: 'darea' });
+    }
+    this.setState({ validatedtax: true });
+  }
+
+  handleAntForm4 = (event) => {
+
+    this.setState({ tabgeo: false, key: 'dgeologicos' });
+
+  }
+
+  handleForm5 = (event) => {
+    const form = document.getElementById("form5");
+    event.preventDefault();
+    if (form.checkValidity() === false) {
+      event.stopPropagation();
+
+
+    } else {
+
+      this.setState({ tabotros: false, key: 'dotros', tabfotos: false, tabvideos: false });
+
+    }
+    this.setState({ validatedarea: true });
+  }
+
+  handleAntForm5 = (event) => {
+
+    this.setState({ tabtax: false, key: 'dtaxonomicos' });
+
+  }
+
+  handleForm6 = (event) => {
+
+    this.setState({ tabotros: false, key: 'dotros', validatedpres: true });
+
+  }
+
+  handleAntForm6 = (event) => {
+
+    this.setState({ tabarea: false, key: 'dotros' });
+
+  }
+
+
+
+  insertarPieza = (event) => {
+
+    const form = document.getElementById("form2");
+    event.preventDefault();
+    if (form.checkValidity() === false) {
+      event.stopPropagation();
+    } else {
+
+      $(".loader").removeAttr("style");
+      var data = {
+        identificador: this.state.nombre,
+        tipoPieza: '',
+        medidasPieza: {
+          ancho: this.state.dimensionAncho,
+          largo: this.state.dimensionLargo,
+          alto: this.state.dimensionAlto,
+          diametro: '',
+          circunferencia: ''
+        },
+        imagenesPieza: [],
+        fechaIngreso: null,
+        fechaBaja: null,
+        motivoBaja: '',
+        perteneceEjemplar: this.props.match.params.id,
+        origen: ''
+
+      }
+
+      fetch(urlApi + "/pieza", {
+        method: "post",
+        body: JSON.stringify(data),
+        headers: {
+          "Content-Type": "application/json",
+          'Authorization': 'Bearer ' + cookies.get('token')
+        },
+      })
+        .then(function (response) {
+          if (response.ok) {
+            toast.success("¡Se guardó la Pieza con Éxito!");
+            $(".loader").fadeOut("slow");
+            return response.json();
+
+          }
+        })
+        .then(function (data) {
+          fetch(urlApi + '/piezasEjemplar/' + this.props.match.params.id, {
+            method: 'GET',
+            headers: {
+              'Authorization': 'Bearer ' + cookies.get('token')
+            }
+          })
+            .then((response) => {
               return response.json()
             })
-            .then((cities) => {
-		      var ciudades =cities.ciudades.map((opt) => ({ label: opt.nombre, value: opt._id }) );		
-              this.setState({ciudades: ciudades });
+            .then(result => {
 
+              this.setState({
+                piezas: result.piezas
+              });
+              this.setState({ nombre: "", dimensionAncho: "", dimensionLargo: "", dimensionAlto: "" });
+              return result;
+
+
+            })
+            .then(function (data) {
+              this.setState({ tablaPiezas: this.renderTablePiezas() })
+            }.bind(this))
+            .catch(function (error) {
+              toast.error("Error al consultar Piezas. Intente nuevamente.");
+              console.log(
+                "Hubo un problema con la petición Fetch:",
+                error.message
+              );
             });
-  
-    } */
-	
-  
-   //Manejadores de cada campo 
-	  
-      handleNombreChange = evt => {
-        this.setState({ nombre: evt.target.value });
-      };
 
 
-      handleTipoChange = (selectedTipo) => {
-         this.setState({selectedTipo});
-        this.setState({tipoEjemplar:selectedTipo.value});
-        console.log(`Option selected:`, selectedTipo);
-       
-      }
-
-  
-
-       handleColeccionesChange = (selectedColeccion) => {
-        this.setState({selectedColeccion});
-        console.log(`Option selected:`, selectedColeccion );
-       
-      }
-
-      handleFechaColeccionChange = evt => {
-        this.setState({ fechaColeccion: evt.target.value });
-      };
-
-      handleDimensionAltoChange = evt => {
-        this.setState({ dimensionAlto: evt.target.value });
-      };
-
-      handleDimensionAnchoChange = evt => {
-        this.setState({ dimensionAncho: evt.target.value });
-      };
-
-      handlePesoChange = evt => {
-        this.setState({ peso: evt.target.value });
-      };
-
-      handleAlimentacionChange = evt => {
-        this.setState({ alimentacion: evt.target.value });
-      };
-
-      handleUbicacionChange = evt => {
-        this.setState({ ubicacion: evt.target.value });
-      };
-
-      handleDescripcion1Change = evt => {
-		  
-        this.setState({ descripcion1: evt.target.value });
-      };
-
-      handleDescripcion1AChange = evt => {
-        this.setState({ descripcion1A: evt.target.value });
-      };
-
-      handleDescripcion2Change = evt => {
-        this.setState({ descripcion2: evt.target.value });
-      };
-
-      handleDescripcion3Change = evt => {
-        this.setState({ descripcion3: evt.target.value });
-      };
-
-      handleFormacionChange = evt => {
-        this.setState({ formacion: evt.target.value });
-      };
-
-      handleGrupoChange = evt => {
-        this.setState({ grupo: evt.target.value });
-      };
-
-      handleSubgrupoChange = evt => {
-        this.setState({ subgrupo: evt.target.value });
-      };
-
-      handleEdadChange = evt => {
-        this.setState({ edad: evt.target.value });
-      }; 
-
-      handlePeriodoChange = evt => {
-        this.setState({ periodo: evt.target.value });
-      };
-
-      handleEraChange = evt => {
-        this.setState({ era: evt.target.value });
-      };
-     
-
-      handleReinoChange = evt => {
-        this.setState({ reino: evt.target.value });
-      };
-
-      handleFiloChange = evt => {
-        this.setState({ filo: evt.target.value });
-      };
-
-      handleClaseChange = evt => {
-        this.setState({clase: evt.target.value });
-      };
-
-      handleOrdenChange = evt => {
-        this.setState({ orden: evt.target.value });
-      };
-
-      handleFamiliaChange = evt => {
-        this.setState({ familia: evt.target.value });
-      };
-
-      handleGeneroChange = evt => {
-        this.setState({ genero: evt.target.value });
-      };
-
-      handleEspecieChange = evt => {
-        this.setState({ especie: evt.target.value });
-      };
+        }.bind(this))
+        .catch(function (error) {
+          $(".loader").fadeOut("slow");
+          toast.error("Error al guardar. Intente nuevamente.");
+          console.log(
+            "Hubo un problema con la petición Fetch:",
+            error.message
+          );
+        });
 
 
+    }
+    this.setState({ validateddim: true });
 
 
-       handleExcavacionesChange = (selectedExcavacion) => {
-        this.setState({selectedExcavacion});
-        
-		
-	/*	if(selectedExcavacion!==null)
-		{
-			 fetch('http://museo.fi.uncoma.edu.ar:3006/api/excavacionId/'+selectedExcavacion.value)
-			 .then((response) => {
-                               return response.json()
-               })
-             .then((result) => {
-				 
-                 if(result.excavacionId.idPais!=='' && result.excavacionId.idPais!==null)	
-                 {					 
-					  var paisSelect= this.state.paisesArray.filter(option => option.value === result.excavacionId.idPais)
-					  this.setState({selectedPais: paisSelect[0]})		
-
-					  fetch('http://museo.fi.uncoma.edu.ar:3006/api/provinciaIdPais/'+result.excavacionId.idPais)
-						.then((response) => {
-							return response.json()
-						  })
-						  .then((estados) => {
-							    var provincias =estados.provincias.map((opt) => ({ label: opt.nombre, value: opt._id }) ); 
-							    this.setState({provincias: estados.provincias});
-							    if(result.excavacionId.idProvincia!=='' && result.excavacionId.idProvincia!==null)
-								{
-							        var provSelect= provincias.filter(option => option.value === result.excavacionId.idProvincia)
-							        this.setState({selectedProvincia: provSelect[0]});
-									fetch('http://museo.fi.uncoma.edu.ar:3006/api/ciudadIdProv/'+result.excavacionId.idProvincia)
-										.then((response) => {
-											return response.json()
-										  })
-										  .then((cities) => {
-											     var ciudades =cities.ciudades.map((opt) => ({ label: opt.nombre, value: opt._id }) );
-                                                 this.setState({ciudades: cities.ciudades});												 
-											     if(result.excavacionId.idCiudad!=='' && result.excavacionId.idCiudad!==null)	
-												 {
-													var ciudadSelect= ciudades.filter(option => option.value === result.excavacionId.idCiudad);
-											        this.setState({selectedCiudad:ciudadSelect[0]});
-												 }
-												 else{
-													this.setState({selectedCiudad: null, ciudades:[]})  
-												 }
-										  }).catch(function(error) {
-												toast.error("Error al consultar (3). Intente nuevamente.");
-												console.log('Hubo un problema con la petición Fetch:',error.message);
-											  });
-														  
-								}	
-								else{
-									
-									this.setState({selectedProvincia: null,selectedCiudad: null, provincias: [], ciudades:[]}) 
-								}
-						   
-						 			 
-							  
-						  }).catch(function(error) {
-								toast.error("Error al consultar (2). Intente nuevamente.");
-								console.log('Hubo un problema con la petición Fetch:',error.message);
-							  });
-				 }
-				 else {
-					 
-					this.setState({selectedPais: null, selectedProvincia: null,selectedCiudad: null, provincias: [], ciudades:[]}) 
-
-					 
-				 }				 
-			  
-			  
-			  
-			  }).catch(function(error) {
-					toast.error("Error al consultar (1). Intente nuevamente.");
-					console.log('Hubo un problema con la petición Fetch:',error.message);
-				  });
-			
-			
-			
-		}
-        else
-		{
-			this.setState({selectedPais: null, selectedProvincia: null,selectedCiudad: null, provincias: [], ciudades:[]}) 
-
-		}			
-       */
-      }
+  }
 
 
-     /* handlePaisChange= (selectedPais) => { 
-	  
-	  
-		  if(selectedPais!=null)
-		  {	  
-		  
-			  
-				this.setState(prevState => ({
-					selectedProvincia: null
-					}
-				  ));
-				
-				fetch('http://museo.fi.uncoma.edu.ar:3006/api/provinciaIdPais/'+selectedPais.value)
-				.then((response) => {
-					return response.json()
-				  })
-				  .then((estados) => {
-					this.setState({provincias: estados.provincias, selectedPais});
-
-				  });
-		   }
-           else{
-			   this.setState({
-					selectedPais:null, selectedProvincia:null, selectedCiudad:null, provincias:[], ciudades:[]});
-		   }		   
-      }
-
-      handleProvinciaChange= (selectedProvincia) => { 
+  renderTablePiezas() {
 
 
-       if(selectedProvincia!=null)
-	   {	
-			this.setState(prevState => ({
-				selectedCiudad: null
-				}
-			  ));
-			
-			fetch('http://museo.fi.uncoma.edu.ar:3006/api/ciudadIdProv/'+selectedProvincia.value)
-			.then((response) => {
-				return response.json()
-			  })
-			  .then((cities) => {
-				this.setState({ciudades: cities.ciudades , selectedProvincia});
+    return this.state.piezas.map((pieza, index) => {
 
-			  });
-	   }
-       else	  
-       {
-		    this.setState({
-				 selectedProvincia:null, selectedCiudad:null,  ciudades:[]});
-		   
-	   }		   
-      
-	  
-	  }
+      return (
+        <tr key={index}>
+          <td><Button variant="secondary" type="button" id="editar" onClick={() => this.mostrarModalActualizarPieza(pieza)}>
+            <FontAwesomeIcon icon={faEdit} />
+          </Button>
+            &nbsp;
+            <Button variant="danger" type="button" id="eliminar" onClick={() => this.eliminarPieza(pieza._id)}>
+              <FontAwesomeIcon icon={faTrash} />
+            </Button></td>
+          <td>{pieza.identificador}</td>
+          <td>{pieza.medidasPieza.alto}</td>
+          <td>{pieza.medidasPieza.largo}</td>
+          <td>{pieza.medidasPieza.ancho}</td>
 
-      handleCiudadChange = (selectedCiudad) => {
-		 
-        this.setState({selectedCiudad});
-      }*/
+        </tr>
+      )
+    })
 
-      handleMuestraChange(evt) {
-		  console.log(evt.target.checked)
-        this.setState({ muestraHome: evt.target.checked });
-      }
+  }
 
-      handleFbajaChange = evt => {
-        this.setState({ fbaja: evt.target.value });
-      };
+  mostrarModalActualizarPieza = (dato) => {
+    console.log(dato);
 
-      handleMotivoChange = evt => {
-        this.setState({ motivo: evt.target.value });
-      };
-	  
-	  
-	  handleSubmit = (event) => {
-		 
-		
-        const form = event.currentTarget;
-        event.preventDefault();
-        if (form.checkValidity() === false) {
-          event.stopPropagation();
-		  
-		   toast.error('Ingrese datos obligatorios.');
-		  if(this.state.selectedExcavacion=="" || this.state.selectedExcavacion==null)
-		  {
-			 toast.error('Seleccione una Excavación.');  
-			  
-		  }	
-		  
-		  if(this.state.selectedColeccion=="" || this.state.selectedColeccion==null)
-		  {
-			 toast.error('Seleccione una Colección.');  
-			  
-		  }	
-			  
-		  
+    this.setState({
+      nombreM: dato.identificador,
+      modalActualizarPieza: true,
+      dimensionAltoM: dato.medidasPieza.alto,
+      dimensionAnchoM: dato.medidasPieza.ancho,
+      dimensionLargoM: dato.medidasPieza.largo,
+      piezaMId: dato._id
+
+    });
+
+  }
+
+  cerrarModalActualizarPieza = () => {
+    this.setState({ modalActualizarPieza: false });
+  };
+
+  eliminarPieza = (idPieza) => {
+    var opcion = window.confirm("¿Está seguro que deseas eliminar la Pieza seleccionada?");
+    if (opcion == true) {
+      $(".loader").removeAttr("style");
+      fetch(urlApi + '/pieza/' + idPieza, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': 'Bearer ' + cookies.get('token')
         }
-        else
-        { 
-	      if(this.state.selectedExcavacion=="" || this.state.selectedExcavacion==null)
-		  {
-			 toast.error('Seleccione una Excavación!');  
-			  
-		  }	
-		  else
-		  {
-			      var idCountry=''
-              if(this.state.selectedPais!==null && this.state.selectedPais.value!==undefined)
-              {
-				  idCountry=this.state.selectedPais.value
-			  }
-			  else
-			  {
-				 if(this.state.selectedPais!==null)
-				 {
-					idCountry=this.state.selectedPais 
-				 }	 
-				  
-			  }	  
-		    
-              
-             var idProv=''
-             if(this.state.selectedProvincia!==null && this.state.selectedProvincia.value!==undefined)
-              {
-				  idProv=this.state.selectedProvincia.value
-			  }
-			  else
-			  {
-				 if(this.state.selectedProvincia!==null)
-				 {
-					idProv=this.state.selectedProvincia
-				 }	 
-				  
-			  }	
-    
-              var idCity=''
-			  if(this.state.selectedCiudad!=null && this.state.selectedCiudad.value!==undefined)
-              {
-				  idCity=this.state.selectedCiudad.value
-			  }
-			  else
-			  {
-				 if(this.state.selectedCiudad!==null)
-				 {
-					idCity=this.state.selectedCiudad
-				 }	 
-				  
-			  }	
-		  
-		      var idExcav=''
-              if(this.state.selectedExcavacion!==null)
-              {idExcav=this.state.selectedExcavacion.value}
+      })
+        .then(function (response) {
+
+          if (response.ok) {
+            toast.success("¡Se eliminó la Pieza con Éxito!");
+          }
+          $(".loader").fadeOut("slow");
+        })
+        .then(function () {
+
+          fetch(urlApi + '/piezasEjemplar/' + this.props.match.params.id, {
+            method: 'GET',
+            headers: {
+              'Authorization': 'Bearer ' + cookies.get('token')
+            }
+          })
+            .then((response) => {
+              return response.json()
+            })
+            .then(result => {
+              this.setState({
+                piezas: result.piezas
+              });
+              return result;
+
+            })
+            .then(function () {
+
+              setTimeout(function () { this.setState({ tablaPiezas: this.renderTablePiezas() }) }.bind(this), 1500);
+            }.bind(this))
+            .catch(function (error) {
+              console.log('Hubo un problema con la petición Fetch (2):' + error.message);
+            })
+        }.bind(this))
+        .catch(function (error) {
+          $(".loader").fadeOut("slow");
+          toast.error("Error al Eliminar Bochon. Intente nuevamente.");
+          console.log('Hubo un problema con la petición Fetch (2):' + error.message);
+        });
 
 
-            
+    }
+  }
 
-              var eraGeo={
-                "formacion":this.state.formacion,
-                "grupo":this.state.grupo,
-                "subgrupo":this.state.subgrupo,
-                "edad":this.state.edad,
-                "periodo":this.state.periodo,
-                "era":this.state.era
+
+  editarPieza = (e) => {
+
+    const form = document.getElementById("form22");
+    e.preventDefault();
+    if (form.checkValidity() === false) {
+      toast.error("¡Verique datos obligatorios!");
+      e.stopPropagation();
+
+    } else {
+      $(".loader").removeAttr("style");
+      var data = {
+        identificador: this.state.nombreM,
+        medidasPieza: {
+          ancho: this.state.dimensionAnchoM,
+          largo: this.state.dimensionLargoM,
+          alto: this.state.dimensionAltoM,
+          diametro: '',
+          circunferencia: ''
+        }
+      }
+
+      fetch(urlApi + "/pieza/" + this.state.piezaMId, {
+        method: "put",
+        body: JSON.stringify(data),
+        headers: {
+          "Content-Type": "application/json",
+          'Authorization': 'Bearer ' + cookies.get('token')
+        },
+      })
+        .then(function (response) {
+          if (response.ok) {
+            toast.success("¡Se guardó la Pieza con Éxito!");
+            $(".loader").fadeOut("slow");
+            return response.json();
+
+          }
+        })
+        .then(function (data) {
+          fetch(urlApi + '/piezasEjemplar/' + this.props.match.params.id, {
+            method: 'GET',
+            headers: {
+              'Authorization': 'Bearer ' + cookies.get('token')
+            }
+          })
+            .then((response) => {
+              return response.json()
+            })
+            .then(result => {
+
+              this.setState({
+                piezas: result.piezas
+              });
+              this.setState({ nombreM: "", dimensionAnchoM: "", dimensionLargoM: "", dimensionAltoM: "", modalActualizarPieza: false });
+              return result;
+
+            })
+            .then(function (data) {
+              this.setState({ tablaPiezas: this.renderTablePiezas() })
+            }.bind(this))
+            .catch(function (error) {
+              toast.error("Error al consultar Piezas. Intente nuevamente.");
+              console.log(
+                "Hubo un problema con la petición Fetch:",
+                error.message
+              );
+            });
+
+
+        }.bind(this))
+        .catch(function (error) {
+          $(".loader").fadeOut("slow");
+          toast.error("Error al guardar. Intente nuevamente.");
+          console.log(
+            "Hubo un problema con la petición Fetch:",
+            error.message
+          );
+        });
+
+    }
+
+    this.setState({ validateddimM: true });
+
+  }
+
+
+  subirFoto = () => {
+
+    const MAXIMO_TAMANIO_BYTES = 5000000;
+    const types = ['image/gif', 'image/png', 'image/jpg', 'image/jpeg', 'image/bmp', 'image/webp'];
+    var file = this.state.archivoFoto
+
+    if (file !== null && file.length !== 0) {
+      var nameFile = (file[0].name).replace(/\s+/g, "_");
+      nameFile = this.reemplazar(nameFile);
+      var size = file[0].size;
+      var type = file[0].type;
+
+      if (size > MAXIMO_TAMANIO_BYTES) {
+        var tamanio = 5000000 / 1000000;
+        toast.error("El archivo seleccionado supera los " + tamanio + 'Mb. permitidos.');
+        document.getElementById('fileFoto').value = '';
+      }
+      else {
+        if (!types.includes(type)) {
+          toast.error("El archivo seleccionado tiene una extensión inválida.");
+          document.getElementById('fileFoto').value = '';
+
+        }
+        else {
+          $(".loader").removeAttr("style");
+          document.getElementById('subirFoto').setAttribute('disabled', 'disabled');
+          fetch(urlApi + '/ejemplarId/' + this.props.match.params.id, {
+            method: 'get',
+            headers: {
+              'Authorization': 'Bearer ' + cookies.get('token')
+            }
+          })
+            .then(response => {
+              return response.json();
+            })
+            .then(function (response) {
+
+              var listArchivosFotos = response.ejemplarId.fotosEjemplar;
+              var fotoSubir = {
+                "nombre": nameFile,
+                "descripcion": this.state.descripcionFoto
+              }
+
+              listArchivosFotos.push(fotoSubir);
+
+              //  console.log('LAS FOTOS::', listArchivosFotos);
+
+              var dataFoto = {
+                "fotosEjemplar": listArchivosFotos,
               };
-			  
 
-			  var areaH={
-                "pais":idCountry,
-                "ciudad":idCity,
-                "provincia":idProv
-                };
-		
-              var data = {
-                "tipoEjemplar": this.state.selectedTipo.value,
-                "taxonReino":this.state.reino,
-                "taxonFilo":this.state.filo,
-                "taxonClase":this.state.clase,
-                "taxonOrden":this.state.orden,
-                "taxonFamilia": this.state.familia,
-                "taxonGenero":this.state.genero,
-                "taxonEspecie":this.state.especie,
-                "eraGeologica": eraGeo,
-                "ilustracionCompleta":this.state.ilustracionCompleta,
-                "descripcionIC":this.state.descripcionIC,
-                "areaHallazgo": areaH,
-                "nroColeccion":this.state.selectedColeccion.value,
-                "dimensionLargo":this.state.dimensionAncho,
-                "dimensionAlto":this.state.dimensionAlto,
-                "peso": this.state.peso,
-                "alimentacion":this.state.alimentacion,
-                "fechaIngresoColeccion":this.state.fechaColeccion,
-                "ubicacionMuseo":this.state.ubicacion,
-                "fotosEjemplar":this.state.fotos,
-                "videosEjemplar":this.state.videos,
-                "fechaBaja": this.state.fbaja, 
-                "motivoBaja": this.state.motivo,
-                "nombre":this.state.nombre,
-                "periodo":this.state.periodo2,
-                "home": this.state.muestraHome,
-                "descripcion1":this.state.descripcion1,
-                "descripcion1A":this.state.descripcion1A,
-                "descripcion2":this.state.descripcion2,
-                "descripcion3": this.state.descripcion3,  
-                "perteneceExca":idExcav
-             };
-
-                fetch('http://museo.fi.uncoma.edu.ar:3006/api/ejemplar/'+this.props.match.params.id, {
+              //Primero Actualizo la Excavacion
+              fetch(urlApi + '/ejemplar/' + this.props.match.params.id, {
                 method: 'put',
-                body: JSON.stringify(data),
-                headers:{
-                            'Content-Type': 'application/json'
-                        }      
-                })
-                .then(function(response) {
-                    if(response.ok) {
-                    toast.success("¡Se actualizó el Ejemplar con Éxito!");
-                     setTimeout(() => {
-									 window.location.replace('/ejemplares');
-								  }, 1500); 
-                    } 
-                })
-                .catch(function(error) {
-                    toast.success("Error al guardar. Intente nuevamente.");
-                    console.log('Hubo un problema con la petición Fetch:',  error.message);
+                body: JSON.stringify(dataFoto),
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': 'Bearer ' + cookies.get('token')
+                }
+              })
+                .then(function (response) {
+                  if (response.ok) {
+                    console.log("¡Se actualizaron los datos del Ejemplar con Éxito!");
+                    this.setState({ listArchivosFotos: listArchivosFotos });
+
+                  }
+                }.bind(this))
+                .then(function (response) {
+                  //segundo subo archivo al server
+
+                  const destino = rutaEjemplares + 'Fotos/' + this.props.match.params.id;
+                  const data = new FormData();
+                  data.append("file", file[0]);
+
+
+                  axios.post(urlApi + "/uploadArchivo", data, {
+                    headers: {
+                      "Content-Type": undefined,
+                      path: destino,
+                      "newfilename": '',
+                      'Authorization': 'Bearer ' + cookies.get('token')
+                    }
+                  })
+                    .then(response => {
+                      $(".loader").fadeOut("slow");
+                      if (response.statusText === "OK") {
+                        this.setState({ archivoFoto: null, descripcionFoto: "", showSuccessFoto: true, showErrorFoto: false, urlArchivo: urlArchivo + 'Fotos/' + this.props.match.params.id + '/' + nameFile });
+                        this.setState({ tableArchivosFotos: this.renderTableArchivosFotos() })
+                        document.getElementById('fileFoto').value = '';
+                      }
+                      else {
+                        this.setState({ showSuccessFoto: false, showErrorFoto: true });
+                      }
+                      document.getElementById('subirFoto').removeAttribute('disabled');
+
+                      setTimeout(() => {
+                        this.setState({ showSuccessFoto: false, showErrorFoto: false });
+                      }, 5000);
+
+
+                    })
+                    .catch(error => {
+                      $(".loader").fadeOut("slow");
+                      this.setState({ showSuccessFoto: false, showErrorFoto: true });
+                      console.log(error);
+                    });
+
+
+
+
+                }.bind(this))
+                .catch(function (error) {
+                  $(".loader").fadeOut("slow");
+                  toast.error("Error al Actualizar Exploracion. Intente nuevamente.");
+                  console.log('Hubo un problema con la petición Fetch (1):' + error.message);
                 });
-			  
-			  
-		  }  
-		  
-		}
-
-	   this.setState({ validated: true });
-	}	
-
-	  
 
 
-render()
-{
-	   const {validated} = this.state; 
-	   const {selectedColeccion} = this.state;
-       const {selectedTipo} = this.state;
-       const {selectedExcavacion}= this.state;
-	  /* const {selectedPais}= this.state;
-	   const {selectedProvincia}= this.state;
-	   const {selectedCiudad}= this.state;*/
-	   
-	
-	 return(
-	         <>
-           <Menu />
-			 <div className="row">
-               <div className="col-md-12">
-                <div id="contenido" align="left" className="container">
-                     <br/>   
-                    <h3 className="page-header" align="left">
-                       <FontAwesomeIcon icon={faPaw} /> Editar Ejemplar
-                    </h3>
-                    <hr />
-					<Form noValidate validated={validated} onSubmit={this.handleSubmit}>
-                    <ToastContainer
-                        position="top-right"
-                        autoClose={5000}
-                        transition={Slide}
-                        hideProgressBar={true}
-                        newestOnTop={true}
-                        closeOnClick
-                        pauseOnHover
+            }.bind(this))
+            .catch(function (error) {
+              $(".loader").fadeOut("slow");
+              toast.error("Error al consultar. Intente nuevamente.");
+              console.log('Hubo un problema con la petición Fetch (2):' + error.message);
+            });
+
+        }
+
+      }
+
+    } else {
+      toast.error("Seleccione un Archivo.");
+    }
+  }
+
+  renderTableArchivosFotos() {
+
+
+    return this.state.listArchivosFotos.map((file, index) => {
+
+      return (
+        <tr key={index}>
+          <td>
+            <Button variant="danger" type="button" id="eliminarArch" onClick={() => this.eliminarArchivoFoto(file.nombre)}>
+              <FontAwesomeIcon icon={faTrash} />
+            </Button>
+          </td>
+          <td>
+            <a href={urlArchivo + 'Fotos/' + this.props.match.params.id + '/' + file.nombre} disabled target="_blank">{file.nombre}</a>
+          </td>
+          <td>
+            {file.descripcion}
+          </td>
+
+        </tr>
+      )
+    })
+
+
+
+  }
+
+
+  eliminarArchivoFoto = (dato) => {
+    var destino = rutaEjemplares + 'Fotos/' + this.props.match.params.id + "/" + dato;
+    var opcion = window.confirm("¿Está seguro que deseas eliminar el Archivo?");
+    if (opcion == true) {
+
+      fetch(urlApi + '/ejemplarId/' + this.props.match.params.id, {
+        method: 'get',
+        headers: {
+          'Authorization': 'Bearer ' + cookies.get('token')
+        }
+      })
+        .then(response => {
+          return response.json();
+        })
+        .then(function (response) {
+          //aca ya tengo la excavacion, tengo que obtener los archivos de autorizacion y quitar el candidato a eliminar
+          $(".loader").removeAttr("style");
+          //elimino archivo del array
+          var archivos = response.ejemplarId.fotosEjemplar;
+          var contador = 0;
+          archivos.map((registro) => {
+            if (dato == registro.nombre) {
+              archivos.splice(contador, 1);
+            }
+            contador++;
+          });
+
+          var dataFoto = {
+            "fotosEjemplar": archivos
+
+          }
+
+          //Actualizo la Exploracion
+          fetch(urlApi + '/ejemplar/' + this.props.match.params.id, {
+            method: 'put',
+            body: JSON.stringify(dataFoto),
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer ' + cookies.get('token')
+            }
+          })
+            .then(function (response) {
+              if (response.ok) {
+                console.log("¡Se actualizaron los datos del Ejemplar con Éxito!");
+                this.setState({ listArchivosFotos: archivos });
+
+              }
+            }.bind(this))
+            .then(function (response) {
+              //Elimino Archivo del Server
+              fetch(urlApi + '/deleteArchivo', {
+                method: 'get',
+                headers: {
+                  'Content-Type': undefined,
+                  'path': destino,
+                  'Authorization': 'Bearer ' + cookies.get('token')
+                }
+              })
+                .then(response => {
+                  return response.json();
+                })
+                .then(function (response) {
+                  $(".loader").fadeOut("slow");
+                  if ((response.msg).trim() === 'OK') {
+                    console.log('ok');
+                    toast.success("¡Se eliminó el Archivo con Éxito!");
+                    this.setState({ archivoFoto: null, tableArchivosFotos: this.renderTableArchivosFotos() })
+
+                  } else {
+                    console.log('error');
+                    toast.error("¡Se produjo un error al eliminar archivo!");
+                  }
+                }.bind(this)).catch(function (error) {
+                  $(".loader").fadeOut("slow");
+                  toast.error("Error al eliminar. Intente nuevamente.");
+                  console.log('Hubo un problema con la petición Fetch (3):' + error.message);
+                });
+
+
+            }.bind(this))
+            .catch(function (error) {
+              $(".loader").fadeOut("slow");
+              toast.error("Error al Actualizar Exploracion. Intente nuevamente.");
+              console.log('Hubo un problema con la petición Fetch (2):' + error.message);
+            });
+
+        }.bind(this))
+        .catch(function (error) {
+          $(".loader").fadeOut("slow");
+          toast.error("Error al consultar. Intente nuevamente.");
+          console.log('Hubo un problema con la petición Fetch (1):' + error.message);
+        });
+
+    }
+
+  };
+
+  reemplazar(cadena) {
+
+    var chars = {
+
+      "á": "a", "é": "e", "í": "i", "ó": "o", "ú": "u",
+
+      "à": "a", "è": "e", "ì": "i", "ò": "o", "ù": "u", "ñ": "n",
+
+      "Á": "A", "É": "E", "Í": "I", "Ó": "O", "Ú": "U",
+
+      "À": "A", "È": "E", "Ì": "I", "Ò": "O", "Ù": "U", "Ñ": "N",
+
+      "ä": "a", "ë": "e", "ï": "i", "ö": "o", "ü": "u",
+
+      "Ä": "A", "Ä": "A", "Ë": "E", "Ï": "I", "Ö": "O", "Ü": "U"
+    }
+
+    var expr = /[áàéèíìóòúùñäëïöü]/ig;
+
+    var res = cadena.replace(expr, function (e) { return chars[e] });
+
+    return res;
+
+  }
+
+
+  handleDescripcionFotoChange = (evt) => {
+    this.setState({ descripcionFoto: evt.target.value });
+  };
+
+  subirVideo = () => {
+
+    const MAXIMO_TAMANIO_BYTES = 50000000;
+    const types = ['video/x-msvideo', 'video/mpeg', 'video/ogg', 'video/x-flv', 'video/mp4', 'video/x-ms-wmv', 'video/quicktime', 'video/3gpp', 'video/MP2T'];
+    var file = this.state.archivoVideo
+
+    if (file !== null && file.length !== 0) {
+      var nameFile = (file[0].name).replace(/\s+/g, "_");
+      nameFile = this.reemplazar(nameFile);
+      var size = file[0].size;
+      var type = file[0].type;
+
+      if (size > MAXIMO_TAMANIO_BYTES) {
+        var tamanio = MAXIMO_TAMANIO_BYTES / 1000000;
+        toast.error("El archivo seleccionado supera los " + tamanio + 'Mb. permitidos.');
+        document.getElementById('filesVideo').value = '';
+      }
+      else {
+        if (!types.includes(type)) {
+          toast.error("El archivo seleccionado tiene una extensión inválida.");
+          document.getElementById('filesVideo').value = '';
+
+        }
+        else {
+          $(".loader").removeAttr("style");
+          document.getElementById('subirVideo').setAttribute('disabled', 'disabled');
+          fetch(urlApi + '/ejemplarId/' + this.props.match.params.id, {
+            method: 'get',
+            headers: {
+              'Authorization': 'Bearer ' + cookies.get('token')
+            }
+          })
+            .then(response => {
+              return response.json();
+            })
+            .then(function (response) {
+
+              var listArchivosVideo = response.ejemplarId.videosEjemplar;
+              listArchivosVideo.push(nameFile);
+
+              var dataVideo = {
+                "videosEjemplar": listArchivosVideo,
+              };
+
+              //Primero Actualizo la Exploracion
+              fetch(urlApi + '/ejemplar/' + this.props.match.params.id, {
+                method: 'put',
+                body: JSON.stringify(dataVideo),
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': 'Bearer ' + cookies.get('token')
+                }
+              })
+                .then(function (response) {
+                  if (response.ok) {
+                    console.log("¡Se actualizaron los datos del Ejemplar con Éxito!");
+                    this.setState({ listArchivosVideo: listArchivosVideo });
+
+                  }
+                }.bind(this))
+                .then(function (response) {
+                  //segundo subo archivo al server
+
+                  const destino = rutaEjemplares + 'Videos/' + this.props.match.params.id;
+                  const data = new FormData();
+                  data.append("file", file[0]);
+
+
+                  axios.post(urlApi + "/uploadArchivo", data, {
+                    headers: {
+                      "Content-Type": undefined,
+                      path: destino,
+                      "newfilename": '',
+                      'Authorization': 'Bearer ' + cookies.get('token')
+                    }
+                  })
+                    .then(response => {
+                      $(".loader").fadeOut("slow");
+                      if (response.statusText === "OK") {
+                        this.setState({ archivoVideo: null, showSuccessVideo: true, showErrorVideo: false, urlArchivo: urlArchivo + 'Videos/' + this.props.match.params.id + '/' + nameFile });
+                        this.setState({ tableArchivosVideos: this.renderTableArchivosVideos() })
+                        document.getElementById('filesVideo').value = '';
+                      }
+                      else {
+                        this.setState({ showSuccessVideo: false, showErrorVideo: true });
+                      }
+                      document.getElementById('subirVideo').removeAttribute('disabled');
+
+                      setTimeout(() => {
+                        this.setState({ showSuccessVideo: false, showErrorVideo: false });
+                      }, 5000);
+
+
+                    })
+                    .catch(error => {
+                      $(".loader").fadeOut("slow");
+                      this.setState({ showSuccessVideo: false, showErrorVideo: true });
+                      console.log(error);
+                    });
+
+
+
+
+                }.bind(this))
+                .catch(function (error) {
+                  $(".loader").fadeOut("slow");
+                  toast.error("Error al Actualizar Ejemplar. Intente nuevamente.");
+                  console.log('Hubo un problema con la petición Fetch (1):' + error.message);
+                });
+
+
+            }.bind(this))
+            .catch(function (error) {
+              $(".loader").fadeOut("slow");
+              toast.error("Error al consultar. Intente nuevamente.");
+              console.log('Hubo un problema con la petición Fetch (2):' + error.message);
+            });
+
+        }
+
+      }
+
+    } else {
+      toast.error("Seleccione un Archivo.");
+    }
+  }
+
+  eliminarArchivoVideo = (dato) => {
+    var destino = rutaEjemplares + 'Videos/' + this.props.match.params.id + "/" + dato;
+    var opcion = window.confirm("¿Está seguro que deseas eliminar el Archivo?");
+    if (opcion == true) {
+
+      fetch(urlApi + '/ejemplarId/' + this.props.match.params.id, {
+        method: 'get',
+        headers: {
+          'Authorization': 'Bearer ' + cookies.get('token')
+        }
+      })
+        .then(response => {
+          return response.json();
+        })
+        .then(function (response) {
+          //aca ya tengo la excavacion, tengo que obtener los archivos de autorizacion y quitar el candidato a eliminar
+          $(".loader").removeAttr("style");
+          //elimino archivo del array
+          var archivos = response.ejemplarId.videosEjemplar;
+          var contador = 0;
+          archivos.map((registro) => {
+            if (dato == registro) {
+              archivos.splice(contador, 1);
+            }
+            contador++;
+          });
+
+          var dataVideo = {
+            "videosEjemplar": archivos
+
+          }
+
+          //Actualizo la Exploracion
+          fetch(urlApi + '/ejemplar/' + this.props.match.params.id, {
+            method: 'put',
+            body: JSON.stringify(dataVideo),
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer ' + cookies.get('token')
+            }
+          })
+            .then(function (response) {
+              if (response.ok) {
+                console.log("¡Se actualizaron los datos del Ejemplar con Éxito!");
+                this.setState({ listArchivosVideo: archivos });
+
+              }
+            }.bind(this))
+            .then(function (response) {
+              //Elimino Archivo del Server
+              fetch(urlApi + '/deleteArchivo', {
+                method: 'get',
+                headers: {
+                  'Content-Type': undefined,
+                  'path': destino,
+                  'Authorization': 'Bearer ' + cookies.get('token')
+                }
+              })
+                .then(response => {
+                  return response.json();
+                })
+                .then(function (response) {
+                  $(".loader").fadeOut("slow");
+                  if ((response.msg).trim() === 'OK') {
+                    console.log('ok');
+                    toast.success("¡Se eliminó el Archivo con Éxito!");
+                    this.setState({ archivoVideo: null, tableArchivosVideos: this.renderTableArchivosVideos() })
+
+                  } else {
+                    console.log('error');
+                    toast.error("¡Se produjo un error al eliminar archivo!");
+                  }
+                }.bind(this)).catch(function (error) {
+                  $(".loader").fadeOut("slow");
+                  toast.error("Error al eliminar. Intente nuevamente.");
+                  console.log('Hubo un problema con la petición Fetch (3):' + error.message);
+                });
+
+
+            }.bind(this))
+            .catch(function (error) {
+              $(".loader").fadeOut("slow");
+              toast.error("Error al Actualizar Ejemplar. Intente nuevamente.");
+              console.log('Hubo un problema con la petición Fetch (2):' + error.message);
+            });
+
+        }.bind(this))
+        .catch(function (error) {
+          $(".loader").fadeOut("slow");
+          toast.error("Error al consultar. Intente nuevamente.");
+          console.log('Hubo un problema con la petición Fetch (1):' + error.message);
+        });
+
+    }
+
+  };
+
+  renderTableArchivosVideos() {
+
+
+    return this.state.listArchivosVideo.map((file, index) => {
+
+      return (
+        <tr key={index}>
+          <td>
+            <Button variant="danger" type="button" id="eliminarArch" onClick={() => this.eliminarArchivoVideo(file)}>
+              <FontAwesomeIcon icon={faTrash} />
+            </Button>
+          </td>
+          <td>
+            <a href={urlArchivo + 'Videos/' + this.props.match.params.id + '/' + file} disabled target="_blank">{file}</a>
+          </td>
+        </tr>
+      )
+    })
+
+
+
+  }
+
+  subirCurriculum = () => {
+
+    const MAXIMO_TAMANIO_BYTES = 5000000;
+    const types = ['application/pdf'];
+    var file = this.state.archivoCurriculum
+
+    if (file !== null && file.length !== 0) {
+      var nameFile = (file[0].name).replace(/\s+/g, "_");
+      nameFile = this.reemplazar(nameFile);
+      var size = file[0].size;
+      var type = file[0].type;
+
+      if (size > MAXIMO_TAMANIO_BYTES) {
+        var tamanio = 5000000 / 1000000;
+        toast.error("El archivo seleccionado supera los " + tamanio + 'Mb. permitidos.');
+        document.getElementById('archivopdf').value = '';
+      }
+      else {
+        if (!types.includes(type)) {
+          toast.error("El archivo seleccionado tiene una extensión inválida.");
+          document.getElementById('archivopdf').value = '';
+
+        }
+        else {
+          $(".loader").removeAttr("style");
+          document.getElementById('subirArchcv').setAttribute('disabled', 'disabled');
+          fetch(urlApi + '/ejemplarId/' + this.props.match.params.id, {
+            method: 'get',
+            headers: {
+              'Authorization': 'Bearer ' + cookies.get('token')
+            }
+          })
+            .then(response => {
+              return response.json();
+            })
+            .then(function (response) {
+
+              var listArchivosCV = response.ejemplarId.archivosCurriculum;
+              listArchivosCV.push(nameFile);
+
+              var dataCV = {
+                "archivosCurriculum": listArchivosCV,
+              };
+
+              //Primero Actualizo la Exploracion
+              fetch(urlApi + '/ejemplar/' + this.props.match.params.id, {
+                method: 'put',
+                body: JSON.stringify(dataCV),
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': 'Bearer ' + cookies.get('token')
+                }
+              })
+                .then(function (response) {
+                  if (response.ok) {
+                    console.log("¡Se actualizaron los datos de la Excavación con Éxito!");
+                    this.setState({ listArchivosCV: listArchivosCV });
+
+                  }
+                }.bind(this))
+                .then(function (response) {
+                  //segundo subo archivo al server
+
+                  const destino = rutaEjemplares + 'Curriculum/' + this.props.match.params.id;
+                  const data = new FormData();
+                  data.append("file", file[0]);
+
+
+                  axios.post(urlApi + "/uploadArchivo", data, {
+                    headers: {
+                      "Content-Type": undefined,
+                      path: destino,
+                      "newfilename": '',
+                      'Authorization': 'Bearer ' + cookies.get('token')
+                    }
+                  })
+                    .then(response => {
+                      $(".loader").fadeOut("slow");
+                      if (response.statusText === "OK") {
+                        this.setState({ archivoCurriculum: null, showSuccess: true, showError: false, urlArchivo: urlArchivo + 'Curriculum/' + this.props.match.params.id + '/' + nameFile });
+                        this.setState({ tableArchivosCV: this.renderTableArchivosCV() })
+                        document.getElementById('archivopdf').value = '';
+                      }
+                      else {
+                        this.setState({ showSuccess: false, showError: true });
+                      }
+                      document.getElementById('subirArchcv').removeAttribute('disabled');
+
+                      setTimeout(() => {
+                        this.setState({ showSuccess: false, showError: false });
+                      }, 5000);
+
+
+                    })
+                    .catch(error => {
+                      $(".loader").fadeOut("slow");
+                      this.setState({ showSuccess: false, showError: true });
+                      console.log(error);
+                    });
+
+
+
+
+                }.bind(this))
+                .catch(function (error) {
+                  $(".loader").fadeOut("slow");
+                  toast.error("Error al Actualizar Exploracion. Intente nuevamente.");
+                  console.log('Hubo un problema con la petición Fetch (1):' + error.message);
+                });
+
+
+            }.bind(this))
+            .catch(function (error) {
+              $(".loader").fadeOut("slow");
+              toast.error("Error al consultar. Intente nuevamente.");
+              console.log('Hubo un problema con la petición Fetch (2):' + error.message);
+            });
+
+        }
+
+      }
+
+    } else {
+      toast.error("Seleccione un Archivo.");
+    }
+  }
+
+  renderTableArchivosCV() {
+
+
+    return this.state.listArchivosCV.map((file, index) => {
+
+      return (
+        <tr key={index}>
+          <td>
+            <Button variant="danger" type="button" id="eliminarArch" onClick={() => this.eliminarArchivoCV(file)}>
+              <FontAwesomeIcon icon={faTrash} />
+            </Button>
+          </td>
+          <td>
+            <a href={urlArchivo + 'Curriculum/' + this.props.match.params.id + '/' + file} disabled target="_blank">{file}</a>
+          </td>
+
+        </tr>
+      )
+    })
+
+
+
+  }
+
+  eliminarArchivoCV = (dato) => {
+    var destino = rutaEjemplares + 'Curriculum/' + this.props.match.params.id + "/" + dato;
+    var opcion = window.confirm("¿Está seguro que deseas eliminar el Archivo?");
+    if (opcion == true) {
+
+      fetch(urlApi + '/ejemplarId/' + this.props.match.params.id, {
+        method: 'get',
+        headers: {
+          'Authorization': 'Bearer ' + cookies.get('token')
+        }
+      })
+        .then(response => {
+          return response.json();
+        })
+        .then(function (response) {
+          //aca ya tengo la excavacion, tengo que obtener los archivos de autorizacion y quitar el candidato a eliminar
+          $(".loader").removeAttr("style");
+          //elimino archivo del array
+          var archivos = response.ejemplarId.archivosCurriculum;
+          var contador = 0;
+          archivos.map((registro) => {
+            if (dato == registro) {
+              archivos.splice(contador, 1);
+            }
+            contador++;
+          });
+
+          var dataCV = {
+            "archivosCurriculum": archivos
+
+          }
+
+          //Actualizo la Exploracion
+          fetch(urlApi + '/ejemplar/' + this.props.match.params.id, {
+            method: 'put',
+            body: JSON.stringify(dataCV),
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer ' + cookies.get('token')
+            }
+          })
+            .then(function (response) {
+              if (response.ok) {
+                console.log("¡Se actualizaron los datos de la Excavación con Éxito!");
+                this.setState({ listArchivosCV: archivos });
+
+              }
+            }.bind(this))
+            .then(function (response) {
+              //Elimino Archivo del Server
+              fetch(urlApi + '/deleteArchivo', {
+                method: 'get',
+                headers: {
+                  'Content-Type': undefined,
+                  'path': destino,
+                  'Authorization': 'Bearer ' + cookies.get('token')
+                }
+              })
+                .then(response => {
+                  return response.json();
+                })
+                .then(function (response) {
+                  $(".loader").fadeOut("slow");
+                  if ((response.msg).trim() === 'OK') {
+                    console.log('ok');
+                    toast.success("¡Se eliminó el Archivo con Éxito!");
+                    this.setState({ archivoCurriculum: null, tableArchivosCV: this.renderTableArchivosCV() })
+
+                  } else {
+                    console.log('error');
+                    toast.error("¡Se produjo un error al eliminar archivo!");
+                  }
+                }.bind(this)).catch(function (error) {
+                  $(".loader").fadeOut("slow");
+                  toast.error("Error al eliminar. Intente nuevamente.");
+                  console.log('Hubo un problema con la petición Fetch (3):' + error.message);
+                });
+
+
+            }.bind(this))
+            .catch(function (error) {
+              $(".loader").fadeOut("slow");
+              toast.error("Error al Actualizar Ejemplar. Intente nuevamente.");
+              console.log('Hubo un problema con la petición Fetch (2):' + error.message);
+            });
+
+        }.bind(this))
+        .catch(function (error) {
+          $(".loader").fadeOut("slow");
+          toast.error("Error al consultar. Intente nuevamente.");
+          console.log('Hubo un problema con la petición Fetch (1):' + error.message);
+        });
+
+
+
+    }
+
+  };
+
+  filehandleChange = (event) => {
+
+    const file = event.target.files;
+    const name = file[0].name;
+    this.setState({ archivoCurriculum: file });
+
+  }
+
+
+  renderTableBochones() {
+
+
+    return this.state.bochones.map((bochon, index) => {
+
+      return (
+        <tr key={index}>
+          <td>{bochon.codigoCampo}</td>
+          <td>{bochon.nroBochon}</td>
+          <td> <Link to={"/editExcavacion/"+bochon.excavacionId[0]._id}>{bochon.excavacionId[0].nombreArea}</Link></td>
+
+        </tr>
+      )
+    })
+
+  }
+
+
+
+
+
+  render() {
+    const { selectedExcavacion } = this.state;
+    const { validated } = this.state;
+    const { validateddim } = this.state;
+    const { validateddimM } = this.state;
+    const { validatedgeo } = this.state;
+    const { validatedtax } = this.state;
+    const { validatedarea } = this.state;
+
+    const { validatedotros } = this.state;
+    const { validatedfotos } = this.state;
+    const { validatedvideos } = this.state;
+
+
+
+    const { selectedPreparador } = this.state;
+    let optPreparador = this.state.preparadores.map((opt) => ({
+      label: opt.nombres + " " + opt.apellidos,
+      value: opt._id,
+    }));
+
+    const { selectedColeccion } = this.state;
+    let optColecciones = this.state.colecciones.map((opt) => ({
+      label: opt.nombre,
+      value: opt._id,
+    }));
+
+    const { selectedMaterial } = this.state;
+
+
+    return (
+      <>
+        <Menu />
+        <div className="row">
+          <div className="col-md-12">
+            <div id="contenido" align="left" className="container">
+              <div className="loader" style={{ display: 'none' }}></div>
+              <br />
+              <h3 className="page-header" align="left">
+                <FontAwesomeIcon icon={faIdCard} /> Editar Ficha de Ingreso
+              </h3>
+              <hr />
+
+              <ToastContainer
+                position="top-right"
+                autoClose={5000}
+                transition={Slide}
+                hideProgressBar={true}
+                newestOnTop={true}
+                closeOnClick
+                pauseOnHover
+              />
+
+
+
+
+
+
+              <Tabs id="tabEjemplar" activeKey={this.state.key} onSelect={this.handleSelect}>
+                <Tab eventKey="dbasicos" title="Datos Básicos" disabled={this.state.tabbas}>
+
+                  <Form id="form1" noValidate validated={validated}>
+
+                    <Form.Row >
+                      <Form.Group className="col-sm-12" controlId="sigla">
+                        <Form.Label>Sigla:</Form.Label>
+                        <Form.Control type="text" placeholder="Obligatorio" autoComplete="off" required onChange={this.handleSiglaChange} value={this.state.sigla} />
+                        <Form.Control.Feedback type="invalid">
+                          Por favor, ingrese Sigla.
+                        </Form.Control.Feedback>
+                      </Form.Group>
+                    </Form.Row>
+
+                    <Form.Row >
+
+
+                      <Form.Group className="col-sm-4" controlId="fechaIngreso">
+                        <Form.Label>Fecha Ingreso:</Form.Label>
+                        <Form.Control type="date" value={this.state.fechaIngreso}
+                          onChange={this.handleFechaIngresoChange} required />
+                        <Form.Control.Feedback type="invalid">
+                          Por favor, ingrese Fecha.
+                        </Form.Control.Feedback>
+                      </Form.Group>
+
+
+                      <Form.Group className="col-sm-8" controlId="coleccion">
+                        <Form.Label>Tipo Colección:</Form.Label>
+
+                        <Select
+                          placeholder={"Seleccione Tipo Colección"}
+                          options={optColecciones}
+                          onChange={this.handleColeccionesChange}
+                          value={selectedColeccion}
+                          isClearable
                         />
-						 <fieldset>
-                            <legend >Datos Básicos</legend>
-							<hr/>
-						   <Form.Row >
-							  <Form.Group className="col-sm-12" controlId="nombre">
-                                <Form.Label>Nombre:</Form.Label>
-                                <Form.Control type="text" placeholder="Ingrese Nombre" autocomplete="off" required onChange={this.handleNombreChange} value={this.state.nombre} />
-                                <Form.Control.Feedback type="invalid">
-                                Por favor, ingrese Nombre.
-                                </Form.Control.Feedback>
-                              </Form.Group>
-                            </Form.Row>
-							
-							<Form.Row >
-							    <Form.Group className="col-sm-4" controlId="tipoEjemplar">
-								<Form.Label>Tipo Ejemplar:</Form.Label>
-								  <Select  
-                                                    placeholder={'Seleccione Tipo'}
-                                                    options={optTipos} 
-                                                    onChange={this.handleTipoChange} 
-                                                    value={optTipos.filter(option => option.value === this.state.tipoEjemplar)}
-												
-                                                    />
-								</Form.Group>
-								<Form.Group className="col-sm-4" controlId="coleccion">
-								   <Form.Label>Colección:</Form.Label>
-								   <Select      
-                                                    placeholder={'Seleccione Colección'}
-                                                    options={this.state.colecciones} 
-                                                    onChange={this.handleColeccionesChange} 
-                                                    value={selectedColeccion}
-													isClearable
-                                                    />
-								</Form.Group>
-								<Form.Group className="col-sm-4" controlId="fechaColeccion">
-								 <Form.Label>Fecha Ingreso Colección:</Form.Label>
-                                    <Form.Control type="date" value={this.state.fechaColeccion}
-                                                    onChange={this.handleFechaColeccionChange}/>
-								</Form.Group>
-							
-							</Form.Row>
-							
-							<Form.Row >
-							 <Form.Group className="col-sm-4" controlId="fbaja">
-                                    <Form.Label>Fecha Baja:</Form.Label>
-                                    <Form.Control type="date"  value={this.state.fbaja} onChange={this.handleFbajaChange}/>
-                            </Form.Group>
 
-                            <Form.Group className="col-sm-8" controlId="motivo">
-                                    <Form.Label>Motivo Baja:</Form.Label>
-                                    <Form.Control as="textarea" rows={3}  value={this.state.motivo} onChange={this.handleMotivoChange}/>
-                            </Form.Group>
-							</Form.Row>
-							
-							<Form.Row >
-							
-							<Form.Group className="col-sm-4" controlId="dimensionAlto">
-                                <Form.Label>Dimensión Alto:</Form.Label>
-                                <Form.Control type="text" placeholder="Ingrese Alto" autocomplete="off" required onChange={this.handleDimensionAltoChange} value={this.state.dimensionAlto} />
-                                <Form.Control.Feedback type="invalid">
-                                Por favor, ingrese Dimensión Alto.
-                                </Form.Control.Feedback>
-                              </Form.Group>
-							  
-							  <Form.Group className="col-sm-4" controlId="dimensionAncho">
-                                <Form.Label>Dimensión Largo:</Form.Label>
-                                <Form.Control type="text" placeholder="Ingrese Largo" autocomplete="off" required value={this.state.dimensionAncho} onChange={this.handleDimensionAnchoChange} />
-                                <Form.Control.Feedback type="invalid">
-                                Por favor, ingrese Largo.
-                                </Form.Control.Feedback>
-                              </Form.Group>
-							  
-							  <Form.Group className="col-sm-4" controlId="peso">
-                                <Form.Label>Peso:</Form.Label>
-                                <Form.Control type="text" placeholder="Ingrese Peso" autocomplete="off" required onChange={this.handlePesoChange} value={this.state.peso} />
-                                <Form.Control.Feedback type="invalid">
-                                Por favor, ingrese Peso.
-                                </Form.Control.Feedback>
-                              </Form.Group>
-							
-							</Form.Row>
-							
-							<Form.Row >
-							   <Form.Group className="col-sm-12" controlId="alimentacion">
-                                <Form.Label>Alimentación:</Form.Label>
-                                <Form.Control type="text" autocomplete="off"   onChange={this.handleAlimentacionChange} value={this.state.alimentacion} />
 
-                               </Form.Group>
-							</Form.Row>
-							
-							<Form.Row>
-							   <Form.Group className="col-sm-12" controlId="ubicacion">
-                                <Form.Label>Ubicación:</Form.Label>
-                                <Form.Control type="text" autocomplete="off"   onChange={this.handleUbicacionChange} value={this.state.ubicacion} />
-							   </Form.Group>	
-							</Form.Row>
-							
-							<Form.Row >
-							   <Form.Group className="col-sm-12" controlId="descripcion1">
-                                <Form.Label>Descripción 1:</Form.Label>
-                                <Form.Control as="textarea" rows={3}   value={this.state.descripcion1} onChange={this.handleDescripcion1Change} />
-                               </Form.Group>
-							</Form.Row>
-							
-							<Form.Row >
-							   <Form.Group className="col-sm-12" controlId="descripcion1A">
-                                <Form.Label>Descripción 1A:</Form.Label>
-                                <Form.Control as="textarea" rows={3}  value={this.state.descripcion1A} onChange={this.handleDescripcion1AChange} />
-                               </Form.Group>
-							</Form.Row>
-							
-							<Form.Row >
-							   <Form.Group className="col-sm-12" controlId="descripcion2">
-                                <Form.Label>Descripción 2:</Form.Label>
-                                <Form.Control as="textarea" rows={3}   value={this.state.descripcion2} onChange={this.handleDescripcion2Change} />
-                               </Form.Group>
-							</Form.Row>
-							
-							<Form.Row >
-							   <Form.Group className="col-sm-12" controlId="descripcion3">
-                                <Form.Label>Descripción 3:</Form.Label>
-                                <Form.Control as="textarea" rows={3}   value={this.state.descripcion3} onChange={this.handleDescripcion3Change} />
-                               </Form.Group>
-							</Form.Row>
-							
-							<br/>   
-                              <legend >Datos Geológicos</legend>
-                            <hr/>
-							
-							<Form.Row >
-							
-							  <Form.Group className="col-sm-4" controlId="formacion">
-                                <Form.Label>Formación:</Form.Label>
-                                <Form.Control type="text"  autocomplete="off"  onChange={this.handleFormacionChange} value={this.state.formacion} />
-                              </Form.Group>
-							  
-							   <Form.Group className="col-sm-4" controlId="grupo">
-                                <Form.Label>Grupo:</Form.Label>
-                                <Form.Control type="text"  autocomplete="off"  onChange={this.handleGrupoChange} value={this.state.grupo} />
-                              </Form.Group>
-							  
-							   <Form.Group className="col-sm-4" controlId="subgrupo">
-                                <Form.Label>Subgrupo:</Form.Label>
-                                <Form.Control type="text"  autocomplete="off"  onChange={this.handleSubgrupoChange} value={this.state.subgrupo} />
-                              </Form.Group>
+                      </Form.Group>
 
-							</Form.Row>
-							
-							<Form.Row >
-							
-							  <Form.Group className="col-sm-4" controlId="edad">
-                                <Form.Label>Edad:</Form.Label>
-                                <Form.Control type="text"  autocomplete="off"  onChange={this.handleEdadChange} value={this.state.edad} />
-                              </Form.Group>
-							  
-							   <Form.Group className="col-sm-4" controlId="perido">
-                                <Form.Label>Período:</Form.Label>
-                                <Form.Control type="text"  autocomplete="off"  onChange={this.handlePeriodoChange} value={this.state.periodo} />
-                              </Form.Group>
-							  
-							   <Form.Group className="col-sm-4" controlId="era">
-                                <Form.Label>Era:</Form.Label>
-                                <Form.Control type="text"  autocomplete="off"  onChange={this.handleEraChange} value={this.state.era} />
-                              </Form.Group>
+                    </Form.Row>
 
-							</Form.Row>
-							
-							<Form.Row >
-							
-							  <Form.Group className="col-sm-4" controlId="reino">
-                                <Form.Label>Reino:</Form.Label>
-                                <Form.Control type="text"  autocomplete="off"  onChange={this.handleReinoChange} value={this.state.reino} />
-                              </Form.Group>
-							  
-							   <Form.Group className="col-sm-4" controlId="filo">
-                                <Form.Label>Filo:</Form.Label>
-                                <Form.Control type="text"  autocomplete="off"  onChange={this.handleFiloChange} value={this.state.filo} />
-                              </Form.Group>
-							  
-							   <Form.Group className="col-sm-4" controlId="clase">
-                                <Form.Label>Clase:</Form.Label>
-                                <Form.Control type="text"  autocomplete="off"  onChange={this.handleClaseChange} value={this.state.clase} />
-                              </Form.Group>
+                    <Form.Row >
+                      <Form.Group className="col-sm-4" controlId="fechaBaja">
+                        <Form.Label>Fecha Baja:</Form.Label>
+                        <Form.Control type="date" value={this.state.fechaBaja} onChange={this.handleFbajaChange} />
+                      </Form.Group>
 
-							</Form.Row>
-							
-							<Form.Row >
-							
-							  <Form.Group className="col-sm-4" controlId="orden">
-                                <Form.Label>Orden:</Form.Label>
-                                <Form.Control type="text"  autocomplete="off"  onChange={this.handleOrdenChange} value={this.state.orden} />
-                              </Form.Group>
-							  
-							   <Form.Group className="col-sm-4" controlId="familia">
-                                <Form.Label>Familia:</Form.Label>
-                                <Form.Control type="text"  autocomplete="off"  onChange={this.handleFamiliaChange} value={this.state.familia} />
-                              </Form.Group>
-							  
-							   <Form.Group className="col-sm-4" controlId="genero">
-                                <Form.Label>Género:</Form.Label>
-                                <Form.Control type="text"  autocomplete="off"  onChange={this.handleGeneroChange} value={this.state.genero} />
-                              </Form.Group>
+                      <Form.Group className="col-sm-8" controlId="motivoBaja">
+                        <Form.Label>Motivo Baja:</Form.Label>
+                        <Form.Control as="textarea" rows={3} value={this.state.motivoBaja} onChange={this.handleMotivoChange} />
+                      </Form.Group>
+                    </Form.Row>
 
-							</Form.Row>
-							
-							<Form.Row>
-							   <Form.Group className="col-sm-12" controlId="especie">
-                                <Form.Label>Especie:</Form.Label>
-                                <Form.Control type="text" autocomplete="off"  onChange={this.handleEspecieChange} value={this.state.especie} />
-							   </Form.Group>	
-							</Form.Row>
-							
-							 <br/>   
-                             <legend >Área de Hallazgo</legend>
-                             <hr/>
-								
-							<Form.Row >
-							    <Form.Group className="col-sm-6" controlId="excavacion">
-									<Form.Label>Excavación:</Form.Label>
-									 <Select
-											placeholder={'Seleccione Excavación'}
-											options={this.state.excavaciones} 
-											onChange={this.handleExcavacionesChange} 
-											value={selectedExcavacion}
-											isClearable
-									  />
-								</Form.Group>  
-                </Form.Row>
-     {/*
-							    <Form.Group className="col-sm-6" controlId="pais">
-									<Form.Label>País:</Form.Label>
-									<Select 
-											placeholder={'Seleccione País'} 
-											options={this.state.paises}
-											onChange={this.handlePaisChange} 
-											value={selectedPais} 
-											isDisabled
-										
-									/>
-									
-								
-									
-									</Form.Group>
-							</Form.Row>
-							
-							 <Form.Row >
-                              <Form.Group className="col-sm-6" controlId="provincia">
-                                <Form.Label>Provincia:</Form.Label>
-                                <Select 
-                                        placeholder={'Seleccione Provincia'} 
-                                        options={this.state.provincias}
-                                        onChange={this.handleProvinciaChange} 
-                                        value={selectedProvincia} 
-										isDisabled
-										
-										/>
-                                
-                            </Form.Group>
-                            <Form.Group className="col-sm-6" controlId="ciudad">
-                                <Form.Label>Ciudad:</Form.Label>
-                                <Select 
-                                        placeholder={'Seleccione Ciudad'} 
-                                        options={this.state.ciudades}
-                                        onChange={this.handleCiudadChange} 
-                                        value={selectedCiudad} 
-										isDisabled
-										
-										/>
-                                
-                            </Form.Group>
-     </Form.Row> */}
-							 <Form.Row >
-							 <Form.Group controlId="muestraHome">
-									<Form.Check inline 
-									            type="checkbox" 
-												label="Muestra en Página Web?" 
-												checked={this.state.muestraHome}
-												onChange={this.handleMuestraChange.bind(this)} 
-												/>
-						      </Form.Group>
-                             </Form.Row>
-						 <br/>					 
-					     </fieldset>	
-                          <hr/>
-                      <Form.Row> 
-					<Form.Group className="mx-sm-3 mb-2">
-								  <Button variant="primary" type="submit" id="guardar">
-								  <FontAwesomeIcon icon={faSave} /> Guardar
-								  </Button>
-								  &nbsp;&nbsp;
-								 <Link to='/ejemplares'>
-								  <Button variant="secondary" type="button" id="volver">
-								  <FontAwesomeIcon icon={faReply} /> Cancelar
-								  </Button>
-								  </Link>
-							</Form.Group>
-					  </Form.Row>					  
 
-					<br/>
-                    <br/>							 
-					</Form>	
-			    </div>
-              </div> 
-        </div>	
-			 
-			 
-			 </>
-	 )
+                    <Form.Row >
+                      <Form.Group controlId="muestraHome">
+                        <Form.Check inline
+                          type="checkbox"
+                          label="Muestra en Página Web?"
+                          checked={this.state.muestraHome}
+                          onChange={this.handleMuestraChange.bind(this)}
+                        />
+                      </Form.Group>
+                    </Form.Row>
+
+                    <Form.Row >
+                      <Button variant="outline-secondary" type="button" id="siguiente" onClick={this.handleForm1}>
+                        Siguiente <FontAwesomeIcon icon={faShare} />
+                      </Button>
+                      &nbsp;&nbsp;
+                      <Link to="/ejemplares">
+                        <Button variant="outline-danger" type="button" id="cancela">
+                          <FontAwesomeIcon icon={faTimesCircle} /> Cancelar
+                        </Button>
+                      </Link>
+                    </Form.Row>
+                  </Form>
+
+                </Tab>
+
+
+
+
+
+                <Tab eventKey="ddimensiones" title="Piezas" disabled={this.state.tabdim}>
+                  <Form id="form2" noValidate validated={validateddim} >
+
+                    <Form.Row >
+                      <Form.Group className="col-sm-6" controlId="nombrePieza">
+                        <Form.Label>Nombre:</Form.Label>
+                        <Form.Control type="text" placeholder="Obligatorio" autoComplete="off" required onChange={this.handleNombrePiezaChange} value={this.state.nombre} />
+                        <Form.Control.Feedback type="invalid">
+                          Por favor, ingrese Nombre Pieza.
+                        </Form.Control.Feedback>
+                      </Form.Group>
+
+                      <Form.Group className="col-sm-6" controlId="dimensionAlto">
+                        <Form.Label>Alto:</Form.Label>
+                        <Form.Control type="text" placeholder="Obligatorio" autoComplete="off" required onChange={this.handleDimensionAltoChange} value={this.state.dimensionAlto} />
+                        <Form.Control.Feedback type="invalid">
+                          Por favor, ingrese Dimensión Alto.
+                        </Form.Control.Feedback>
+                      </Form.Group>
+
+
+                    </Form.Row>
+
+
+                    <Form.Row >
+
+
+                      <Form.Group className="col-sm-6" controlId="dimensionLargo">
+                        <Form.Label>Largo:</Form.Label>
+                        <Form.Control type="text" placeholder="Obligatorio" autoComplete="off" required value={this.state.dimensionLargo} onChange={this.handleDimensionLargoChange} />
+                        <Form.Control.Feedback type="invalid">
+                          Por favor, ingrese Largo.
+                        </Form.Control.Feedback>
+                      </Form.Group>
+
+                      <Form.Group className="col-sm-6" controlId="dimensionAncho">
+                        <Form.Label>Ancho:</Form.Label>
+                        <Form.Control type="text" placeholder="Obligatorio" autoComplete="off" required onChange={this.handleDimensionAnchoChange} value={this.state.dimensionAncho} />
+                        <Form.Control.Feedback type="invalid">
+                          Por favor, ingrese Ancho.
+                        </Form.Control.Feedback>
+                      </Form.Group>
+
+                    </Form.Row>
+
+                    <Form.Row>
+                      <Form.Group className="mx-sm-3 mb-2">
+                        <Button variant="primary" type="button" id="guardarPieza" onClick={this.insertarPieza}>
+                          <FontAwesomeIcon icon={faPlus} /> Agregar
+                        </Button>
+
+                      </Form.Group>
+                    </Form.Row>
+
+                    <Form.Row>
+                      <Table striped bordered hover responsive>
+                        <thead className="thead-dark">
+                          <tr>
+                            <th>Acción</th>
+                            <th>Nombre</th>
+                            <th>Alto</th>
+                            <th>Largo</th>
+                            <th>Ancho</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {this.state.tablaPiezas}
+                        </tbody>
+                      </Table>
+                    </Form.Row>
+
+
+                    <Form.Row >
+                      <Button variant="outline-secondary" type="button" id="anterior1" onClick={this.handleAntForm2}>
+                        <FontAwesomeIcon icon={faReply} /> Anterior
+                      </Button>
+                      &nbsp;
+                      <Button variant="outline-secondary" type="button" id="siguiente1" onClick={this.handleForm2}>
+                        Siguiente <FontAwesomeIcon icon={faShare} />
+                      </Button>
+                    </Form.Row>
+
+                  </Form>
+                </Tab>
+                <Tab eventKey="dgeologicos" title="Datos Geológicos" disabled={this.state.tabgeo}>
+                  <Form id="form3" noValidate validated={validatedgeo} >
+
+                    <Form.Row >
+
+                      <Form.Group className="col-sm-4" controlId="formacion">
+                        <Form.Label>Formación:</Form.Label>
+                        <Form.Control type="text" autoComplete="off" onChange={this.handleFormacionChange} value={this.state.formacion} />
+                      </Form.Group>
+
+                      <Form.Group className="col-sm-4" controlId="grupo">
+                        <Form.Label>Grupo:</Form.Label>
+                        <Form.Control type="text" autoComplete="off" onChange={this.handleGrupoChange} value={this.state.grupo} />
+                      </Form.Group>
+
+                      <Form.Group className="col-sm-4" controlId="subgrupo">
+                        <Form.Label>Subgrupo:</Form.Label>
+                        <Form.Control type="text" autoComplete="off" onChange={this.handleSubgrupoChange} value={this.state.subgrupo} />
+                      </Form.Group>
+
+                    </Form.Row>
+
+                    <Form.Row >
+
+                      <Form.Group className="col-sm-4" controlId="edad">
+                        <Form.Label>Edad:</Form.Label>
+                        <Form.Control type="text" autoComplete="off" onChange={this.handleEdadChange} value={this.state.edad} />
+                      </Form.Group>
+
+                      <Form.Group className="col-sm-4" controlId="perido">
+                        <Form.Label>Período:</Form.Label>
+                        <Form.Control type="text" autoComplete="off" onChange={this.handlePeriodoChange} value={this.state.periodo} />
+                      </Form.Group>
+
+                      <Form.Group className="col-sm-4" controlId="era">
+                        <Form.Label>Era:</Form.Label>
+                        <Form.Control type="text" autoComplete="off" onChange={this.handleEraChange} value={this.state.era} />
+                      </Form.Group>
+
+                    </Form.Row>
+                    <Form.Row >
+                      <Button variant="outline-secondary" type="button" id="anterior2" onClick={this.handleAntForm3}>
+                        <FontAwesomeIcon icon={faReply} /> Anterior
+                      </Button>
+                      &nbsp;
+                      <Button variant="outline-secondary" type="button" id="siguiente2" onClick={this.handleForm3}>
+                        Siguiente <FontAwesomeIcon icon={faShare} />
+                      </Button>
+                    </Form.Row>
+
+                  </Form>
+                </Tab>
+                <Tab eventKey="dtaxonomicos" title="Datos Taxonómicos" disabled={this.state.tabtax}>
+
+                  <Form id="form4" noValidate validated={validatedtax} >
+                    <Form.Row >
+
+                      <Form.Group className="col-sm-4" controlId="reino">
+                        <Form.Label>Reino:</Form.Label>
+                        <Form.Control type="text" autoComplete="off" onChange={this.handleReinoChange} value={this.state.reino} />
+                      </Form.Group>
+
+                      <Form.Group className="col-sm-4" controlId="filo">
+                        <Form.Label>Filo:</Form.Label>
+                        <Form.Control type="text" autoComplete="off" onChange={this.handleFiloChange} value={this.state.filo} />
+                      </Form.Group>
+
+                      <Form.Group className="col-sm-4" controlId="clase">
+                        <Form.Label>Clase:</Form.Label>
+                        <Form.Control type="text" autoComplete="off" onChange={this.handleClaseChange} value={this.state.clase} />
+                      </Form.Group>
+
+                    </Form.Row>
+
+                    <Form.Row >
+
+                      <Form.Group className="col-sm-4" controlId="orden">
+                        <Form.Label>Orden:</Form.Label>
+                        <Form.Control type="text" autoComplete="off" onChange={this.handleOrdenChange} value={this.state.orden} />
+                      </Form.Group>
+
+                      <Form.Group className="col-sm-4" controlId="familia">
+                        <Form.Label>Familia:</Form.Label>
+                        <Form.Control type="text" autoComplete="off" onChange={this.handleFamiliaChange} value={this.state.familia} />
+                      </Form.Group>
+
+                      <Form.Group className="col-sm-4" controlId="genero">
+                        <Form.Label>Género:</Form.Label>
+                        <Form.Control type="text" autoComplete="off" onChange={this.handleGeneroChange} value={this.state.genero} />
+                      </Form.Group>
+
+                    </Form.Row>
+
+                    <Form.Row>
+                      <Form.Group className="col-sm-12" controlId="especie">
+                        <Form.Label>Especie:</Form.Label>
+                        <Form.Control type="text" autoComplete="off" onChange={this.handleEspecieChange} value={this.state.especie} />
+                      </Form.Group>
+                    </Form.Row>
+
+                    <Form.Row >
+                      <Button variant="outline-secondary" type="button" id="anterior3" onClick={this.handleAntForm4}>
+                        <FontAwesomeIcon icon={faReply} /> Anterior
+                      </Button>
+                      &nbsp;
+                      <Button variant="outline-secondary" type="button" id="siguiente3" onClick={this.handleForm4}>
+                        Siguiente <FontAwesomeIcon icon={faShare} />
+                      </Button>
+                    </Form.Row>
+                  </Form>
+
+                </Tab>
+                <Tab eventKey="darea" title="Área de Hallazgo" disabled={this.state.tabarea}>
+                  <Form id="form5" noValidate validated={validatedarea} >
+
+                    <Form.Row >
+
+                      <Form.Group className="col-sm-12" controlId="areaHallazgo">
+                        <Form.Label>Nombre Área:</Form.Label>
+                        <Form.Control type="text" autoComplete="off" onChange={this.handleAreaHChange} value={this.state.areaHallazgo} />
+                      </Form.Group>
+
+                    </Form.Row>
+
+                    <Form.Row >
+                      
+                      <Form.Group className="col-sm-12">
+                      <h4>Bochones Asociados al Ejemplar</h4>
+                      <hr/>
+
+                        <Table striped bordered hover responsive>
+                          <thead className="thead-dark">
+                            <tr>
+                              <th>Código Campo</th>
+                              <th>Nro. Bochon</th>
+                              <th>Excavación</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {this.state.tableBochones}
+                          </tbody>
+                        </Table>
+
+
+                      </Form.Group>
+
+                    </Form.Row>
+
+
+                    <Form.Row >
+                      <Button variant="outline-secondary" type="button" id="anterior4" onClick={this.handleAntForm5}>
+                        <FontAwesomeIcon icon={faReply} /> Anterior
+                      </Button>
+                      &nbsp;
+                      <Button variant="outline-secondary" type="button" id="siguiente4" onClick={this.handleForm5}>
+                        Siguiente <FontAwesomeIcon icon={faShare} />
+                      </Button>
+                    </Form.Row>
+
+                  </Form>
+                </Tab>
+
+
+
+                <Tab eventKey="dotros" title="Otros Datos" disabled={this.state.tabotros}>
+                  <Form id="form7" noValidate validated={validatedotros} >
+                    <Form.Row>
+                      <Form.Group className="col-sm-12" controlId="ubicacion">
+                        <Form.Label>Ubicación:</Form.Label>
+                        <Form.Control type="text" autoComplete="off" onChange={this.handleUbicacionChange} value={this.state.ubicacion} />
+                      </Form.Group>
+                    </Form.Row>
+
+                    <Form.Row >
+
+
+                      <Form.Group className="col-sm-6" controlId="ingresadoPor">
+                        <Form.Label>Material Ingresado Por:</Form.Label>
+
+                        <Select
+                          placeholder={"Seleccione Opción"}
+                          options={optMaterial}
+                          onChange={this.handleIngresadoPorChange}
+                          value={selectedMaterial}
+                          isClearable
+                        />
+
+
+
+                      </Form.Group>
+
+
+                      <Form.Group className="col-sm-6" controlId="preparador">
+                        <Form.Label>Preparador:</Form.Label>
+                        <Select
+                          placeholder={"Seleccione Opción"}
+                          options={optPreparador}
+                          onChange={this.handlePreparadorChange}
+                          value={selectedPreparador}
+                          isClearable
+                        />
+                      </Form.Group>
+                    </Form.Row>
+
+
+                    <Form.Row >
+                      <Form.Group className="col-sm-12" controlId="tipoIntervencion">
+                        <Form.Label>Tipo de Intervención:</Form.Label>
+                        <Form.Control as="textarea" rows={3} value={this.state.tipoIntervencion} onChange={this.handleTipoIntervencionChange} />
+                      </Form.Group>
+                    </Form.Row>
+
+                    <Form.Row >
+                      <Form.Group className="col-sm-12" controlId="autores">
+                        <Form.Label>Autores:</Form.Label>
+                        <Form.Control as="textarea" rows={3} value={this.state.autores} onChange={this.handleAutoresChange} />
+                      </Form.Group>
+                    </Form.Row>
+
+                    <Form.Row >
+                      <Form.Group className="col-sm-12" controlId="publicaciones">
+                        <Form.Label>Publicaciones:</Form.Label>
+                        <Form.Control as="textarea" rows={3} value={this.state.publicaciones} onChange={this.handlePublicacionesChange} />
+                      </Form.Group>
+                    </Form.Row>
+
+                    <Form.Row>
+
+                      <Form.Group className="col-sm-8" >
+                        <Form.Label>Curriculum Vitae:</Form.Label>
+                        <input type="file" id="archivopdf" className="form-control" accept="application/pdf" onChange={this.filehandleChange.bind(this)} />
+                      </Form.Group>
+
+                    </Form.Row>
+
+                    <Form.Row>
+                      <Form.Group className="col-sm-2" >
+                        <Button variant="primary" type="button" id="subirArchcv" onClick={() => this.subirCurriculum()} >
+                          <FontAwesomeIcon icon={faUpload} /> Subir
+                        </Button>
+                      </Form.Group>
+                      <Form.Group className="col-sm-6">
+                        <Alert show={this.state.showSuccess} variant="success">
+                          <p>
+                            Se subió el archivo con Éxito!!
+                          </p>
+                        </Alert>
+
+                        <Alert show={this.state.showError} variant="danger">
+                          <p>
+                            El archivo no se pudo subir. Intente nuevamente.
+                          </p>
+                        </Alert>
+                      </Form.Group>
+                    </Form.Row>
+
+
+                    <Form.Row>
+                      <Form.Group className="col-sm-6" controlId="archivopdf">
+
+                        <Table striped bordered hover responsive>
+                          <thead className="thead-dark">
+                            <tr>
+                              <th>Acción</th>
+                              <th>Nombre</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {this.state.tableArchivosCV}
+                          </tbody>
+                        </Table>
+
+
+                      </Form.Group>
+                    </Form.Row>
+
+
+
+                    <Form.Row >
+                      <Form.Group className="col-sm-12" controlId="observacionesAdic">
+                        <Form.Label>Observaciones Adicionales:</Form.Label>
+                        <Form.Control as="textarea" rows={3} value={this.state.observacionesAdic} onChange={this.handleObservacionesAdicChange} />
+                      </Form.Group>
+                    </Form.Row>
+
+                    <hr />
+                    <Form.Row>
+                      <Form.Group className="mx-sm-3 mb-2">
+                        <Button variant="primary" type="button" id="guardar" onClick={this.actualizarEjemplar}>
+                          <FontAwesomeIcon icon={faSave} /> Guardar
+                        </Button>
+                        &nbsp;&nbsp;
+                        <Link to='/ejemplares'>
+                          <Button variant="danger" type="button" id="volver">
+                            <FontAwesomeIcon icon={faTimesCircle} /> Cancelar
+                          </Button>
+                        </Link>
+
+                      </Form.Group>
+                    </Form.Row>
+                  </Form>
+                </Tab>
+
+                <Tab eventKey="dfotos" title="Fotos" disabled={this.state.tabfotos}>
+                  <Form id="form7" noValidate validated={validatedfotos}>
+                    <legend>Fotos</legend>
+                    <hr />
+
+                    <Form.Row>
+                      <Form.Group className="col-sm-12">
+                        <label>Archivos:</label>
+                        <input type="file" className="form-control" id="fileFoto" accept="image/*" onChange={this.filesImagehandleChange.bind(this)} />
+                      </Form.Group>
+                    </Form.Row>
+
+                    <Form.Row>
+                      <Form.Group className="col-sm-12" controlId="descripcionFoto">
+                        <Form.Label>Descripción Breve:</Form.Label>
+                        <small>(Para accesibilidad de la Web)</small>
+                        <Form.Control
+                          type="text"
+                          value={this.state.descripcionFoto}
+                          onChange={this.handleDescripcionFotoChange}
+                        />
+                      </Form.Group>
+                    </Form.Row>
+
+                    <Form.Row>
+                      <Form.Group className="col-sm-2" >
+                        <Button variant="primary" type="button" id="subirFoto" onClick={() => this.subirFoto()} >
+                          <FontAwesomeIcon icon={faUpload} /> Subir
+                        </Button>
+                      </Form.Group>
+                      <Form.Group className="col-sm-6">
+                        <Alert show={this.state.showSuccessFoto} variant="success">
+                          <p>
+                            Se subió el archivo con Éxito!!
+                          </p>
+                        </Alert>
+
+                        <Alert show={this.state.showErrorFoto} variant="danger">
+                          <p>
+                            El archivo no se pudo subir. Intente nuevamente.
+                          </p>
+                        </Alert>
+                      </Form.Group>
+                    </Form.Row>
+
+                    <Form.Row>
+                      <Form.Group className="col-sm-8" controlId="archivospdf">
+
+                        <Table striped bordered hover responsive>
+                          <thead className="thead-dark">
+                            <tr>
+                              <th>Acción</th>
+                              <th>Nombre</th>
+                              <th>Descripción</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {this.state.tableArchivosFotos}
+                          </tbody>
+                        </Table>
+
+
+                      </Form.Group>
+                    </Form.Row>
+
+                  </Form>
+                </Tab>
+
+                <Tab eventKey="dvideos" title="Videos" disabled={this.state.tabvideos}>
+                  <Form id="form8" noValidate validated={validatedvideos}>
+                    <legend>Videos</legend>
+                    <hr />
+
+                    <Form.Row>
+                      <Form.Group className="col-sm-8">
+                        <label>Archivos:</label>
+                        <input type="file" className="form-control" id="filesVideo" accept="video/*" onChange={this.filesVideohandleChange.bind(this)} />
+                      </Form.Group>
+                    </Form.Row>
+
+                    <Form.Row>
+                      <Form.Group className="col-sm-2" >
+                        <Button variant="primary" type="button" id="subirVideo" onClick={() => this.subirVideo()} >
+                          <FontAwesomeIcon icon={faUpload} /> Subir
+                        </Button>
+                      </Form.Group>
+                      <Form.Group className="col-sm-6">
+                        <Alert show={this.state.showSuccessVideo} variant="success">
+                          <p>
+                            Se subió el archivo con Éxito!!
+                          </p>
+                        </Alert>
+
+                        <Alert show={this.state.showErrorVideo} variant="danger">
+                          <p>
+                            El archivo no se pudo subir. Intente nuevamente.
+                          </p>
+                        </Alert>
+                      </Form.Group>
+                    </Form.Row>
+
+                    <Form.Row>
+                      <Form.Group className="col-sm-8" controlId="archivospdf">
+
+                        <Table striped bordered hover responsive>
+                          <thead className="thead-dark">
+                            <tr>
+                              <th>Acción</th>
+                              <th>Nombre</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {this.state.tableArchivosVideos}
+                          </tbody>
+                        </Table>
+
+
+                      </Form.Group>
+                    </Form.Row>
+
+                  </Form>
+                </Tab>
+
+
+              </Tabs>
+
+
+              <Modal
+                show={this.state.modalActualizarPieza}
+                onHide={() => this.cerrarModalActualizarPieza()}
+                backdrop="static"
+                keyboard={false}
+                size="lg"
+              >
+                <Modal.Header closeButton>
+                  <Modal.Title>Editar Pieza</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                  <Form id="form22" noValidate validated={validateddimM} >
+
+                    <Form.Row >
+                      <Form.Group className="col-sm-6" controlId="nombrePiezaM">
+                        <Form.Label>Nombre:</Form.Label>
+                        <Form.Control type="text" placeholder="Obligatorio" autoComplete="off" required onChange={this.handleNombrePiezaMChange} value={this.state.nombreM} />
+                        <Form.Control.Feedback type="invalid">
+                          Por favor, ingrese Nombre Pieza.
+                        </Form.Control.Feedback>
+                      </Form.Group>
+
+                      <Form.Group className="col-sm-6" controlId="dimensionAlto">
+                        <Form.Label>Alto:</Form.Label>
+                        <Form.Control type="text" placeholder="Obligatorio" autoComplete="off" required onChange={this.handleDimensionAltoMChange} value={this.state.dimensionAltoM} />
+                        <Form.Control.Feedback type="invalid">
+                          Por favor, ingrese Dimensión Alto.
+                        </Form.Control.Feedback>
+                      </Form.Group>
+
+
+                    </Form.Row>
+
+
+                    <Form.Row >
+
+
+                      <Form.Group className="col-sm-6" controlId="dimensionLargoM">
+                        <Form.Label>Largo:</Form.Label>
+                        <Form.Control type="text" placeholder="Obligatorio" autoComplete="off" required value={this.state.dimensionLargoM} onChange={this.handleDimensionLargoMChange} />
+                        <Form.Control.Feedback type="invalid">
+                          Por favor, ingrese Largo.
+                        </Form.Control.Feedback>
+                      </Form.Group>
+
+                      <Form.Group className="col-sm-6" controlId="dimensionAnchoM">
+                        <Form.Label>Ancho:</Form.Label>
+                        <Form.Control type="text" placeholder="Obligatorio" autoComplete="off" required onChange={this.handleDimensionAnchoMChange} value={this.state.dimensionAnchoM} />
+                        <Form.Control.Feedback type="invalid">
+                          Por favor, ingrese Ancho.
+                        </Form.Control.Feedback>
+                      </Form.Group>
+
+                    </Form.Row>
+
+
+
+                  </Form>
+
+                </Modal.Body>
+                <Modal.Footer>
+                  <Button variant="secondary" onClick={() => this.cerrarModalActualizarPieza()}>
+                    Cerrar
+                  </Button>
+                  <Button variant="primary" id="guardarAct" onClick={this.editarPieza}> <FontAwesomeIcon icon={faSave} /> Guardar</Button>
+                </Modal.Footer>
+              </Modal>
+
+
+
+
+
+            </div>
+          </div>
+        </div>
+
+
+      </>
+    )
+  }
+
 }
-	
-}
-export default EditEjemplar;		
+export default EditEjemplar;

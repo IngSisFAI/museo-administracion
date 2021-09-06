@@ -8,13 +8,12 @@ import {
   faUsers,
   faMapMarked,
   faCompass,
-  faPaw,
-  faHandLizard,
   faSignOutAlt,
   faKey,
   faUserEdit,
   faMap,
   faFileArchive,
+  faIdCard,
 } from "@fortawesome/free-solid-svg-icons";
 import { Link } from "react-router-dom";
 import Cookies from "universal-cookie";
@@ -48,18 +47,20 @@ class Menu extends React.Component {
                 <NavDropdown.Item as={Link} to={"/exploraciones"}>
                   <FontAwesomeIcon icon={faMapMarked} /> Exploraciones
                 </NavDropdown.Item>
+
+                <NavDropdown.Item as={Link} to={"/ejemplares"}>
+                  <FontAwesomeIcon icon={faIdCard} /> Inventario MUC
+                </NavDropdown.Item>
+
                 <NavDropdown.Item as={Link} to={"/excavaciones"}>
                   <FontAwesomeIcon icon={faCompass} /> Excavaciones
                 </NavDropdown.Item>
-                <NavDropdown.Item as={Link} to={"/ejemplares"}>
-                  <FontAwesomeIcon icon={faPaw} /> Inventarios MUC
-                </NavDropdown.Item>
-             {/*   <NavDropdown.Item as={Link} to={"/bochones"}>
+                {/*   <NavDropdown.Item as={Link} to={"/bochones"}>
                   <FontAwesomeIcon icon={faHandLizard} /> Bochones
     </NavDropdown.Item>*/}
                 <NavDropdown.Item as={Link} to={"/documentacion"}>
                   <FontAwesomeIcon icon={faFileArchive} /> Documentación
-                 </NavDropdown.Item>
+                </NavDropdown.Item>
                 <NavDropdown.Item as={Link} to={"/datosGeograficos"}>
                   <FontAwesomeIcon icon={faMap} /> Visualizar Datos Geográficos
                 </NavDropdown.Item>

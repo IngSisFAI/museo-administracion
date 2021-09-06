@@ -3,7 +3,7 @@ import { Form, Button, Tabs, Tab, Table, Modal, Alert } from 'react-bootstrap';
 import { ToastContainer, toast, Slide } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faSave, faReply, faPaw, faPlus, faFileArchive, faTrash, faEdit, faShare, faTimesCircle, faUpload } from '@fortawesome/free-solid-svg-icons'
+import { faSave, faReply, faPlus, faTrash, faEdit, faShare, faTimesCircle, faUpload, faIdCard } from '@fortawesome/free-solid-svg-icons'
 import { Link } from 'react-router-dom';
 import Select from 'react-select';
 import Menu from "./../Menu"
@@ -56,7 +56,6 @@ class AddEjemplar extends React.Component {
       videos: [],
       colecciones: [],
       selectedColeccion: null,
-      selectedIngresadoPor: null,
       validated: false,
       paisesArray: [],
       preparadores: [],
@@ -1815,7 +1814,7 @@ class AddEjemplar extends React.Component {
               <div className="loader" style={{ display: 'none' }}></div>
               <br />
               <h3 className="page-header" align="left">
-                <FontAwesomeIcon icon={faPaw} /> Ficha de Ingreso
+                <FontAwesomeIcon icon={faIdCard} /> Nueva Ficha de Ingreso
               </h3>
               <hr />
               <ToastContainer

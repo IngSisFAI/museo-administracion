@@ -1,6 +1,6 @@
 import React from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faPaw, faPlus } from '@fortawesome/free-solid-svg-icons'
+import { faIdCard, faPlus } from '@fortawesome/free-solid-svg-icons'
 import MaterialTable from "material-table";
 import { ToastContainer, toast, Slide } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -175,7 +175,7 @@ class MainEjemplares extends React.Component {
           <Form.Row>
             <div id="contenido" align="left" className="container">
 
-              <legend> <FontAwesomeIcon icon={faPaw} /> Inventarios MUC </legend>
+              <legend> <FontAwesomeIcon icon={faIdCard} /> Inventario MUC </legend>
               <hr />
               <Link to='/addEjemplar'>
                 <Button variant="primary" type="buttom" >
