@@ -176,8 +176,8 @@ class MainEjemplares extends React.Component {
                     field: 'tipoColeccion'
                   },
                   {
-                    title: 'Ubicación',
-                    field: 'ubicacionMuseo'
+                    title: 'Especie',
+                    field: 'taxonEspecie'
                   }
                 ]}
                 data={this.state.ejemplares}

@@ -10,6 +10,7 @@ import Menu from "./../Menu"
 import Cookies from 'universal-cookie';
 import Moment from 'moment';
 import $ from 'jquery';
+import axios from "axios";
 
 const cookies = new Cookies();
 
@@ -17,6 +18,12 @@ const cookies = new Cookies();
 const urlApi = process.env.REACT_APP_API_HOST;
 const urlArchivo = process.env.REACT_APP_URL_EJEMPLARES;
 const rutaEjemplares = process.env.REACT_APP_RUTA_EJEMPLARES;
+
+
+const optMaterial = [{ "value": "Donación", "label": "Donación" },
+{ "value": "Excavación realizada MUC", "label": "Excavación realizada MUC" },
+{ "value": "Otros", "label": "Otros" }]
+
 
 
 class AddEjemplar extends React.Component {
@@ -73,7 +80,7 @@ class AddEjemplar extends React.Component {
       selectedIngresadoPor: null,
       validated: false,
       paisesArray: [],
-      colectores: [],
+      preparadores: [],
       show: false,
       tabdim: true,
       key: 'dbasicos',
@@ -119,8 +126,12 @@ class AddEjemplar extends React.Component {
       dimensionAnchoM: "",
       nombreM: '',
       validateddimM: false,
-      piezaMId:''
-
+      piezaMId: '',
+      areaHallazgo: '',
+      selectedMaterial: null,
+      tipoIntervencion: '',
+      autores: '',
+      publicaciones: ''
     }
 
   }
@@ -164,7 +175,7 @@ class AddEjemplar extends React.Component {
       })
       .then((data) => {
         this.setState({
-          colectores: data.personas,
+          preparadores: data.personas,
         });
       }).catch(function (error) {
         toast.error("Error al guardar. Intente nuevamente.");
@@ -193,8 +204,8 @@ class AddEjemplar extends React.Component {
     this.setState({ sigla: evt.target.value });
   };
 
-  handleColectorChange = (selectedColector) => {
-    this.setState({ selectedColector });
+  handlePreparadorChange = (selectedPreparador) => {
+    this.setState({ selectedPreparador });
   };
 
 
@@ -210,9 +221,9 @@ class AddEjemplar extends React.Component {
     this.setState({ selectedColeccion });
   }
 
-  handleIngresadoPorChange = (event) => {
-    this.setState({ selectedIngresadoPor: event.target.value });
-    // console.log(`Option selected:`, event.target.value );
+  handleIngresadoPorChange = (selectedMaterial) => {
+    this.setState({ selectedMaterial });
+    console.log(`Option selected:`, selectedMaterial);
 
   }
 
@@ -263,20 +274,20 @@ class AddEjemplar extends React.Component {
     this.setState({ ubicacion: evt.target.value });
   };
 
-  handleDescripcion1Change = evt => {
-    this.setState({ descripcion1: evt.target.value });
+  handleTipoIntervencionChange = evt => {
+    this.setState({ tipoIntervencion: evt.target.value });
   };
 
-  handleDescripcion1AChange = evt => {
-    this.setState({ descripcion1A: evt.target.value });
+  handleAutoresChange = evt => {
+    this.setState({ autores: evt.target.value });
   };
 
-  handleDescripcion2Change = evt => {
-    this.setState({ descripcion2: evt.target.value });
+  handlePublicacionesChange = evt => {
+    this.setState({ publicaciones: evt.target.value });
   };
 
-  handleDescripcion3Change = evt => {
-    this.setState({ descripcion3: evt.target.value });
+  handleObservacionesAdicChange = evt => {
+    this.setState({ observacionesAdic: evt.target.value });
   };
 
   handleFormacionChange = evt => {
@@ -346,6 +357,10 @@ class AddEjemplar extends React.Component {
 
   handleInstitucionChange = evt => {
     this.setState({ institucion: evt.target.value });
+  };
+
+  handleAreaHChange = evt => {
+    this.setState({ areaHallazgo: evt.target.value });
   };
 
 
@@ -519,6 +534,108 @@ class AddEjemplar extends React.Component {
     this.setState({ validated: true });
   }
 
+  actualizarEjemplar = (event) => {
+    const form = document.getElementById("form7");
+    event.preventDefault();
+    if (form.checkValidity() === false) {
+      event.stopPropagation();
+    } else {
+
+      $(".loader").removeAttr("style");
+      var coleccionName = "";
+      var coleccionId = "";
+      if (this.state.selectedColeccion !== null) {
+        coleccionName = this.state.selectedColeccion.label;
+        coleccionId = this.state.selectedColeccion.value
+      }
+
+      var idPreparador = "";
+      if (this.state.selectedPreparador !== null) {
+        idPreparador = this.state.selectedPreparador.value
+      }
+
+      var idMaterial = "";
+      if (this.state.selectedMaterial !== null) {
+        idMaterial = this.state.selectedMaterial.value
+      }
+
+      var eraGeo = {
+        "formacion": this.state.formacion,
+        "grupo": this.state.grupo,
+        "subgrupo": this.state.subgrupo,
+        "edad": this.state.edad,
+        "periodo": this.state.periodo,
+        "era": this.state.era
+      };
+
+      var areaH = {
+        "nombreArea": this.state.areaHallazgo,
+        "pais": '',
+        "ciudad": '',
+        "provincia": ''
+      };
+
+
+
+      var data = {
+        sigla: this.state.sigla,
+        tipoColeccion: coleccionName,
+        tipoColeccionId: coleccionId,
+        fechaIngreso: this.state.fechaIngreso,
+        fechaBaja: this.state.fechaBaja,
+        motivoBaja: this.state.motivoBaja,
+        taxonReino: this.state.reino,
+        taxonFilo: this.state.filo,
+        taxonClase: this.state.clase,
+        taxonOrden: this.state.orden,
+        taxonFamilia: this.state.familia,
+        taxonGenero: this.state.genero,
+        taxonEspecie: this.state.especie,
+        eraGeologica: eraGeo,
+        ubicacionMuseo: this.state.ubicacion,
+        preparador: idPreparador,
+        materialIngresadoPor: idMaterial,
+        tipoIntervencion: this.state.tipoIntervencion,
+        autores: this.state.autores,
+        publicaciones: this.state.publicaciones,
+        observacionesAdic: this.state.observacionesAdic,
+        home: this.state.muestraHome,
+        areaHallazgo: areaH
+      }
+
+      fetch(urlApi + '/ejemplar/' + this.state.ejemplarId, {
+        method: 'put',
+        body: JSON.stringify(data),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + cookies.get('token')
+        }
+      })
+        .then(function (response) {
+          if (response.ok) {
+            toast.success("¡Se actualizaron los datos del Ejemplar con Éxito!");
+            $(".loader").fadeOut("slow");
+            return response.json();
+
+          }
+        })
+        .catch(function (error) {
+          $(".loader").fadeOut("slow");
+          toast.error("Error al guardar. Intente nuevamente.");
+          console.log(
+            "Hubo un problema con la petición Fetch:",
+            error.message
+          );
+        });
+
+
+    }
+
+    this.setState({ validatedotros: true });
+
+
+  }
+
 
   handleForm1 = (event) => {
     const form = document.getElementById("form1");
@@ -565,6 +682,7 @@ class AddEjemplar extends React.Component {
           tipoIntervencion: '',
           autores: '',
           publicaciones: '',
+          materialIngresadoPor: '',
           archivosPublicaciones: [],
           observacionesAdic: '',
           home: this.state.muestraHome,
@@ -712,12 +830,8 @@ class AddEjemplar extends React.Component {
 
 
     } else {
-      if (this.state.selectedExcavacion === "" || this.state.selectedExcavacion === null) {
-        toast.error('Seleccione una Excavación.');
 
-      } else {
-        this.setState({ tabotros: false, key: 'dotros', tabpres: false });
-      }
+      this.setState({ tabotros: false, key: 'dotros', tabfotos: false, tabvideos: false });
 
     }
     this.setState({ validatedarea: true });
@@ -963,9 +1077,6 @@ class AddEjemplar extends React.Component {
 
   }
 
-  eliminarPieza() {
-    alert('Elimina');
-  }
 
   renderTablePiezas() {
 
@@ -1086,7 +1197,7 @@ class AddEjemplar extends React.Component {
         }
       }
 
-      fetch(urlApi + "/pieza/"+this.state.piezaMId, {
+      fetch(urlApi + "/pieza/" + this.state.piezaMId, {
         method: "put",
         body: JSON.stringify(data),
         headers: {
@@ -1150,6 +1261,295 @@ class AddEjemplar extends React.Component {
   }
 
 
+  subirFoto = () => {
+
+    const MAXIMO_TAMANIO_BYTES = 5000000;
+    const types = ['image/gif', 'image/png', 'image/jpg', 'image/jpeg', 'image/bmp', 'image/webp'];
+    var file = this.state.archivoFoto
+
+    if (file !== null && file.length !== 0) {
+      var nameFile = (file[0].name).replace(/\s+/g, "_");
+      nameFile = this.reemplazar(nameFile);
+      var size = file[0].size;
+      var type = file[0].type;
+
+      if (size > MAXIMO_TAMANIO_BYTES) {
+        var tamanio = 5000000 / 1000000;
+        toast.error("El archivo seleccionado supera los " + tamanio + 'Mb. permitidos.');
+        document.getElementById('fileFoto').value = '';
+      }
+      else {
+        if (!types.includes(type)) {
+          toast.error("El archivo seleccionado tiene una extensión inválida.");
+          document.getElementById('fileFoto').value = '';
+
+        }
+        else {
+          $(".loader").removeAttr("style");
+          document.getElementById('subirFoto').setAttribute('disabled', 'disabled');
+          fetch(urlApi + '/ejemplarId/' + this.state.ejemplarId, {
+            method: 'get',
+            headers: {
+              'Authorization': 'Bearer ' + cookies.get('token')
+            }
+          })
+            .then(response => {
+              return response.json();
+            })
+            .then(function (response) {
+
+              var listArchivosFotos = response.ejemplarId.fotosEjemplar;
+              var fotoSubir = {
+                "nombre": nameFile,
+                "descripcion": this.state.descripcionFoto
+              }
+
+              listArchivosFotos.push(fotoSubir);
+
+              //  console.log('LAS FOTOS::', listArchivosFotos);
+
+              var dataFoto = {
+                "fotosEjemplar": listArchivosFotos,
+              };
+
+              //Primero Actualizo la Excavacion
+              fetch(urlApi + '/ejemplar/' + this.state.ejemplarId, {
+                method: 'put',
+                body: JSON.stringify(dataFoto),
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': 'Bearer ' + cookies.get('token')
+                }
+              })
+                .then(function (response) {
+                  if (response.ok) {
+                    console.log("¡Se actualizaron los datos del Ejemplar con Éxito!");
+                    this.setState({ listArchivosFotos: listArchivosFotos });
+
+                  }
+                }.bind(this))
+                .then(function (response) {
+                  //segundo subo archivo al server
+
+                  const destino = rutaEjemplares + 'Fotos/' + this.state.ejemplarId;
+                  const data = new FormData();
+                  data.append("file", file[0]);
+
+
+                  axios.post(urlApi + "/uploadArchivo", data, {
+                    headers: {
+                      "Content-Type": undefined,
+                      path: destino,
+                      "newfilename": '',
+                      'Authorization': 'Bearer ' + cookies.get('token')
+                    }
+                  })
+                    .then(response => {
+                      $(".loader").fadeOut("slow");
+                      if (response.statusText === "OK") {
+                        this.setState({ archivoFoto: null, descripcionFoto: "", showSuccessFoto: true, showErrorFoto: false, urlArchivo: urlArchivo + 'Fotos/' + this.state.ejemplarId + '/' + nameFile });
+                        this.setState({ tableArchivosFotos: this.renderTableArchivosFotos() })
+                        document.getElementById('fileFoto').value = '';
+                      }
+                      else {
+                        this.setState({ showSuccessFoto: false, showErrorFoto: true });
+                      }
+                      document.getElementById('subirFoto').removeAttribute('disabled');
+
+                      setTimeout(() => {
+                        this.setState({ showSuccessFoto: false, showErrorFoto: false });
+                      }, 5000);
+
+
+                    })
+                    .catch(error => {
+                      $(".loader").fadeOut("slow");
+                      this.setState({ showSuccessFoto: false, showErrorFoto: true });
+                      console.log(error);
+                    });
+
+
+
+
+                }.bind(this))
+                .catch(function (error) {
+                  $(".loader").fadeOut("slow");
+                  toast.error("Error al Actualizar Exploracion. Intente nuevamente.");
+                  console.log('Hubo un problema con la petición Fetch (1):' + error.message);
+                });
+
+
+            }.bind(this))
+            .catch(function (error) {
+              $(".loader").fadeOut("slow");
+              toast.error("Error al consultar. Intente nuevamente.");
+              console.log('Hubo un problema con la petición Fetch (2):' + error.message);
+            });
+
+        }
+
+      }
+
+    } else {
+      toast.error("Seleccione un Archivo.");
+    }
+  }
+
+  renderTableArchivosFotos() {
+
+
+    return this.state.listArchivosFotos.map((file, index) => {
+
+      return (
+        <tr key={index}>
+          <td>
+            <Button variant="danger" type="button" id="eliminarArch" onClick={() => this.eliminarArchivoFoto(file.nombre)}>
+              <FontAwesomeIcon icon={faTrash} />
+            </Button>
+          </td>
+          <td>
+            <a href={urlArchivo + 'Fotos/' + this.state.ejemplarId + '/' + file.nombre} disabled target="_blank">{file.nombre}</a>
+          </td>
+          <td>
+            {file.descripcion}
+          </td>
+
+        </tr>
+      )
+    })
+
+
+
+  }
+
+  
+  eliminarArchivoFoto = (dato) => {
+    var destino = rutaEjemplares + 'Fotos/' + this.state.ejemplarId + "/" + dato;
+    var opcion = window.confirm("¿Está seguro que deseas eliminar el Archivo?");
+    if (opcion == true) {
+
+      fetch(urlApi + '/ejemplarId/' + this.state.ejemplarId, {
+        method: 'get',
+        headers: {
+          'Authorization': 'Bearer ' + cookies.get('token')
+        }
+      })
+        .then(response => {
+          return response.json();
+        })
+        .then(function (response) {
+          //aca ya tengo la excavacion, tengo que obtener los archivos de autorizacion y quitar el candidato a eliminar
+          $(".loader").removeAttr("style");
+          //elimino archivo del array
+          var archivos = response.ejemplarId.fotosEjemplar;
+          var contador = 0;
+          archivos.map((registro) => {
+            if (dato == registro.nombre) {
+              archivos.splice(contador, 1);
+            }
+            contador++;
+          });
+
+          var dataFoto = {
+            "fotosEjemplar": archivos
+
+          }
+
+          //Actualizo la Exploracion
+          fetch(urlApi + '/ejemplar/' + this.state.ejemplarId, {
+            method: 'put',
+            body: JSON.stringify(dataFoto),
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer ' + cookies.get('token')
+            }
+          })
+            .then(function (response) {
+              if (response.ok) {
+                console.log("¡Se actualizaron los datos del Ejemplar con Éxito!");
+                this.setState({ listArchivosFotos: archivos });
+
+              }
+            }.bind(this))
+            .then(function (response) {
+              //Elimino Archivo del Server
+              fetch(urlApi + '/deleteArchivo', {
+                method: 'get',
+                headers: {
+                  'Content-Type': undefined,
+                  'path': destino,
+                  'Authorization': 'Bearer ' + cookies.get('token')
+                }
+              })
+                .then(response => {
+                  return response.json();
+                })
+                .then(function (response) {
+                  $(".loader").fadeOut("slow");
+                  if ((response.msg).trim() === 'OK') {
+                    console.log('ok');
+                    toast.success("¡Se eliminó el Archivo con Éxito!");
+                    this.setState({ archivoFoto: null, tableArchivosFotos: this.renderTableArchivosFotos() })
+
+                  } else {
+                    console.log('error');
+                    toast.error("¡Se produjo un error al eliminar archivo!");
+                  }
+                }.bind(this)).catch(function (error) {
+                  $(".loader").fadeOut("slow");
+                  toast.error("Error al eliminar. Intente nuevamente.");
+                  console.log('Hubo un problema con la petición Fetch (3):' + error.message);
+                });
+
+
+            }.bind(this))
+            .catch(function (error) {
+              $(".loader").fadeOut("slow");
+              toast.error("Error al Actualizar Exploracion. Intente nuevamente.");
+              console.log('Hubo un problema con la petición Fetch (2):' + error.message);
+            });
+
+        }.bind(this))
+        .catch(function (error) {
+          $(".loader").fadeOut("slow");
+          toast.error("Error al consultar. Intente nuevamente.");
+          console.log('Hubo un problema con la petición Fetch (1):' + error.message);
+        });
+
+    }
+
+  };
+
+  reemplazar(cadena) {
+
+    var chars = {
+
+      "á": "a", "é": "e", "í": "i", "ó": "o", "ú": "u",
+
+      "à": "a", "è": "e", "ì": "i", "ò": "o", "ù": "u", "ñ": "n",
+
+      "Á": "A", "É": "E", "Í": "I", "Ó": "O", "Ú": "U",
+
+      "À": "A", "È": "E", "Ì": "I", "Ò": "O", "Ù": "U", "Ñ": "N",
+
+      "ä": "a", "ë": "e", "ï": "i", "ö": "o", "ü": "u",
+
+      "Ä": "A", "Ä": "A", "Ë": "E", "Ï": "I", "Ö": "O", "Ü": "U"
+    }
+
+    var expr = /[áàéèíìóòúùñäëïöü]/ig;
+
+    var res = cadena.replace(expr, function (e) { return chars[e] });
+
+    return res;
+
+  }
+
+
+  handleDescripcionFotoChange = (evt) => {
+    this.setState({ descripcionFoto: evt.target.value });
+  };
+
 
 
 
@@ -1173,8 +1573,8 @@ class AddEjemplar extends React.Component {
     let optExcavaciones = this.state.excavaciones.map((opt) => ({ label: opt.nombre, value: opt._id }));
 
 
-    const { selectedColector } = this.state;
-    let optColectores = this.state.colectores.map((opt) => ({
+    const { selectedPreparador } = this.state;
+    let optPreparador = this.state.preparadores.map((opt) => ({
       label: opt.nombres + " " + opt.apellidos,
       value: opt._id,
     }));
@@ -1185,12 +1585,15 @@ class AddEjemplar extends React.Component {
       value: opt._id,
     }));
 
+    const { selectedMaterial } = this.state;
+
     return (
       <>
         <Menu />
         <div className="row">
           <div className="col-md-12">
             <div id="contenido" align="left" className="container">
+            <div className="loader" style={{ display: 'none' }}></div>
               <br />
               <h3 className="page-header" align="left">
                 <FontAwesomeIcon icon={faPaw} /> Ficha de Ingreso
@@ -1497,9 +1900,18 @@ class AddEjemplar extends React.Component {
                 <Tab eventKey="darea" title="Área de Hallazgo" disabled={this.state.tabarea}>
                   <Form id="form5" noValidate validated={validatedarea} >
 
-
-
                     <Form.Row >
+
+                      <Form.Group className="col-sm-12" controlId="areaHallazgo">
+                        <Form.Label>Nombre Área:</Form.Label>
+                        <Form.Control type="text" autoComplete="off" onChange={this.handleAreaHChange} value={this.state.areaHallazgo} />
+                      </Form.Group>
+
+                    </Form.Row>
+
+
+
+                    {/* <Form.Row >
                       <Form.Group className="col-sm-12" controlId="excavacion">
                         <Form.Label>Excavación:</Form.Label>
                         <Select
@@ -1510,7 +1922,9 @@ class AddEjemplar extends React.Component {
                           isClearable
                         />
                       </Form.Group>
-                    </Form.Row>
+                   </Form.Row>*/}
+
+
                     <Form.Row >
                       <Button variant="outline-secondary" type="button" id="anterior4" onClick={this.handleAntForm5}>
                         <FontAwesomeIcon icon={faReply} /> Anterior
@@ -1541,34 +1955,26 @@ class AddEjemplar extends React.Component {
                       <Form.Group className="col-sm-6" controlId="ingresadoPor">
                         <Form.Label>Material Ingresado Por:</Form.Label>
 
-                        <Form.Control
-                          as="select"
-                          className="form-control"
+                        <Select
+                          placeholder={"Seleccione Opción"}
+                          options={optMaterial}
                           onChange={this.handleIngresadoPorChange}
-                          required
-                        >
-                          <option value="">Seleccione Opción</option>
-                          <option value="1">Donación</option>
-                          <option value="2">Excavación realizada MUC</option>
-                          <option value="3">Otros</option>
+                          value={selectedMaterial}
+                          isClearable
+                        />
 
 
-
-                        </Form.Control>
-                        <Form.Control.Feedback type="invalid">
-                          Por favor, seleccione opción.
-                        </Form.Control.Feedback>
 
                       </Form.Group>
 
 
-                      <Form.Group className="col-sm-6" controlId="colector">
-                        <Form.Label>Colector:</Form.Label>
+                      <Form.Group className="col-sm-6" controlId="preparador">
+                        <Form.Label>Preparador:</Form.Label>
                         <Select
                           placeholder={"Seleccione Opción"}
-                          options={optColectores}
-                          onChange={this.handleColectorChange}
-                          value={selectedColector}
+                          options={optPreparador}
+                          onChange={this.handlePreparadorChange}
+                          value={selectedPreparador}
                           isClearable
                         />
                       </Form.Group>
@@ -1576,23 +1982,23 @@ class AddEjemplar extends React.Component {
 
 
                     <Form.Row >
-                      <Form.Group className="col-sm-12" controlId="descripcion1">
+                      <Form.Group className="col-sm-12" controlId="tipoIntervencion">
                         <Form.Label>Tipo de Intervención:</Form.Label>
-                        <Form.Control as="textarea" rows={3} value={this.state.descripcion1} onChange={this.handleDescripcion1Change} />
+                        <Form.Control as="textarea" rows={3} value={this.state.tipoIntervencion} onChange={this.handleTipoIntervencionChange} />
                       </Form.Group>
                     </Form.Row>
 
                     <Form.Row >
-                      <Form.Group className="col-sm-12" controlId="descripcion1A">
+                      <Form.Group className="col-sm-12" controlId="autores">
                         <Form.Label>Autores:</Form.Label>
-                        <Form.Control as="textarea" rows={3} value={this.state.descripcion1A} onChange={this.handleDescripcion1AChange} />
+                        <Form.Control as="textarea" rows={3} value={this.state.autores} onChange={this.handleAutoresChange} />
                       </Form.Group>
                     </Form.Row>
 
                     <Form.Row >
-                      <Form.Group className="col-sm-12" controlId="descripcion2">
+                      <Form.Group className="col-sm-12" controlId="publicaciones">
                         <Form.Label>Publicaciones:</Form.Label>
-                        <Form.Control as="textarea" rows={3} value={this.state.descripcion2} onChange={this.handleDescripcion2Change} />
+                        <Form.Control as="textarea" rows={3} value={this.state.publicaciones} onChange={this.handlePublicacionesChange} />
                       </Form.Group>
                     </Form.Row>
 
@@ -1631,14 +2037,14 @@ class AddEjemplar extends React.Component {
                     <Form.Row >
                       <Form.Group className="col-sm-12" controlId="descripcion3">
                         <Form.Label>Observaciones Adicionales:</Form.Label>
-                        <Form.Control as="textarea" rows={3} value={this.state.descripcion3} onChange={this.handleDescripcion3Change} />
+                        <Form.Control as="textarea" rows={3} value={this.state.observacionesAdic} onChange={this.handleObservacionesAdicChange} />
                       </Form.Group>
                     </Form.Row>
 
                     <hr />
                     <Form.Row>
                       <Form.Group className="mx-sm-3 mb-2">
-                        <Button variant="primary" type="submit" id="guardar">
+                        <Button variant="primary" type="button" id="guardar" onClick={this.actualizarEjemplar}>
                           <FontAwesomeIcon icon={faSave} /> Guardar
                         </Button>
                         &nbsp;&nbsp;
