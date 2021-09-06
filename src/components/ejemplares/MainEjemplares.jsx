@@ -39,7 +39,7 @@ class MainEjemplares extends React.Component {
         }
       })
         .then((response) => {
-          console.log(response)
+         // console.log(response)
           return response.json()
         })
         .then((ejemplars) => {
@@ -53,83 +53,110 @@ class MainEjemplares extends React.Component {
   }
 
   eliminar(id) {
-    fetch(urlApi + "/ejemplar/" + id,
-      {
-        method: "delete",
-        headers: {
-          'Authorization': 'Bearer ' + cookies.get('token')
-        }
+
+    fetch(urlApi + '/piezasEjemplar/' + id, {
+      method: 'GET',
+      headers: {
+        'Authorization': 'Bearer ' + cookies.get('token')
       }
-    )
-      .then(function (response) {
-        if (response.ok) {
-          console.log("¡Se eliminó el Ejemplar con Éxito!");
+    })
+      .then((response) => {
+        return response.json()
+      })
+      .then(result => {
+          console.log(result.piezas.length)
+        if (result.piezas.length > 0) {
+          toast.error("No se puede eliminar el ejemplar: Contiene piezas asociadas.")
+        }
+        else {
+          fetch(urlApi + "/ejemplar/" + id,
+            {
+              method: "delete",
+              headers: {
+                'Authorization': 'Bearer ' + cookies.get('token')
+              }
+            }
+          )
+            .then(function (response) {
+              if (response.ok) {
+                console.log("¡Se eliminó el Ejemplar con Éxito!");
+
+              }
+            }).then(function (resp) {
+              //Elimino todos los directorios asociados a la excavacion
+              //Primero las Fotos
+              const destinoFotos = rutaEjemplares + 'Fotos/' + id + "/";
+              fetch(urlApi + "/deleteDirectorio", {
+                method: "get",
+                headers: {
+                  "Content-Type": undefined,
+                  path: destinoFotos,
+                  'Authorization': 'Bearer ' + cookies.get('token')
+                },
+              })
+                .then(function (response) {
+                  if (response.ok) {
+                    console.log('Se eliminó directorio fotos.');
+                  }
+                })
+                .then(function () {
+                  //Segundo los videos
+                  const destinoVideos = rutaEjemplares + 'Videos/' + id + "/";
+                  fetch(urlApi + "/deleteDirectorio", {
+                    method: "get",
+                    headers: {
+                      "Content-Type": undefined,
+                      path: destinoVideos,
+                      'Authorization': 'Bearer ' + cookies.get('token')
+                    },
+                  })
+                    .then(function (response) {
+                      if (response.ok) {
+                        console.log('Se eliminó directorio videos.');
+                      }
+                      //Cartel de Exito
+                      toast.success("¡Se eliminó el Ejemplar con Éxito!");
+                      setTimeout(() => {
+                        window.location.href = "/ejemplares";
+                      }, 1500);
+
+                    })
+                    .catch(function (error) {
+                      toast.error("Error al eliminar. Intente nuevamente.");
+                      console.log(
+                        "Hubo un problema con la petición Fetch:" + error.message
+                      );
+                    });
+
+                })
+                .catch(function (error) {
+                  toast.error("Error al eliminar. Intente nuevamente.");
+                  console.log(
+                    "Hubo un problema con la petición Fetch:" + error.message
+                  );
+                });
+
+            })
+            .catch(function (error) {
+              toast.error("Error al eliminar. Intente nuevamente.");
+              console.log(
+                "Hubo un problema con la petición Fetch:" + error.message
+              );
+            });
+
 
         }
-      }).then(function (resp) {
-        //Elimino todos los directorios asociados a la excavacion
-        //Primero las Fotos
-        const destinoFotos = rutaEjemplares + 'Fotos/' + id + "/";
-        fetch(urlApi + "/deleteDirectorio", {
-          method: "get",
-          headers: {
-            "Content-Type": undefined,
-            path: destinoFotos,
-            'Authorization': 'Bearer ' + cookies.get('token')
-          },
-        })
-          .then(function (response) {
-            if (response.ok) {
-              console.log('Se eliminó directorio fotos.');
-            }
-          })
-          .then(function () {
-            //Segundo los videos
-            const destinoVideos = rutaEjemplares + 'Videos/' + id + "/";
-            fetch(urlApi + "/deleteDirectorio", {
-              method: "get",
-              headers: {
-                "Content-Type": undefined,
-                path: destinoVideos,
-                'Authorization': 'Bearer ' + cookies.get('token')
-              },
-            })
-              .then(function (response) {
-                if (response.ok) {
-                  console.log('Se eliminó directorio videos.');
-                }
-                //Cartel de Exito
-                toast.success("¡Se eliminó el Ejemplar con Éxito!");
-                setTimeout(() => {
-                  window.location.href = "/ejemplares";
-                }, 1500);
-
-              })
-              .catch(function (error) {
-                toast.error("Error al eliminar. Intente nuevamente.");
-                console.log(
-                  "Hubo un problema con la petición Fetch:" + error.message
-                );
-              });
-
-          })
-          .catch(function (error) {
-            toast.error("Error al eliminar. Intente nuevamente.");
-            console.log(
-              "Hubo un problema con la petición Fetch:" + error.message
-            );
-          });
 
       })
       .catch(function (error) {
-        toast.error("Error al eliminar. Intente nuevamente.");
-        console.log(
-          "Hubo un problema con la petición Fetch:" + error.message
-        );
-      });
+        console.log('Error:', error)
+      })
+
+
 
   }
 
+  
   render() {
     return (
       <>

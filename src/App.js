@@ -29,7 +29,6 @@ import ObtenerExploraciones from "./areaGeospatial/ObtenerExploraciones";
 import Ejemplares from "./components/ejemplares/MainEjemplares";
 import AddEjemplar from "./components/ejemplares/AddEjemplar";
 import EditEjemplar from "./components/ejemplares/EditEjemplar";
-import MultimediaEjemplar from "./components/ejemplares/MultimediaEjemplar";
 
 //Bochones
 import Bochones from "./components/bochones/MainBochones";
@@ -69,10 +68,7 @@ class App extends Component {
           <Route path="/ejemplares" component={Ejemplares} />
           <Route path="/addEjemplar" component={AddEjemplar} />
           <Route path="/editEjemplar/:id" component={EditEjemplar} />
-          <Route
-            path="/multimediaEjemplar/:id"
-            component={MultimediaEjemplar}
-          />
+         
 
           <Route path="/bochones" component={Bochones} />
           <Route path="/addBochon" component={AddBochon} />
