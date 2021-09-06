@@ -8,7 +8,6 @@ import { Link } from 'react-router-dom';
 import Select from 'react-select';
 import Menu from "./../Menu"
 import Cookies from 'universal-cookie';
-import Moment from 'moment';
 import $ from 'jquery';
 import axios from "axios";
 
@@ -32,18 +31,11 @@ class AddEjemplar extends React.Component {
     super(props);
     this.state = {
       sigla: "",
-      nroColeccion: "",
-      fechaIngeso: "",
+      fechaIngreso:"",
       dimensionAlto: "",
       dimensionLargo: "",
       dimensionAncho: "",
-      peso: "",
-      alimentacion: "",
       ubicacion: "",
-      descripcion1: "",
-      descripcion1A: "",
-      descripcion2: "",
-      descripcion3: "",
       formacion: "",
       grupo: "",
       subgrupo: "",
@@ -57,22 +49,9 @@ class AddEjemplar extends React.Component {
       familia: "",
       genero: "",
       especie: "",
-      paises: [],
-      selectedPais: null,
-      provincias: [],
-      selectedProvincia: null,
-      ciudades: [],
-      selectedCiudad: null,
       muestraHome: false,
-      excavaciones: [],
-      selectedExcavacion: null,
-      //     selectedTipo: { value: 'Encontrado', label: 'Encontrado' },
       fechaBaja: "",
       motivoBaja: "",
-      ilustracionCompleta: "",
-      descripcionIC: "",
-      periodo2: "",
-      perteneceExca: "",
       fotos: [],
       videos: [],
       colecciones: [],
@@ -131,7 +110,12 @@ class AddEjemplar extends React.Component {
       selectedMaterial: null,
       tipoIntervencion: '',
       autores: '',
-      publicaciones: ''
+      publicaciones: '',
+      archivoCurriculum: null,
+      listArchivosCV: [],
+      tableArchivosCV: [],
+      showSuccess: false,
+      showError: false,
     }
 
   }
@@ -191,7 +175,6 @@ class AddEjemplar extends React.Component {
 
   //Manejadores de cada campo 
 
-
   handleShow = evt => {
     this.setState({ show: true });
   };
@@ -211,10 +194,9 @@ class AddEjemplar extends React.Component {
 
   handleTipoChange = (selectedTipo) => {
     this.setState({ selectedTipo });
-    console.log(`Option selected:`, selectedTipo);
+  //  console.log(`Option selected:`, selectedTipo);
 
   }
-
 
 
   handleColeccionesChange = (selectedColeccion) => {
@@ -223,7 +205,7 @@ class AddEjemplar extends React.Component {
 
   handleIngresadoPorChange = (selectedMaterial) => {
     this.setState({ selectedMaterial });
-    console.log(`Option selected:`, selectedMaterial);
+   // console.log(`Option selected:`, selectedMaterial);
 
   }
 
@@ -266,10 +248,7 @@ class AddEjemplar extends React.Component {
     this.setState({ dimensionAltoM: evt.target.value });
   };
 
-  handleAlimentacionChange = evt => {
-    this.setState({ alimentacion: evt.target.value });
-  };
-
+  
   handleUbicacionChange = evt => {
     this.setState({ ubicacion: evt.target.value });
   };
@@ -365,20 +344,6 @@ class AddEjemplar extends React.Component {
 
 
 
-
-  handleChange = (e) => {
-    console.log(e.target.name)
-    this.setState({
-      form: {
-        ...this.state.form,
-        [e.target.name]: e.target.value,
-      },
-    });
-  };
-
-
-
-
   handleExcavacionesChange = (selectedExcavacion) => {
     //  console.log(selectedExcavacion);
     this.setState({ selectedExcavacion });
@@ -411,128 +376,6 @@ class AddEjemplar extends React.Component {
     this.setState({ archivoVideo: file });
   }
 
-  handleSubmit = (event) => {
-
-
-    const form = event.currentTarget;
-    event.preventDefault();
-    if (form.checkValidity() === false) {
-      event.stopPropagation();
-
-      toast.error('Ingrese datos obligatorios.');
-      if (this.state.selectedExcavacion === "" || this.state.selectedExcavacion === null) {
-        toast.error('Seleccione una Excavación.');
-
-      }
-
-      if (this.state.selectedColeccion === "" || this.state.selectedColeccion === null) {
-        toast.error('Seleccione una Colección.');
-
-      }
-
-
-    }
-    else {
-      if (this.state.selectedExcavacion === "" || this.state.selectedExcavacion === null) {
-        toast.error('Seleccione una Excavación!');
-
-      }
-      else {
-        if (this.state.selectedColeccion === "" || this.state.selectedColeccion === null) {
-          toast.error('Seleccione una Colección.');
-
-        }
-        else {
-
-          var idCountry = ''
-          if (this.state.selectedPais !== null) { idCountry = this.state.selectedPais.value }
-
-          var idProv = ''
-          if (this.state.selectedProvincia !== null) { idProv = this.state.selectedProvincia.value }
-
-          var idCity = ''
-          if (this.state.selectedCiudad !== null) { idCity = this.state.selectedCiudad.value }
-
-
-          var eraGeo = {
-            "formacion": this.state.formacion,
-            "grupo": this.state.grupo,
-            "subgrupo": this.state.subgrupo,
-            "edad": this.state.edad,
-            "periodo": this.state.periodo,
-            "era": this.state.era
-          };
-
-          var areaH = {
-            "nombreArea": "",
-            "pais": idCountry,
-            "ciudad": idCity,
-            "provincia": idProv
-          };
-
-
-
-          var data = {
-            "tipoEjemplar": this.state.selectedTipo.value,
-            "taxonReino": this.state.reino,
-            "taxonFilo": this.state.filo,
-            "taxonClase": this.state.clase,
-            "taxonOrden": this.state.orden,
-            "taxonFamilia": this.state.familia,
-            "taxonGenero": this.state.genero,
-            "taxonEspecie": this.state.especie,
-            "eraGeologica": eraGeo,
-            "ilustracionCompleta": this.state.ilustracionCompleta,
-            "descripcionIC": this.state.descripcionIC,
-            "areaHallazgo": areaH,
-            "nroColeccion": this.state.selectedColeccion.value,
-            "dimensionLargo": this.state.dimensionAncho,
-            "dimensionAlto": this.state.dimensionAlto,
-            "peso": this.state.peso,
-            "alimentacion": this.state.alimentacion,
-            "fechaIngresoColeccion": this.state.fechaColeccion,
-            "ubicacionMuseo": this.state.ubicacion,
-            "fotosEjemplar": this.state.fotos,
-            "videosEjemplar": this.state.videos,
-            "fechaBaja": this.state.fbaja,
-            "motivoBaja": this.state.motivo,
-            "nombre": this.state.nombre,
-            "periodo": this.state.periodo2,
-            "home": this.state.muestraHome,
-            "descripcion1": this.state.descripcion1,
-            "descripcion1A": this.state.descripcion1A,
-            "descripcion2": this.state.descripcion2,
-            "descripcion3": this.state.descripcion3,
-            "perteneceExca": this.state.selectedExcavacion.value
-          };
-
-          fetch('http://museo.fi.uncoma.edu.ar:3006/api/ejemplar', {
-            method: 'post',
-            body: JSON.stringify(data),
-            headers: {
-              'Content-Type': 'application/json'
-            }
-          })
-            .then(function (response) {
-              if (response.ok) {
-                toast.success("¡Se guardó el Ejemplar con Éxito!");
-                setTimeout(() => {
-                  window.location.replace('/ejemplares');
-                }, 1500);
-              }
-            })
-            .catch(function (error) {
-              toast.error("Error al guardar. Intente nuevamente.");
-              console.log('Hubo un problema con la petición Fetch:', error.message);
-            });
-        }
-
-      }
-
-    }
-
-    this.setState({ validated: true });
-  }
 
   actualizarEjemplar = (event) => {
     const form = document.getElementById("form7");
@@ -683,7 +526,7 @@ class AddEjemplar extends React.Component {
           autores: '',
           publicaciones: '',
           materialIngresadoPor: '',
-          archivosPublicaciones: [],
+          archivosCurriculum: [],
           observacionesAdic: '',
           home: this.state.muestraHome,
           areaHallazgo: {
@@ -856,133 +699,6 @@ class AddEjemplar extends React.Component {
   }
 
 
-
-
-
-
-  filehandleChange = (event) => {
-
-    const files = event.target.files;
-    var arrayFiles = this.state.archivos;
-
-
-    Array.from(files).forEach(file => {
-      var key = Math.floor(Math.random() * 1000);
-      file.id = key;
-      arrayFiles.push(file)
-    })
-    this.setState({ archivos: arrayFiles });
-
-    //aca deberiamos mover el archivo a la carpeta 
-
-
-
-  };
-
-
-
-
-  renderTableDataFiles() {
-
-    // console.log(this.state.archivos);
-
-    return this.state.archivos.map((file, index) => {
-
-      return (
-        <tr key={index}>
-          <td>
-            <Button variant="danger" type="button" id="eliminar" onClick={() => this.eliminarArchivo(file)}>
-              <FontAwesomeIcon icon={faTrash} />
-            </Button>
-          </td>
-          <td>{file.name}</td>
-
-        </tr>
-      )
-    })
-
-
-
-  }
-
-
-  eliminarArchivo = (dato) => {
-    //aca tambien hay que eliminar en la BD y traer los prestamos
-    var opcion = window.confirm("¿Está seguro que deseas eliminar el Archivo?");
-    if (opcion == true) {
-      var contador = 0;
-      var arreglo = this.state.archivos;
-      arreglo.map((registro) => {
-        if (dato.id == registro.id) {
-          arreglo.splice(contador, 1);
-        }
-        contador++;
-      });
-      this.setState({ archivos: arreglo });
-    }
-  };
-
-
-  fileodatoshandleChange = (event) => {
-
-    const files = event.target.files;
-    var arrayFiles = this.state.archivosOD;
-
-
-    Array.from(files).forEach(file => {
-      var key = Math.floor(Math.random() * 1000);
-      file.id = key;
-      arrayFiles.push(file)
-    })
-    this.setState({ archivosOD: arrayFiles });
-
-    console.log('SALIDA::', arrayFiles)
-
-    //aca deberiamos mover el archivo a la carpeta 
-
-
-
-  };
-
-
-
-
-  renderTableDataFilesODatos() {
-
-    return this.state.archivosOD.map((file, index) => {
-
-      return (
-        <tr key={index}>
-          <td>
-            <Button variant="danger" type="button" id="eliminarOD" onClick={() => this.eliminarArchivoODatos(file)}>
-              <FontAwesomeIcon icon={faTrash} />
-            </Button>
-          </td>
-          <td>{file.name}</td>
-
-        </tr>
-      )
-    })
-
-
-  }
-
-
-  eliminarArchivoODatos = (dato) => {
-    //aca tambien hay que eliminar en la BD y traer los prestamos
-    var opcion = window.confirm("¿Está seguro que deseas eliminar el Archivo?");
-    if (opcion == true) {
-      var contador = 0;
-      var arreglo = this.state.archivosOD;
-      arreglo.map((registro) => {
-        if (dato.id == registro.id) {
-          arreglo.splice(contador, 1);
-        }
-        contador++;
-      });
-      this.setState({ archivosOD: arreglo });
-    }
-  };
 
   insertarPieza = (event) => {
 
@@ -1422,7 +1138,7 @@ class AddEjemplar extends React.Component {
 
   }
 
-  
+
   eliminarArchivoFoto = (dato) => {
     var destino = rutaEjemplares + 'Fotos/' + this.state.ejemplarId + "/" + dato;
     var opcion = window.confirm("¿Está seguro que deseas eliminar el Archivo?");
@@ -1550,6 +1266,510 @@ class AddEjemplar extends React.Component {
     this.setState({ descripcionFoto: evt.target.value });
   };
 
+  subirVideo = () => {
+
+    const MAXIMO_TAMANIO_BYTES = 50000000;
+    const types = ['video/x-msvideo', 'video/mpeg', 'video/ogg', 'video/x-flv', 'video/mp4', 'video/x-ms-wmv', 'video/quicktime', 'video/3gpp', 'video/MP2T'];
+    var file = this.state.archivoVideo
+
+    if (file !== null && file.length !== 0) {
+      var nameFile = (file[0].name).replace(/\s+/g, "_");
+      nameFile = this.reemplazar(nameFile);
+      var size = file[0].size;
+      var type = file[0].type;
+
+      if (size > MAXIMO_TAMANIO_BYTES) {
+        var tamanio = MAXIMO_TAMANIO_BYTES / 1000000;
+        toast.error("El archivo seleccionado supera los " + tamanio + 'Mb. permitidos.');
+        document.getElementById('filesVideo').value = '';
+      }
+      else {
+        if (!types.includes(type)) {
+          toast.error("El archivo seleccionado tiene una extensión inválida.");
+          document.getElementById('filesVideo').value = '';
+
+        }
+        else {
+          $(".loader").removeAttr("style");
+          document.getElementById('subirVideo').setAttribute('disabled', 'disabled');
+          fetch(urlApi + '/ejemplarId/' + this.state.ejemplarId, {
+            method: 'get',
+            headers: {
+              'Authorization': 'Bearer ' + cookies.get('token')
+            }
+          })
+            .then(response => {
+              return response.json();
+            })
+            .then(function (response) {
+
+              var listArchivosVideo = response.ejemplarId.videosEjemplar;
+              listArchivosVideo.push(nameFile);
+
+              var dataVideo = {
+                "videosEjemplar": listArchivosVideo,
+              };
+
+              //Primero Actualizo la Exploracion
+              fetch(urlApi + '/ejemplar/' + this.state.ejemplarId, {
+                method: 'put',
+                body: JSON.stringify(dataVideo),
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': 'Bearer ' + cookies.get('token')
+                }
+              })
+                .then(function (response) {
+                  if (response.ok) {
+                    console.log("¡Se actualizaron los datos del Ejemplar con Éxito!");
+                    this.setState({ listArchivosVideo: listArchivosVideo });
+
+                  }
+                }.bind(this))
+                .then(function (response) {
+                  //segundo subo archivo al server
+
+                  const destino = rutaEjemplares + 'Videos/' + this.state.ejemplarId;
+                  const data = new FormData();
+                  data.append("file", file[0]);
+
+
+                  axios.post(urlApi + "/uploadArchivo", data, {
+                    headers: {
+                      "Content-Type": undefined,
+                      path: destino,
+                      "newfilename": '',
+                      'Authorization': 'Bearer ' + cookies.get('token')
+                    }
+                  })
+                    .then(response => {
+                      $(".loader").fadeOut("slow");
+                      if (response.statusText === "OK") {
+                        this.setState({ archivoVideo: null, showSuccessVideo: true, showErrorVideo: false, urlArchivo: urlArchivo + 'Videos/' + this.state.ejemplarId + '/' + nameFile });
+                        this.setState({ tableArchivosVideos: this.renderTableArchivosVideos() })
+                        document.getElementById('filesVideo').value = '';
+                      }
+                      else {
+                        this.setState({ showSuccessVideo: false, showErrorVideo: true });
+                      }
+                      document.getElementById('subirVideo').removeAttribute('disabled');
+
+                      setTimeout(() => {
+                        this.setState({ showSuccessVideo: false, showErrorVideo: false });
+                      }, 5000);
+
+
+                    })
+                    .catch(error => {
+                      $(".loader").fadeOut("slow");
+                      this.setState({ showSuccessVideo: false, showErrorVideo: true });
+                      console.log(error);
+                    });
+
+
+
+
+                }.bind(this))
+                .catch(function (error) {
+                  $(".loader").fadeOut("slow");
+                  toast.error("Error al Actualizar Ejemplar. Intente nuevamente.");
+                  console.log('Hubo un problema con la petición Fetch (1):' + error.message);
+                });
+
+
+            }.bind(this))
+            .catch(function (error) {
+              $(".loader").fadeOut("slow");
+              toast.error("Error al consultar. Intente nuevamente.");
+              console.log('Hubo un problema con la petición Fetch (2):' + error.message);
+            });
+
+        }
+
+      }
+
+    } else {
+      toast.error("Seleccione un Archivo.");
+    }
+  }
+
+  eliminarArchivoVideo = (dato) => {
+    var destino = rutaEjemplares + 'Videos/' + this.state.ejemplarId + "/" + dato;
+    var opcion = window.confirm("¿Está seguro que deseas eliminar el Archivo?");
+    if (opcion == true) {
+
+      fetch(urlApi + '/ejemplarId/' + this.state.ejemplarId, {
+        method: 'get',
+        headers: {
+          'Authorization': 'Bearer ' + cookies.get('token')
+        }
+      })
+        .then(response => {
+          return response.json();
+        })
+        .then(function (response) {
+          //aca ya tengo la excavacion, tengo que obtener los archivos de autorizacion y quitar el candidato a eliminar
+          $(".loader").removeAttr("style");
+          //elimino archivo del array
+          var archivos = response.ejemplarId.videosEjemplar;
+          var contador = 0;
+          archivos.map((registro) => {
+            if (dato == registro) {
+              archivos.splice(contador, 1);
+            }
+            contador++;
+          });
+
+          var dataVideo = {
+            "videosEjemplar": archivos
+
+          }
+
+          //Actualizo la Exploracion
+          fetch(urlApi + '/ejemplar/' + this.state.ejemplarId, {
+            method: 'put',
+            body: JSON.stringify(dataVideo),
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer ' + cookies.get('token')
+            }
+          })
+            .then(function (response) {
+              if (response.ok) {
+                console.log("¡Se actualizaron los datos del Ejemplar con Éxito!");
+                this.setState({ listArchivosVideo: archivos });
+
+              }
+            }.bind(this))
+            .then(function (response) {
+              //Elimino Archivo del Server
+              fetch(urlApi + '/deleteArchivo', {
+                method: 'get',
+                headers: {
+                  'Content-Type': undefined,
+                  'path': destino,
+                  'Authorization': 'Bearer ' + cookies.get('token')
+                }
+              })
+                .then(response => {
+                  return response.json();
+                })
+                .then(function (response) {
+                  $(".loader").fadeOut("slow");
+                  if ((response.msg).trim() === 'OK') {
+                    console.log('ok');
+                    toast.success("¡Se eliminó el Archivo con Éxito!");
+                    this.setState({ archivoVideo: null, tableArchivosVideos: this.renderTableArchivosVideos() })
+
+                  } else {
+                    console.log('error');
+                    toast.error("¡Se produjo un error al eliminar archivo!");
+                  }
+                }.bind(this)).catch(function (error) {
+                  $(".loader").fadeOut("slow");
+                  toast.error("Error al eliminar. Intente nuevamente.");
+                  console.log('Hubo un problema con la petición Fetch (3):' + error.message);
+                });
+
+
+            }.bind(this))
+            .catch(function (error) {
+              $(".loader").fadeOut("slow");
+              toast.error("Error al Actualizar Ejemplar. Intente nuevamente.");
+              console.log('Hubo un problema con la petición Fetch (2):' + error.message);
+            });
+
+        }.bind(this))
+        .catch(function (error) {
+          $(".loader").fadeOut("slow");
+          toast.error("Error al consultar. Intente nuevamente.");
+          console.log('Hubo un problema con la petición Fetch (1):' + error.message);
+        });
+
+    }
+
+  };
+
+  renderTableArchivosVideos() {
+
+
+    return this.state.listArchivosVideo.map((file, index) => {
+
+      return (
+        <tr key={index}>
+          <td>
+            <Button variant="danger" type="button" id="eliminarArch" onClick={() => this.eliminarArchivoVideo(file)}>
+              <FontAwesomeIcon icon={faTrash} />
+            </Button>
+          </td>
+          <td>
+            <a href={urlArchivo + 'Videos/' + this.state.ejemplarId + '/' + file} disabled target="_blank">{file}</a>
+          </td>
+        </tr>
+      )
+    })
+
+
+
+  }
+
+  subirCurriculum = () => {
+
+    const MAXIMO_TAMANIO_BYTES = 5000000;
+    const types = ['application/pdf'];
+    var file = this.state.archivoCurriculum
+
+    if (file !== null && file.length !== 0) {
+      var nameFile = (file[0].name).replace(/\s+/g, "_");
+      nameFile = this.reemplazar(nameFile);
+      var size = file[0].size;
+      var type = file[0].type;
+
+      if (size > MAXIMO_TAMANIO_BYTES) {
+        var tamanio = 5000000 / 1000000;
+        toast.error("El archivo seleccionado supera los " + tamanio + 'Mb. permitidos.');
+        document.getElementById('archivopdf').value = '';
+      }
+      else {
+        if (!types.includes(type)) {
+          toast.error("El archivo seleccionado tiene una extensión inválida.");
+          document.getElementById('archivopdf').value = '';
+
+        }
+        else {
+          $(".loader").removeAttr("style");
+          document.getElementById('subirArchcv').setAttribute('disabled', 'disabled');
+          fetch(urlApi + '/ejemplarId/' + this.state.ejemplarId, {
+            method: 'get',
+            headers: {
+              'Authorization': 'Bearer ' + cookies.get('token')
+            }
+          })
+            .then(response => {
+              return response.json();
+            })
+            .then(function (response) {
+
+              var listArchivosCV = response.ejemplarId.archivosCurriculum;
+              listArchivosCV.push(nameFile);
+
+              var dataCV = {
+                "archivosCurriculum": listArchivosCV,
+              };
+
+              //Primero Actualizo la Exploracion
+              fetch(urlApi + '/ejemplar/' + this.state.ejemplarId, {
+                method: 'put',
+                body: JSON.stringify(dataCV),
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': 'Bearer ' + cookies.get('token')
+                }
+              })
+                .then(function (response) {
+                  if (response.ok) {
+                    console.log("¡Se actualizaron los datos de la Excavación con Éxito!");
+                    this.setState({ listArchivosCV: listArchivosCV });
+
+                  }
+                }.bind(this))
+                .then(function (response) {
+                  //segundo subo archivo al server
+
+                  const destino = rutaEjemplares + 'Curriculum/' + this.state.ejemplarId;
+                  const data = new FormData();
+                  data.append("file", file[0]);
+
+
+                  axios.post(urlApi + "/uploadArchivo", data, {
+                    headers: {
+                      "Content-Type": undefined,
+                      path: destino,
+                      "newfilename": '',
+                      'Authorization': 'Bearer ' + cookies.get('token')
+                    }
+                  })
+                    .then(response => {
+                      $(".loader").fadeOut("slow");
+                      if (response.statusText === "OK") {
+                        this.setState({ archivoCurriculum: null, showSuccess: true, showError: false, urlArchivo: urlArchivo + 'Curriculum/' + this.state.ejemplarId + '/' + nameFile });
+                        this.setState({ tableArchivosCV: this.renderTableArchivosCV() })
+                        document.getElementById('archivopdf').value = '';
+                      }
+                      else {
+                        this.setState({ showSuccess: false, showError: true });
+                      }
+                      document.getElementById('subirArchcv').removeAttribute('disabled');
+
+                      setTimeout(() => {
+                        this.setState({ showSuccess: false, showError: false });
+                      }, 5000);
+
+
+                    })
+                    .catch(error => {
+                      $(".loader").fadeOut("slow");
+                      this.setState({ showSuccess: false, showError: true });
+                      console.log(error);
+                    });
+
+
+
+
+                }.bind(this))
+                .catch(function (error) {
+                  $(".loader").fadeOut("slow");
+                  toast.error("Error al Actualizar Exploracion. Intente nuevamente.");
+                  console.log('Hubo un problema con la petición Fetch (1):' + error.message);
+                });
+
+
+            }.bind(this))
+            .catch(function (error) {
+              $(".loader").fadeOut("slow");
+              toast.error("Error al consultar. Intente nuevamente.");
+              console.log('Hubo un problema con la petición Fetch (2):' + error.message);
+            });
+
+        }
+
+      }
+
+    } else {
+      toast.error("Seleccione un Archivo.");
+    }
+  }
+
+  renderTableArchivosCV() {
+
+
+    return this.state.listArchivosCV.map((file, index) => {
+
+      return (
+        <tr key={index}>
+          <td>
+            <Button variant="danger" type="button" id="eliminarArch" onClick={() => this.eliminarArchivoCV(file)}>
+              <FontAwesomeIcon icon={faTrash} />
+            </Button>
+          </td>
+          <td>
+            <a href={urlArchivo + 'Curriculum/' + this.state.ejemplarId + '/' + file} disabled target="_blank">{file}</a>
+          </td>
+
+        </tr>
+      )
+    })
+
+
+
+  }
+
+  eliminarArchivoCV = (dato) => {
+    var destino = rutaEjemplares + 'Curriculum/' + this.state.ejemplarId + "/" + dato;
+    var opcion = window.confirm("¿Está seguro que deseas eliminar el Archivo?");
+    if (opcion == true) {
+
+      fetch(urlApi + '/ejemplarId/' + this.state.ejemplarId, {
+        method: 'get',
+        headers: {
+          'Authorization': 'Bearer ' + cookies.get('token')
+        }
+      })
+        .then(response => {
+          return response.json();
+        })
+        .then(function (response) {
+          //aca ya tengo la excavacion, tengo que obtener los archivos de autorizacion y quitar el candidato a eliminar
+          $(".loader").removeAttr("style");
+          //elimino archivo del array
+          var archivos = response.ejemplarId.archivosCurriculum;
+          var contador = 0;
+          archivos.map((registro) => {
+            if (dato == registro) {
+              archivos.splice(contador, 1);
+            }
+            contador++;
+          });
+
+          var dataCV = {
+            "archivosCurriculum": archivos
+
+          }
+
+          //Actualizo la Exploracion
+          fetch(urlApi + '/ejemplar/' + this.state.ejemplarId, {
+            method: 'put',
+            body: JSON.stringify(dataCV),
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer ' + cookies.get('token')
+            }
+          })
+            .then(function (response) {
+              if (response.ok) {
+                console.log("¡Se actualizaron los datos de la Excavación con Éxito!");
+                this.setState({ listArchivosCV: archivos });
+
+              }
+            }.bind(this))
+            .then(function (response) {
+              //Elimino Archivo del Server
+              fetch(urlApi + '/deleteArchivo', {
+                method: 'get',
+                headers: {
+                  'Content-Type': undefined,
+                  'path': destino,
+                  'Authorization': 'Bearer ' + cookies.get('token')
+                }
+              })
+                .then(response => {
+                  return response.json();
+                })
+                .then(function (response) {
+                  $(".loader").fadeOut("slow");
+                  if ((response.msg).trim() === 'OK') {
+                    console.log('ok');
+                    toast.success("¡Se eliminó el Archivo con Éxito!");
+                    this.setState({ archivoCurriculum: null, tableArchivosCV: this.renderTableArchivosCV() })
+
+                  } else {
+                    console.log('error');
+                    toast.error("¡Se produjo un error al eliminar archivo!");
+                  }
+                }.bind(this)).catch(function (error) {
+                  $(".loader").fadeOut("slow");
+                  toast.error("Error al eliminar. Intente nuevamente.");
+                  console.log('Hubo un problema con la petición Fetch (3):' + error.message);
+                });
+
+
+            }.bind(this))
+            .catch(function (error) {
+              $(".loader").fadeOut("slow");
+              toast.error("Error al Actualizar Ejemplar. Intente nuevamente.");
+              console.log('Hubo un problema con la petición Fetch (2):' + error.message);
+            });
+
+        }.bind(this))
+        .catch(function (error) {
+          $(".loader").fadeOut("slow");
+          toast.error("Error al consultar. Intente nuevamente.");
+          console.log('Hubo un problema con la petición Fetch (1):' + error.message);
+        });
+
+
+
+    }
+
+  };
+
+  filehandleChange = (event) => {
+
+    const file = event.target.files;
+    const name = file[0].name;
+    this.setState({ archivoCurriculum: file });
+
+  }
 
 
 
@@ -1570,7 +1790,6 @@ class AddEjemplar extends React.Component {
     const { validatedfotos } = this.state;
     const { validatedvideos } = this.state;
 
-    let optExcavaciones = this.state.excavaciones.map((opt) => ({ label: opt.nombre, value: opt._id }));
 
 
     const { selectedPreparador } = this.state;
@@ -1593,7 +1812,7 @@ class AddEjemplar extends React.Component {
         <div className="row">
           <div className="col-md-12">
             <div id="contenido" align="left" className="container">
-            <div className="loader" style={{ display: 'none' }}></div>
+              <div className="loader" style={{ display: 'none' }}></div>
               <br />
               <h3 className="page-header" align="left">
                 <FontAwesomeIcon icon={faPaw} /> Ficha de Ingreso
@@ -1910,21 +2129,6 @@ class AddEjemplar extends React.Component {
                     </Form.Row>
 
 
-
-                    {/* <Form.Row >
-                      <Form.Group className="col-sm-12" controlId="excavacion">
-                        <Form.Label>Excavación:</Form.Label>
-                        <Select
-                          placeholder={'Seleccione Excavación'}
-                          options={optExcavaciones}
-                          onChange={this.handleExcavacionesChange}
-                          value={selectedExcavacion}
-                          isClearable
-                        />
-                      </Form.Group>
-                   </Form.Row>*/}
-
-
                     <Form.Row >
                       <Button variant="outline-secondary" type="button" id="anterior4" onClick={this.handleAntForm5}>
                         <FontAwesomeIcon icon={faReply} /> Anterior
@@ -2003,15 +2207,35 @@ class AddEjemplar extends React.Component {
                     </Form.Row>
 
                     <Form.Row>
-                      {/*    <Form.Group className="col-sm-6" controlId="archivopdf">
-               
-                      <Form.File id="archivopdf"  label="Archivos:" multiple onChange={this.fileodatoshandleChange.bind(this)} />*/}
+
                       <Form.Group className="col-sm-8" >
                         <Form.Label>Curriculum Vitae:</Form.Label>
-                        <input type="file" id="archivopdf" className="form-control" accept="application/pdf" onChange={this.fileodatoshandleChange.bind(this)} />
+                        <input type="file" id="archivopdf" className="form-control" accept="application/pdf" onChange={this.filehandleChange.bind(this)} />
                       </Form.Group>
 
                     </Form.Row>
+
+                    <Form.Row>
+                      <Form.Group className="col-sm-2" >
+                        <Button variant="primary" type="button" id="subirArchcv" onClick={() => this.subirCurriculum()} >
+                          <FontAwesomeIcon icon={faUpload} /> Subir
+                        </Button>
+                      </Form.Group>
+                      <Form.Group className="col-sm-6">
+                        <Alert show={this.state.showSuccess} variant="success">
+                          <p>
+                            Se subió el archivo con Éxito!!
+                          </p>
+                        </Alert>
+
+                        <Alert show={this.state.showError} variant="danger">
+                          <p>
+                            El archivo no se pudo subir. Intente nuevamente.
+                          </p>
+                        </Alert>
+                      </Form.Group>
+                    </Form.Row>
+
 
                     <Form.Row>
                       <Form.Group className="col-sm-6" controlId="archivopdf">
@@ -2024,7 +2248,7 @@ class AddEjemplar extends React.Component {
                             </tr>
                           </thead>
                           <tbody>
-                            {this.renderTableDataFilesODatos()}
+                            {this.state.tableArchivosCV}
                           </tbody>
                         </Table>
 
@@ -2035,7 +2259,7 @@ class AddEjemplar extends React.Component {
 
 
                     <Form.Row >
-                      <Form.Group className="col-sm-12" controlId="descripcion3">
+                      <Form.Group className="col-sm-12" controlId="observacionesAdic">
                         <Form.Label>Observaciones Adicionales:</Form.Label>
                         <Form.Control as="textarea" rows={3} value={this.state.observacionesAdic} onChange={this.handleObservacionesAdicChange} />
                       </Form.Group>
