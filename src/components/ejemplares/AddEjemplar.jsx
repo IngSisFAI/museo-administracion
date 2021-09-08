@@ -31,7 +31,7 @@ class AddEjemplar extends React.Component {
     super(props);
     this.state = {
       sigla: "",
-      fechaIngreso:"",
+      fechaIngreso: "",
       dimensionAlto: "",
       dimensionLargo: "",
       dimensionAncho: "",
@@ -115,6 +115,12 @@ class AddEjemplar extends React.Component {
       tableArchivosCV: [],
       showSuccess: false,
       showError: false,
+      excavaciones: [],
+      selectedExcavacion: null,
+      bochones: [],
+      selectedBochon: null,
+      selectedExcavacionM: null,
+      selectedBochonM: null,
     }
 
   }
@@ -168,6 +174,27 @@ class AddEjemplar extends React.Component {
         );
       });
 
+    fetch(urlApi + "/excavacion", {
+      method: 'get',
+      headers: {
+        'Authorization': 'Bearer ' + cookies.get('token')
+      }
+    })
+      .then((response) => {
+        return response.json();
+      })
+      .then((data) => {
+        this.setState({
+          excavaciones: data.excavaciones,
+        });
+      }).catch(function (error) {
+        toast.error("Error al conusltar. Intente nuevamente.");
+        console.log(
+          "Hubo un problema con la petición Fetch:",
+          error.message
+        );
+      });
+
   }
 
 
@@ -193,7 +220,7 @@ class AddEjemplar extends React.Component {
 
   handleTipoChange = (selectedTipo) => {
     this.setState({ selectedTipo });
-  //  console.log(`Option selected:`, selectedTipo);
+    //  console.log(`Option selected:`, selectedTipo);
 
   }
 
@@ -204,7 +231,7 @@ class AddEjemplar extends React.Component {
 
   handleIngresadoPorChange = (selectedMaterial) => {
     this.setState({ selectedMaterial });
-   // console.log(`Option selected:`, selectedMaterial);
+    // console.log(`Option selected:`, selectedMaterial);
 
   }
 
@@ -247,7 +274,7 @@ class AddEjemplar extends React.Component {
     this.setState({ dimensionAltoM: evt.target.value });
   };
 
-  
+
   handleUbicacionChange = evt => {
     this.setState({ ubicacion: evt.target.value });
   };
@@ -344,10 +371,58 @@ class AddEjemplar extends React.Component {
 
 
   handleExcavacionesChange = (selectedExcavacion) => {
-    //  console.log(selectedExcavacion);
+
     this.setState({ selectedExcavacion });
+    if (selectedExcavacion !== null) {
+      //busco los bochones asociadas a la excavacion
+      fetch(urlApi + '/bochonExca/' + selectedExcavacion.value, {
+        method: 'GET',
+        headers: {
+          'Authorization': 'Bearer ' + cookies.get('token')
+        }
+      })
+        .then((response) => {
+          return response.json()
+        })
+        .then(function (data) {
+          this.setState({ bochones: data.bochones, selectedBochon: null })
+        }.bind(this))
+        .catch(function (error) {
+          console.log('Error:', error)
+        })
+    }
   }
 
+  handleBochonChange = (selectedBochon) => {
+    this.setState({ selectedBochon })
+  }
+
+  handleExcavacionesMChange = (selectedExcavacionM) => {
+
+    this.setState({ selectedExcavacionM });
+    if (selectedExcavacionM !== null) {
+      //busco los bochones asociadas a la excavacion
+      fetch(urlApi + '/bochonExca/' + selectedExcavacionM.value, {
+        method: 'GET',
+        headers: {
+          'Authorization': 'Bearer ' + cookies.get('token')
+        }
+      })
+        .then((response) => {
+          return response.json()
+        })
+        .then(function (data) {
+          this.setState({ bochones: data.bochones, selectedBochonM: null })
+        }.bind(this))
+        .catch(function (error) {
+          console.log('Error:', error)
+        })
+    }
+  }
+
+  handleBochonMChange = (selectedBochonM) => {
+    this.setState({ selectedBochonM })
+  }
 
   handleMuestraChange(evt) {
     this.setState({ muestraHome: evt.target.checked });
@@ -707,6 +782,20 @@ class AddEjemplar extends React.Component {
       event.stopPropagation();
     } else {
 
+      var excavacionSelect = "";
+      var excavacionDesc = ""
+      if (this.state.selectedExcavacion !== null) {
+        excavacionSelect = this.state.selectedExcavacion.value
+        excavacionDesc = this.state.selectedExcavacion.label
+      }
+
+      var bochonSelect = "";
+      var bochonDesc = ""
+      if (this.state.selectedBochon !== null) {
+        bochonSelect = this.state.selectedBochon.value
+        bochonDesc = this.state.selectedBochon.label
+      }
+
       $(".loader").removeAttr("style");
       var data = {
         identificador: this.state.nombre,
@@ -723,7 +812,12 @@ class AddEjemplar extends React.Component {
         fechaBaja: null,
         motivoBaja: '',
         perteneceEjemplar: this.state.ejemplarId,
-        origen: ''
+        origen: '',
+        excavacionId: excavacionSelect,
+        excavacionDesc: excavacionDesc,
+        bochonId: bochonSelect,
+        bochonDesc: bochonDesc
+
 
       }
 
@@ -758,11 +852,12 @@ class AddEjemplar extends React.Component {
               this.setState({
                 piezas: result.piezas
               });
-              this.setState({ nombre: "", dimensionAncho: "", dimensionLargo: "", dimensionAlto: "" });
+              this.setState({ nombre: "", dimensionAncho: "", dimensionLargo: "", dimensionAlto: "", selectedExcavacion: null, selectedBochon: null, bochones: [] });
               return result;
 
 
             })
+
             .then(function (data) {
               this.setState({ tablaPiezas: this.renderTablePiezas() })
             }.bind(this))
@@ -811,6 +906,8 @@ class AddEjemplar extends React.Component {
           <td>{pieza.medidasPieza.alto}</td>
           <td>{pieza.medidasPieza.largo}</td>
           <td>{pieza.medidasPieza.ancho}</td>
+          <td>{pieza.excavacionDesc}</td>
+          <td>{pieza.bochonDesc}</td>
 
         </tr>
       )
@@ -819,17 +916,59 @@ class AddEjemplar extends React.Component {
   }
 
   mostrarModalActualizarPieza = (dato) => {
-    console.log(dato);
+    
+    //Buscar bochones de la excavacion y seleccionar bochon
+    //selecciono la excavacion seleccionada
+    var selectExc=null;
+    if(dato.excavacionId!==""){
+        selectExc={"value":dato.excavacionId, "label": dato.excavacionDesc}
+        var selectB=null;
+        if(dato.bochonId!==""){
+          selectB={"value":dato.bochonId, "label": dato.bochonDesc}
+        }
 
-    this.setState({
-      nombreM: dato.identificador,
-      modalActualizarPieza: true,
-      dimensionAltoM: dato.medidasPieza.alto,
-      dimensionAnchoM: dato.medidasPieza.ancho,
-      dimensionLargoM: dato.medidasPieza.largo,
-      piezaMId: dato._id
+        fetch(urlApi + '/bochonExca/' + dato.excavacionId, {
+          method: 'GET',
+          headers: {
+            'Authorization': 'Bearer ' + cookies.get('token')
+          }
+        })
+          .then((response) => {
+            return response.json()
+          })
+          .then(function (data) {
+            this.setState({ bochones: data.bochones })
+            
+            this.setState({
+              nombreM: dato.identificador,
+              modalActualizarPieza: true,
+              dimensionAltoM: dato.medidasPieza.alto,
+              dimensionAnchoM: dato.medidasPieza.ancho,
+              dimensionLargoM: dato.medidasPieza.largo,
+              piezaMId: dato._id,
+              selectedExcavacionM: selectExc,
+              selectedBochonM: selectB
+            });
+      
+          }.bind(this))
+          .catch(function (error) {
+            console.log('Error:', error)
+          })
 
-    });
+     
+    }else{
+      this.setState({
+        nombreM: dato.identificador,
+        modalActualizarPieza: true,
+        dimensionAltoM: dato.medidasPieza.alto,
+        dimensionAnchoM: dato.medidasPieza.ancho,
+        dimensionLargoM: dato.medidasPieza.largo,
+        piezaMId: dato._id,
+      });
+
+    }
+
+  
 
   }
 
@@ -901,6 +1040,20 @@ class AddEjemplar extends React.Component {
 
     } else {
       $(".loader").removeAttr("style");
+
+      var excavacionSelect = "";
+      var excavacionDesc = ""
+      if (this.state.selectedExcavacionM !== null) {
+        excavacionSelect = this.state.selectedExcavacionM.value
+        excavacionDesc = this.state.selectedExcavacionM.label
+      }
+
+      var bochonSelect = "";
+      var bochonDesc = ""
+      if (this.state.selectedBochonM !== null) {
+        bochonSelect = this.state.selectedBochonM.value
+        bochonDesc = this.state.selectedBochonM.label
+      }
       var data = {
         identificador: this.state.nombreM,
         medidasPieza: {
@@ -909,8 +1062,15 @@ class AddEjemplar extends React.Component {
           alto: this.state.dimensionAltoM,
           diametro: '',
           circunferencia: ''
-        }
+        },
+        excavacionId: excavacionSelect,
+        excavacionDesc: excavacionDesc,
+        bochonId: bochonSelect,
+        bochonDesc: bochonDesc
       }
+
+
+
 
       fetch(urlApi + "/pieza/" + this.state.piezaMId, {
         method: "put",
@@ -943,7 +1103,7 @@ class AddEjemplar extends React.Component {
               this.setState({
                 piezas: result.piezas
               });
-              this.setState({ nombreM: "", dimensionAnchoM: "", dimensionLargoM: "", dimensionAltoM: "", modalActualizarPieza: false });
+              this.setState({ nombreM: "", dimensionAnchoM: "", dimensionLargoM: "", dimensionAltoM: "", modalActualizarPieza: false, selectedExcavacionM: null, selectedBochonM: null, bochones: [] });
               return result;
 
             })
@@ -1777,7 +1937,7 @@ class AddEjemplar extends React.Component {
 
   render() {
 
-    const { selectedExcavacion } = this.state;
+
     const { validated } = this.state;
     const { validateddim } = this.state;
     const { validateddimM } = this.state;
@@ -1804,6 +1964,21 @@ class AddEjemplar extends React.Component {
     }));
 
     const { selectedMaterial } = this.state;
+
+    const { selectedExcavacion } = this.state;
+    const { selectedExcavacionM } = this.state;
+    let optExcavaciones = this.state.excavaciones.map((opt) => ({
+      label: opt.nombreArea + " (Cód. Campo: " + opt.codigoCampo + ")",
+      value: opt._id,
+    }));
+
+
+    const { selectedBochon } = this.state;
+    const { selectedBochonM } = this.state;
+    let optBochones = this.state.bochones.map((opt) => ({
+      label: "Cód. Campo: " + opt.codigoCampo + " - Nro. Bochón:" + opt.nroBochon,
+      value: opt._id,
+    }));
 
     return (
       <>
@@ -1964,6 +2139,39 @@ class AddEjemplar extends React.Component {
 
                     </Form.Row>
 
+                    <Form.Row >
+
+                      <Form.Group className="col-sm-6" controlId="excavacion">
+                        <Form.Label>Excavación:</Form.Label>
+
+                        <Select
+                          placeholder={"Seleccione Excavación"}
+                          options={optExcavaciones}
+                          onChange={this.handleExcavacionesChange}
+                          value={selectedExcavacion}
+                          isClearable
+                        />
+
+
+                      </Form.Group>
+
+                      <Form.Group className="col-sm-6" controlId="bochones">
+                        <Form.Label>Bochón:</Form.Label>
+
+                        <Select
+                          placeholder={"Seleccione Bochon"}
+                          options={optBochones}
+                          onChange={this.handleBochonChange}
+                          value={selectedBochon}
+                          isClearable
+                        />
+
+
+                      </Form.Group>
+                    </Form.Row>
+
+
+
                     <Form.Row>
                       <Form.Group className="mx-sm-3 mb-2">
                         <Button variant="primary" type="button" id="guardarPieza" onClick={this.insertarPieza}>
@@ -1982,6 +2190,8 @@ class AddEjemplar extends React.Component {
                             <th>Alto</th>
                             <th>Largo</th>
                             <th>Ancho</th>
+                            <th>Excavación</th>
+                            <th>Bochón</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -2462,6 +2672,37 @@ class AddEjemplar extends React.Component {
                         </Form.Control.Feedback>
                       </Form.Group>
 
+                    </Form.Row>
+
+                    <Form.Row >
+
+                      <Form.Group className="col-sm-6" controlId="excavacionM">
+                        <Form.Label>Excavación:</Form.Label>
+
+                        <Select
+                          placeholder={"Seleccione Excavación"}
+                          options={optExcavaciones}
+                          onChange={this.handleExcavacionesMChange}
+                          value={selectedExcavacionM}
+                          isClearable
+                        />
+
+
+                      </Form.Group>
+
+                      <Form.Group className="col-sm-6" controlId="bochonesM">
+                        <Form.Label>Bochón:</Form.Label>
+
+                        <Select
+                          placeholder={"Seleccione Bochon"}
+                          options={optBochones}
+                          onChange={this.handleBochonMChange}
+                          value={selectedBochonM}
+                          isClearable
+                        />
+
+
+                      </Form.Group>
                     </Form.Row>
 
 
