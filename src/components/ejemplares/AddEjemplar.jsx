@@ -391,6 +391,9 @@ class AddEjemplar extends React.Component {
           console.log('Error:', error)
         })
     }
+    else{
+      this.setState({selectedBochon: null, bochones:[] })
+    }
   }
 
   handleBochonChange = (selectedBochon) => {
@@ -417,6 +420,9 @@ class AddEjemplar extends React.Component {
         .catch(function (error) {
           console.log('Error:', error)
         })
+    }
+    else{
+      this.setState({selectedBochonM: null, bochones:[] })
     }
   }
 
@@ -2332,7 +2338,7 @@ class AddEjemplar extends React.Component {
 
                       <Form.Group className="col-sm-12" controlId="areaHallazgo">
                         <Form.Label>Nombre Área:</Form.Label>
-                        <Form.Control type="text" autoComplete="off" onChange={this.handleAreaHChange} value={this.state.areaHallazgo} />
+                        <Form.Control as="textarea" onChange={this.handleAreaHChange} value={this.state.areaHallazgo} />
                       </Form.Group>
 
                     </Form.Row>
