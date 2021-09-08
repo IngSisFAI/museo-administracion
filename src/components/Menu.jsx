@@ -48,13 +48,15 @@ class Menu extends React.Component {
                   <FontAwesomeIcon icon={faMapMarked} /> Exploraciones
                 </NavDropdown.Item>
 
+                <NavDropdown.Item as={Link} to={"/excavaciones"}>
+                  <FontAwesomeIcon icon={faCompass} /> Excavaciones
+                </NavDropdown.Item>
+
                 <NavDropdown.Item as={Link} to={"/ejemplares"}>
                   <FontAwesomeIcon icon={faIdCard} /> Inventario MUC
                 </NavDropdown.Item>
 
-                <NavDropdown.Item as={Link} to={"/excavaciones"}>
-                  <FontAwesomeIcon icon={faCompass} /> Excavaciones
-                </NavDropdown.Item>
+               
                 {/*   <NavDropdown.Item as={Link} to={"/bochones"}>
                   <FontAwesomeIcon icon={faHandLizard} /> Bochones
     </NavDropdown.Item>*/}

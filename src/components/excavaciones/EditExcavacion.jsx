@@ -116,7 +116,11 @@ class EditExcavacion extends React.Component {
       validatedMBochon: false,
       idExploracionModificar:"",
       puntoGps:{},
-      tablaBochones:[]
+      tablaBochones:[],
+      ejemplar:'',
+      piezasAsoc:'',
+      ejemplarM:'',
+      piezasAsocM:''
     };
 
   }
@@ -176,7 +180,7 @@ class EditExcavacion extends React.Component {
         console.log('Ha ocurrido un error:', error)
       });
 
-    fetch(urlApi + '/ejemplares', {
+    /*fetch(urlApi + '/ejemplares', {
       method: 'GET',
       headers: {
         'Authorization': 'Bearer ' + cookies.get('token')
@@ -196,7 +200,7 @@ class EditExcavacion extends React.Component {
           "Hubo un problema con la petición Fetch:",
           error.message
         );
-      });
+      });*/
 
 
   }
@@ -317,6 +321,22 @@ class EditExcavacion extends React.Component {
 
   //**Manejadores**
 
+  handleEjemplarChange = (evt) => {
+    this.setState({ ejemplar: evt.target.value });
+  }; 
+  
+  handleEjemplarMChange = (evt) => {
+    this.setState({ ejemplarM: evt.target.value });
+  };
+
+  handlePiezasAsocChange = (evt) => {
+    this.setState({ piezasAsoc: evt.target.value });
+  };
+  
+  handlePiezasAsocMChange = (evt) => {
+    this.setState({ piezasAsocM: evt.target.value });
+  }; 
+
   handleMuestraChange(evt) {
     this.setState({ muestraHome: evt.target.checked });
   }
@@ -370,7 +390,7 @@ class EditExcavacion extends React.Component {
     this.setState({ idExploracionModificar:selectedExploracion.value });
   };
 
-  handleEjemplarChange = (selectedEjemplar) => {
+  /*handleEjemplarChange = (selectedEjemplar) => {
     this.setState({ selectedEjemplar });
     if (selectedEjemplar !== null) {
       fetch(urlApi + '/piezasEjemplar/' + selectedEjemplar.value, {
@@ -438,7 +458,7 @@ class EditExcavacion extends React.Component {
       });
 
     }
-  };
+  };*/
 
   handleGeologicosChange = (evt) => {
     this.setState({ geologicos: evt.target.value });
@@ -602,13 +622,13 @@ class EditExcavacion extends React.Component {
     this.setState({ piezasId: piezas, piezasNames: names });
   };
 
-  handlePiezasMChange = (selectedPiezaM) => {
+  /*handlePiezasMChange = (selectedPiezaM) => {
     let piezas = Array.from(selectedPiezaM, option => option.value);
     let names = Array.from(selectedPiezaM, option => option.label);
 
     this.setState({ selectedPiezaM });
     this.setState({ piezasMId: piezas, piezasMNames: names });
-  };
+  };*/
 
   insertarBochon = (event) => {
 
@@ -617,9 +637,8 @@ class EditExcavacion extends React.Component {
     if (form.checkValidity() === false) {
       event.stopPropagation();
     } else {
-      if (this.state.selectedEjemplar !== null) {
 
-        if (this.state.selectedPieza !== null) {
+         
           $(".loader").removeAttr("style");
           var data = {
             "nombre": "",
@@ -629,11 +648,13 @@ class EditExcavacion extends React.Component {
             "preparadorID": "",
             "tipoPreparacion": "",
             "acidosAplicados": [],
-            "ejemplarAsociado": this.state.selectedEjemplar.value,
+            "ejemplarAsociado": "",
             "excavacionId": this.props.match.params.id,
-            "piezasId": this.state.piezasId,
-            "piezasNames": this.state.piezasNames,
-            "infoAdicional": this.state.infoAdicional
+            "piezasId": [],
+            "piezasNames": [],
+            "infoAdicional": this.state.infoAdicional,
+            "ejemplarDescripcion": this.state.ejemplar,
+            "piezasDescripcion": this.state.piezasAsoc
           }
 
           fetch(urlApi + "/bochon", {
@@ -673,7 +694,7 @@ class EditExcavacion extends React.Component {
                   this.setState({
                     bochones: result.bochones
                   });
-                  this.setState({ codigoCampoB: "", nroBochon: "", selectedEjemplar: null, piezasId: [], piezasNames: [], selectedPieza: null, infoAdicional: "" });
+                  this.setState({ codigoCampoB: "", nroBochon: "", selectedEjemplar: null, piezasId: [], piezasNames: [], selectedPieza: null, infoAdicional: "",ejemplar:'', piezasAsoc:'' });
                   return result;
 
 
@@ -728,16 +749,6 @@ class EditExcavacion extends React.Component {
               );
             });
 
-        }
-        else {
-          toast.error("¡Debe Seleccionar al menos una pieza!");
-        }
-
-
-      }
-      else {
-        toast.error("¡Debe Seleccionar un Ejemplar!");
-      }
 
     }
     this.setState({ validatedbochon: true });
@@ -761,8 +772,8 @@ class EditExcavacion extends React.Component {
             </Button></td>
           <td>{bochon.codigoCampo}</td>
           <td>{bochon.nroBochon}</td>
-          <td>{bochon.ejemplarAsociado[0].sigla}</td>
-          <td>{bochon.piezasNames.toString()}</td>
+          <td>{bochon.ejemplarDescripcion}</td>
+          <td>{bochon.piezasDescripcion}</td>
           <td>{bochon.infoAdicional}</td>
 
         </tr>
@@ -773,7 +784,7 @@ class EditExcavacion extends React.Component {
 
   mostrarModalActualizarBochon = (dato) => {
 
-    if (dato.ejemplarAsociado[0]._id !== null && dato.ejemplarAsociado[0]._id !== '') {
+   /* if (dato.ejemplarAsociado[0]._id !== null && dato.ejemplarAsociado[0]._id !== '') {
       //busco las piezas del ejemplar
       fetch(urlApi + '/piezasEjemplar/' + dato.ejemplarAsociado[0]._id, {
         method: 'GET',
@@ -818,7 +829,17 @@ class EditExcavacion extends React.Component {
           console.log('Hubo un problema con la petición Fetch (2):' + error.message);
         })
 
-    }
+    }*/
+
+    this.setState({
+      codigoCampoM: dato.codigoCampo,
+      nroBochonM: dato.nroBochon,
+      infoAdicionalM: dato.infoAdicional,
+      ejemplarM: dato.ejemplarDescripcion,
+      piezasAsocM: dato.piezasDescripcion,
+      modalActualizarBochon: true,
+      bochonMId: dato._id
+    });
 
 
 
@@ -851,22 +872,13 @@ class EditExcavacion extends React.Component {
 
     } else {
 
-      if (this.state.selectedEjemplarM !== null) {
-
-        if (this.state.selectedPiezaM !== null) {
+ 
           $(".loader").removeAttr("style");
           var data = {
-            "nombre": "",
             "codigoCampo": this.state.codigoCampoM,
             "nroBochon": this.state.nroBochonM,
-            "preparador": "",
-            "preparadorID": "",
-            "tipoPreparacion": "",
-            "acidosAplicados": [],
-            "ejemplarAsociado": this.state.selectedEjemplarM.value,
-            "excavacionId": this.props.match.params.id,
-            "piezasId": this.state.piezasMId,
-            "piezasNames": this.state.piezasMNames,
+            "ejemplarDescripcion": this.state.ejemplarM,
+            "piezasDescripcion": this.state.piezasAsocM,
             "infoAdicional": this.state.infoAdicionalM
           }
 
@@ -907,7 +919,7 @@ class EditExcavacion extends React.Component {
                   this.setState({
                     bochones: result.bochones
                   });
-                  this.setState({ codigoCampoM: "", nroBochonM: "", selectedEjemplarM: null, piezasMId: [], piezasMNames: [], selectedPiezaM: null, infoAdicionalM: "", modalActualizarBochon: false });
+                  this.setState({ codigoCampoM: "", nroBochonM: "", selectedEjemplarM: null, piezasMId: [], piezasMNames: [], selectedPiezaM: null, infoAdicionalM: "", modalActualizarBochon: false,  ejemplarM:'', piezasAsocM:''});
                   return result;
 
 
@@ -961,20 +973,6 @@ class EditExcavacion extends React.Component {
                 error.message
               );
             });
-
-        }
-        else {
-          toast.error("¡Debe Seleccionar al menos una pieza!");
-        }
-
-
-      }
-      else {
-        toast.error("¡Debe Seleccionar un Ejemplar!");
-      }
-
-
-
 
 
     }
@@ -1044,6 +1042,35 @@ class EditExcavacion extends React.Component {
                   }
                   $(".loader").fadeOut("slow");
                 })
+                .then(function () {
+                  //Actualizo la lista de bochones
+    
+                  fetch(urlApi + '/bochonExca/' + this.props.match.params.id, {
+                    method: 'GET',
+                    headers: {
+                      'Authorization': 'Bearer ' + cookies.get('token')
+                    }
+                  })
+                    .then((response) => {
+                      return response.json()
+                    })
+                    .then(result => {
+                      this.setState({
+                        bochones: result.bochones
+                      });
+                      return result;
+    
+                    })
+                    .then(function () {
+    
+                      setTimeout(function () { this.setState({ tablaBochones: this.renderTableBochones() }) }.bind(this), 1500);
+                    }.bind(this))
+                    .catch(function (error) {
+                      console.log('Hubo un problema con la petición Fetch (2):' + error.message);
+                    })
+    
+    
+                }.bind(this))
                 .catch(function (error) {
                   $(".loader").fadeOut("slow");
                   toast.error("Error al Eliminar Bochon. Intente nuevamente.");
@@ -1051,35 +1078,7 @@ class EditExcavacion extends React.Component {
                 });
 
             }.bind(this))
-            .then(function () {
-              //Actualizo la lista de bochones
-
-              fetch(urlApi + '/bochonExca/' + this.props.match.params.id, {
-                method: 'GET',
-                headers: {
-                  'Authorization': 'Bearer ' + cookies.get('token')
-                }
-              })
-                .then((response) => {
-                  return response.json()
-                })
-                .then(result => {
-                  this.setState({
-                    bochones: result.bochones
-                  });
-                  return result;
-
-                })
-                .then(function () {
-
-                  setTimeout(function () { this.setState({ tablaBochones: this.renderTableBochones() }) }.bind(this), 1500);
-                }.bind(this))
-                .catch(function (error) {
-                  console.log('Hubo un problema con la petición Fetch (2):' + error.message);
-                })
-
-
-            }.bind(this))
+          
             .catch(function (error) {
               $(".loader").fadeOut("slow");
               toast.error("Error al Actualizar Excavacion. Intente nuevamente.");
@@ -2107,26 +2106,26 @@ class EditExcavacion extends React.Component {
       value: opt._id,
     }));
 
-    const { selectedPieza } = this.state;
+    /*const { selectedPieza } = this.state;
     let optPiezas = this.state.piezas.map((opt) => ({
       label: opt.identificador,
       value: opt._id,
-    }));
+    }));*/
 
-    const { selectedPiezaM } = this.state;
+    /*const { selectedPiezaM } = this.state;
     let optPiezasM = this.state.piezasM.map((opt) => ({
       label: opt.identificador,
       value: opt._id,
-    }));
+    }));*/
 
     const { selectedHallazgo } = this.state;
 
-    const { selectedEjemplar } = this.state;
+    /*const { selectedEjemplar } = this.state;
     const { selectedEjemplarM } = this.state;
     let optEjemplares = this.state.ejemplares.map((opt) => ({
       label: opt.sigla + ' (' + opt.tipoColeccion + ')',
       value: opt._id,
-    }));
+    }));*/
 
     const {idExploracionModificar}=this.state;
 
@@ -2487,9 +2486,38 @@ class EditExcavacion extends React.Component {
                       </Form.Group>
                     </Form.Row>
 
-
-
                     <Form.Row>
+                      <Form.Group className="col-sm-12" controlId="ejemplar">
+                        <Form.Label>Ejemplar:</Form.Label>
+                        <Form.Control
+                          type="text"
+                          name='ejemlplar'
+                          value={this.state.ejemplar}
+                          onChange={this.handleEjemplarChange}
+                          
+                        />
+                      
+                      </Form.Group>
+
+                      </Form.Row>
+                      <Form.Row>
+                      <Form.Group className="col-sm-12" controlId="piezasAsoc">
+                        <Form.Label>Piezas Asociadas:</Form.Label>
+                        <Form.Control
+                          type="text"
+                          name='piezasAsoc'
+                          value={this.state.piezasAsoc}
+                          onChange={this.handlePiezasAsocChange}
+                          
+                        />
+                      </Form.Group>
+                     
+
+                    </Form.Row>
+
+
+
+             {/*       <Form.Row>
                       <Form.Group className="col-sm-12" controlId="ejemplarAsociado">
                         <Form.Label>Ejemplar:</Form.Label>
                         <Select
@@ -2515,7 +2543,7 @@ class EditExcavacion extends React.Component {
                           isClearable
                         />
                       </Form.Group>
-                    </Form.Row>
+                    </Form.Row>*/}
 
                     <Form.Row>
                       <Form.Group className="col-sm-12" controlId="infoAdicional">
@@ -2526,7 +2554,7 @@ class EditExcavacion extends React.Component {
                           value={this.state.infoAdicional}
                         />
                       </Form.Group>
-                    </Form.Row>
+             </Form.Row> 
 
 
 
@@ -2734,6 +2762,35 @@ class EditExcavacion extends React.Component {
                     </Form.Row>
 
                     <Form.Row>
+                      <Form.Group className="col-sm-12" controlId="ejemplarM">
+                        <Form.Label>Ejemplar:</Form.Label>
+                        <Form.Control
+                          type="text"
+                          name='ejemlplarM'
+                          value={this.state.ejemplarM}
+                          onChange={this.handleEjemplarMChange}
+                          
+                        />
+                      
+                      </Form.Group>
+
+                      </Form.Row>
+                      <Form.Row>
+                      <Form.Group className="col-sm-12" controlId="piezasAsocM">
+                        <Form.Label>Piezas Asociadas:</Form.Label>
+                        <Form.Control
+                          type="text"
+                          name='piezasAsoc'
+                          value={this.state.piezasAsocM}
+                          onChange={this.handlePiezasAsocMChange}
+                          
+                        />
+                      </Form.Group>
+                     
+
+                    </Form.Row>
+
+                {/*    <Form.Row>
                       <Form.Group className="col-sm-12" controlId="ejemplarAsociadoM" >
                         <Form.Label>Ejemplar (*):</Form.Label>
                         <Select
@@ -2761,6 +2818,9 @@ class EditExcavacion extends React.Component {
                         />
                       </Form.Group>
                     </Form.Row>
+
+                */}
+
                     <Form.Row>
                       <Form.Group className="col-sm-12" controlId="infoAdicionalM">
                         <Form.Label>Información Adicional:</Form.Label>

@@ -115,8 +115,12 @@ class AddExcavacion extends React.Component {
       piezasMNames: [],
       bochonMId: '',
       validatedMBochon: false,
-      idExploracionCrear:'',
-      tablaBochones:[]
+      idExploracionCrear: '',
+      tablaBochones: [],
+      ejemplar:'',
+      piezasAsoc:'',
+      ejemplarM:'',
+      piezasAsocM:''
     };
   }
 
@@ -168,7 +172,7 @@ class AddExcavacion extends React.Component {
           );
         });
 
-      fetch(urlApi + '/ejemplares', {
+     /* fetch(urlApi + '/ejemplares', {
         method: 'GET',
         headers: {
           'Authorization': 'Bearer ' + cookies.get('token')
@@ -188,7 +192,7 @@ class AddExcavacion extends React.Component {
             "Hubo un problema con la petición Fetch:",
             error.message
           );
-        });
+        });*/
 
 
     }
@@ -198,6 +202,23 @@ class AddExcavacion extends React.Component {
 
   setPuntoGpsExcavacion = (puntoGps) =>
     this.setState({ puntoGpsExcavacion: puntoGps });
+
+
+    handleEjemplarChange = (evt) => {
+      this.setState({ ejemplar: evt.target.value });
+    }; 
+    
+    handleEjemplarMChange = (evt) => {
+      this.setState({ ejemplarM: evt.target.value });
+    };
+
+    handlePiezasAsocChange = (evt) => {
+      this.setState({ piezasAsoc: evt.target.value });
+    };
+    
+    handlePiezasAsocMChange = (evt) => {
+      this.setState({ piezasAsocM: evt.target.value });
+    }; 
 
   handleMuestraChange(evt) {
     this.setState({ muestraHome: evt.target.checked });
@@ -247,15 +268,15 @@ class AddExcavacion extends React.Component {
   handleExploracionesChange = (selectedExploracion) => {
     this.setState({ selectedExploracionAnt: this.state.selectedExploracion });
     this.setState({ selectedExploracion });
-    if(selectedExploracion!==null){
-      this.setState({ idExploracionCrear:selectedExploracion.value });
+    if (selectedExploracion !== null) {
+      this.setState({ idExploracionCrear: selectedExploracion.value });
     }
-  
 
-    
+
+
   };
 
-  handleEjemplarChange = (selectedEjemplar) => {
+  /*handleEjemplarChange = (selectedEjemplar) => {
     this.setState({ selectedEjemplar });
     if (selectedEjemplar !== null) {
       fetch(urlApi + '/piezasEjemplar/' + selectedEjemplar.value, {
@@ -288,9 +309,9 @@ class AddExcavacion extends React.Component {
       });
 
     }
-  };
+  };*/
 
-  handleEjemplarMChange = (selectedEjemplarM) => {
+  /*handleEjemplarMChange = (selectedEjemplarM) => {
     this.setState({ selectedEjemplarM });
     if (selectedEjemplarM !== null) {
       fetch(urlApi + '/piezasEjemplar/' + selectedEjemplarM.value, {
@@ -323,7 +344,7 @@ class AddExcavacion extends React.Component {
       });
 
     }
-  };
+  };*/
 
   handleGeologicosChange = (evt) => {
     this.setState({ geologicos: evt.target.value });
@@ -567,9 +588,6 @@ class AddExcavacion extends React.Component {
     if (form.checkValidity() === false) {
       event.stopPropagation();
     } else {
-      if (this.state.selectedEjemplar !== null) {
-
-        if (this.state.selectedPieza !== null) {
           $(".loader").removeAttr("style");
           var data = {
             "nombre": "",
@@ -579,11 +597,13 @@ class AddExcavacion extends React.Component {
             "preparadorID": "",
             "tipoPreparacion": "",
             "acidosAplicados": [],
-            "ejemplarAsociado": this.state.selectedEjemplar.value,
+            "ejemplarAsociado": "",
             "excavacionId": this.state.excavacionId,
-            "piezasId": this.state.piezasId,
-            "piezasNames": this.state.piezasNames,
-            "infoAdicional": this.state.infoAdicional
+            "piezasId": [],
+            "piezasNames": [],
+            "infoAdicional": this.state.infoAdicional,
+            "ejemplarDescripcion": this.state.ejemplar,
+            "piezasDescripcion": this.state.piezasAsoc
           }
 
           fetch(urlApi + "/bochon", {
@@ -623,7 +643,7 @@ class AddExcavacion extends React.Component {
                   this.setState({
                     bochones: result.bochones
                   });
-                  this.setState({ codigoCampoB: "", nroBochon: "", piezasId: [], piezasNames: [], selectedPieza: null, infoAdicional: "" });
+                  this.setState({ codigoCampoB: "", nroBochon: "", piezasId: [], piezasNames: [], selectedPieza: null, infoAdicional: "", ejemplar:'', piezasAsoc:'' });
                   return result;
 
 
@@ -650,34 +670,6 @@ class AddExcavacion extends React.Component {
 
                       }
                     }.bind(this))
-                   /* .then(function () {
-
-                      var datosE = {
-                        "perteneceExca": this.state.excavacionId
-                      }
-
-                      fetch(urlApi + '/ejemplar/' + this.state.selectedEjemplar.value, {
-                        method: 'put',
-                        body: JSON.stringify(datosE),
-                        headers: {
-                          'Content-Type': 'application/json',
-                          'Authorization': 'Bearer ' + cookies.get('token')
-                        }
-                      })
-                        .then(function (response) {
-                          if (response.ok) {
-                            console.log("¡Se actualizaron los datos del Ejemplar con Éxito!");
-
-                          }
-                        })
-                        .then(function () {
-                          this.setState({ selectedEjemplar: null })
-                        }.bind(this))
-                        .catch(function (error) {
-                          console.log("Error: ", error);
-                        })
-
-                    }.bind(this))/*/
                     .catch(function (error) {
                       console.log(
                         "Hubo un problema con la petición Fetch:",
@@ -687,7 +679,7 @@ class AddExcavacion extends React.Component {
 
 
                 }.bind(this))
-               
+
                 .catch(function (error) {
                   toast.error("Error al consultar Bochones. Intente nuevamente.");
                   console.log(
@@ -707,16 +699,7 @@ class AddExcavacion extends React.Component {
               );
             });
 
-        }
-        else {
-          toast.error("¡Debe Seleccionar al menos una pieza!");
-        }
 
-
-      }
-      else {
-        toast.error("¡Debe Seleccionar un Ejemplar!");
-      }
 
     }
     this.setState({ validatedbochon: true });
@@ -740,8 +723,8 @@ class AddExcavacion extends React.Component {
             </Button></td>
           <td>{bochon.codigoCampo}</td>
           <td>{bochon.nroBochon}</td>
-          <td>{bochon.ejemplarAsociado[0].sigla}</td>
-          <td>{bochon.piezasNames.toString()}</td>
+          <td>{bochon.ejemplarDescripcion}</td>
+          <td>{bochon.piezasDescripcion}</td>
           <td>{bochon.infoAdicional}</td>
 
         </tr>
@@ -752,8 +735,8 @@ class AddExcavacion extends React.Component {
 
   mostrarModalActualizarBochon = (dato) => {
 
-    if (dato.ejemplarAsociado[0]._id !== null && dato.ejemplarAsociado[0]._id !== '') {
-      //busco las piezas del ejemplar
+    /*if (dato.ejemplarAsociado[0]._id !== null && dato.ejemplarAsociado[0]._id !== '') {
+     
       fetch(urlApi + '/piezasEjemplar/' + dato.ejemplarAsociado[0]._id, {
         method: 'GET',
         headers: {
@@ -784,11 +767,9 @@ class AddExcavacion extends React.Component {
             codigoCampoM: dato.codigoCampo,
             nroBochonM: dato.nroBochon,
             infoAdicionalM: dato.infoAdicional,
-            selectedEjemplarM: ejemplarSelect,
-            selectedPiezaM: piezasSelect,
+            ejemplarM: dato.ejemplarDescripcion,
+            piezasAsocM: dato.piezasAsocM,
             modalActualizarBochon: true,
-            piezasMId: dato.piezasId,
-            piezasMNames: dato.piezasNames,
             bochonMId: dato._id
           });
 
@@ -797,7 +778,16 @@ class AddExcavacion extends React.Component {
           console.log('Hubo un problema con la petición Fetch (2):' + error.message);
         })
 
-    }
+    }*/
+    this.setState({
+      codigoCampoM: dato.codigoCampo,
+      nroBochonM: dato.nroBochon,
+      infoAdicionalM: dato.infoAdicional,
+      ejemplarM: dato.ejemplarDescripcion,
+      piezasAsocM: dato.piezasDescripcion,
+      modalActualizarBochon: true,
+      bochonMId: dato._id
+    });
 
 
 
@@ -830,22 +820,13 @@ class AddExcavacion extends React.Component {
 
     } else {
 
-      if (this.state.selectedEjemplarM !== null) {
 
-        if (this.state.selectedPiezaM !== null) {
           $(".loader").removeAttr("style");
           var data = {
-            "nombre": "",
             "codigoCampo": this.state.codigoCampoM,
             "nroBochon": this.state.nroBochonM,
-            "preparador": "",
-            "preparadorID": "",
-            "tipoPreparacion": "",
-            "acidosAplicados": [],
-            "ejemplarAsociado": this.state.selectedEjemplarM.value,
-            "excavacionId": this.state.excavacionId,
-            "piezasId": this.state.piezasMId,
-            "piezasNames": this.state.piezasMNames,
+            "ejemplarDescripcion": this.state.ejemplarM,
+            "piezasDescripcion": this.state.piezasAsocM,
             "infoAdicional": this.state.infoAdicionalM
           }
 
@@ -886,7 +867,7 @@ class AddExcavacion extends React.Component {
                   this.setState({
                     bochones: result.bochones
                   });
-                  this.setState({ codigoCampoM: "", nroBochonM: "", selectedEjemplarM: null, piezasMId: [], piezasMNames: [], selectedPiezaM: null, infoAdicionalM: "", modalActualizarBochon: false });
+                  this.setState({ codigoCampoM: "", nroBochonM: "", selectedEjemplarM: null, piezasMId: [], piezasMNames: [], selectedPiezaM: null, infoAdicionalM: "", modalActualizarBochon: false, ejemplarM:'', piezasAsocM:'' });
                   return result;
 
 
@@ -940,20 +921,6 @@ class AddExcavacion extends React.Component {
                 error.message
               );
             });
-
-        }
-        else {
-          toast.error("¡Debe Seleccionar al menos una pieza!");
-        }
-
-
-      }
-      else {
-        toast.error("¡Debe Seleccionar un Ejemplar!");
-      }
-
-
-
 
 
     }
@@ -1017,12 +984,41 @@ class AddExcavacion extends React.Component {
                 }
               })
                 .then(function (response) {
-               
+
                   if (response.ok) {
                     toast.success("¡Se eliminó al Bochon con Éxito!");
                   }
                   $(".loader").fadeOut("slow");
                 })
+                .then(function () {
+                  //Actualizo la lista de bochones
+    
+                  fetch(urlApi + '/bochonExca/' + this.state.excavacionId, {
+                    method: 'GET',
+                    headers: {
+                      'Authorization': 'Bearer ' + cookies.get('token')
+                    }
+                  })
+                    .then((response) => {
+                      return response.json()
+                    })
+                    .then(result => {
+                      this.setState({
+                        bochones: result.bochones
+                      });
+                      return result;
+    
+                    })
+                    .then(function () {
+    
+                      setTimeout(function () { this.setState({ tablaBochones: this.renderTableBochones() }) }.bind(this), 1500);
+                    }.bind(this))
+                    .catch(function (error) {
+                      console.log('Hubo un problema con la petición Fetch (2):' + error.message);
+                    })
+    
+    
+                }.bind(this))
                 .catch(function (error) {
                   $(".loader").fadeOut("slow");
                   toast.error("Error al Eliminar Bochon. Intente nuevamente.");
@@ -1030,35 +1026,7 @@ class AddExcavacion extends React.Component {
                 });
 
             }.bind(this))
-            .then(function () {
-              //Actualizo la lista de bochones
-
-              fetch(urlApi + '/bochonExca/' + this.state.excavacionId, {
-                method: 'GET',
-                headers: {
-                  'Authorization': 'Bearer ' + cookies.get('token')
-                }
-              })
-                .then((response) => {
-                  return response.json()
-                })
-                .then(result => {
-                  this.setState({
-                    bochones: result.bochones
-                  });
-                  return result;
-
-                })
-                .then(function () {
-
-                  setTimeout(function () { this.setState({ tablaBochones: this.renderTableBochones() }) }.bind(this), 1500);
-                }.bind(this))
-                .catch(function (error) {
-                  console.log('Hubo un problema con la petición Fetch (2):' + error.message);
-                })
-
-
-            }.bind(this))
+           
             .catch(function (error) {
               $(".loader").fadeOut("slow");
               toast.error("Error al Actualizar Excavacion. Intente nuevamente.");
@@ -1416,7 +1384,7 @@ class AddExcavacion extends React.Component {
       hallazgo = this.state.selectedHallazgo.value;
     }
 
-    console.log('PTO GPS:', this.state.puntoGpsExcavacion );
+    console.log('PTO GPS:', this.state.puntoGpsExcavacion);
 
     var data = {
       "nombreArea": this.state.nombreArea,
@@ -1505,7 +1473,7 @@ class AddExcavacion extends React.Component {
             })
 
         }
-        else{
+        else {
           $(".loader").fadeOut("slow");
         }
 
@@ -2099,9 +2067,9 @@ class AddExcavacion extends React.Component {
 
     const { idExploracionCrear } = this.state;
 
-  
 
-    const { selectedPieza } = this.state;
+
+    /*const { selectedPieza } = this.state;
     let optPiezas = this.state.piezas.map((opt) => ({
       label: opt.identificador,
       value: opt._id,
@@ -2113,7 +2081,7 @@ class AddExcavacion extends React.Component {
       value: opt._id,
     }));
 
-    const { selectedHallazgo } = this.state;
+   
 
     const { selectedEjemplar } = this.state;
     const { selectedEjemplarM } = this.state;
@@ -2121,7 +2089,9 @@ class AddExcavacion extends React.Component {
       label: opt.sigla + ' (' + opt.tipoColeccion + ')',
       value: opt._id,
     }));
+*/
 
+const { selectedHallazgo } = this.state;
 
 
     return (
@@ -2383,12 +2353,12 @@ class AddExcavacion extends React.Component {
                     <br />
 
 
-                  
-                       <CrearExcavacion
+
+                    <CrearExcavacion
                       idExploracion={idExploracionCrear}
                       setIdAreaExcavacion={this.setIdAreaExcavacion}
                       setPuntoGpsExcavacion={this.setPuntoGpsExcavacion}
-                    /> 
+                    />
                     <br />
 
                     <Form.Row >
@@ -2485,8 +2455,38 @@ class AddExcavacion extends React.Component {
                     </Form.Row>
 
 
-
                     <Form.Row>
+                      <Form.Group className="col-sm-12" controlId="ejemplar">
+                        <Form.Label>Ejemplar:</Form.Label>
+                        <Form.Control
+                          type="text"
+                          name='ejemlplar'
+                          value={this.state.ejemplar}
+                          onChange={this.handleEjemplarChange}
+                          
+                        />
+                      
+                      </Form.Group>
+
+                      </Form.Row>
+                      <Form.Row>
+                      <Form.Group className="col-sm-12" controlId="piezasAsoc">
+                        <Form.Label>Piezas Asociadas:</Form.Label>
+                        <Form.Control
+                          type="text"
+                          name='piezasAsoc'
+                          value={this.state.piezasAsoc}
+                          onChange={this.handlePiezasAsocChange}
+                          
+                        />
+                      </Form.Group>
+                     
+
+                    </Form.Row>
+
+
+
+                  {/* <Form.Row>
                       <Form.Group className="col-sm-12" controlId="ejemplarAsociado">
                         <Form.Label>Ejemplar:</Form.Label>
                         <Select
@@ -2512,7 +2512,9 @@ class AddExcavacion extends React.Component {
                           isClearable
                         />
                       </Form.Group>
-                    </Form.Row>
+                  </Form.Row> */}
+
+
 
                     <Form.Row>
                       <Form.Group className="col-sm-12" controlId="infoAdicional">
@@ -2730,7 +2732,37 @@ class AddExcavacion extends React.Component {
 
                     </Form.Row>
 
+
                     <Form.Row>
+                      <Form.Group className="col-sm-12" controlId="ejemplarM">
+                        <Form.Label>Ejemplar:</Form.Label>
+                        <Form.Control
+                          type="text"
+                          name='ejemlplarM'
+                          value={this.state.ejemplarM}
+                          onChange={this.handleEjemplarMChange}
+                          
+                        />
+                      
+                      </Form.Group>
+
+                      </Form.Row>
+                      <Form.Row>
+                      <Form.Group className="col-sm-12" controlId="piezasAsocM">
+                        <Form.Label>Piezas Asociadas:</Form.Label>
+                        <Form.Control
+                          type="text"
+                          name='piezasAsocM'
+                          value={this.state.piezasAsocM}
+                          onChange={this.handlePiezasAsocMChange}
+                          
+                        />
+                      </Form.Group>
+                     
+
+                    </Form.Row>
+
+                    {/*}      <Form.Row>
                       <Form.Group className="col-sm-12" controlId="ejemplarAsociadoM">
                         <Form.Label>Ejemplar (*):</Form.Label>
                         <Select
@@ -2756,7 +2788,8 @@ class AddExcavacion extends React.Component {
                           isClearable
                         />
                       </Form.Group>
-                    </Form.Row>
+    </Form.Row>*/}
+
                     <Form.Row>
                       <Form.Group className="col-sm-12" controlId="infoAdicionalM">
                         <Form.Label>Información Adicional:</Form.Label>
