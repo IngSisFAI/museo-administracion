@@ -2424,7 +2424,7 @@ class AddEjemplar extends React.Component {
                     <Form.Row>
 
                       <Form.Group className="col-sm-8" >
-                        <Form.Label>Curriculum Vitae:</Form.Label>
+                        <Form.Label>Papers:</Form.Label>
                         <input type="file" id="archivopdf" className="form-control" accept="application/pdf" onChange={this.filehandleChange.bind(this)} />
                       </Form.Group>
 

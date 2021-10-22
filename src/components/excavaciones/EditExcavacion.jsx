@@ -1198,7 +1198,7 @@ class EditExcavacion extends React.Component {
 
   subirDenuncia = () => {
 
-    const MAXIMO_TAMANIO_BYTES = 5000000;
+    const MAXIMO_TAMANIO_BYTES = 15000000;
     const types = ['application/pdf'];
     var file = this.state.archivoDenuncia
 
@@ -1209,7 +1209,7 @@ class EditExcavacion extends React.Component {
       var type = file[0].type;
 
       if (size > MAXIMO_TAMANIO_BYTES) {
-        var tamanio = 5000000 / 1000000;
+        var tamanio = 15000000 / 1000000;
         toast.error("El archivo seleccionado supera los " + tamanio + 'Mb. permitidos.');
         document.getElementById('filesAut').value = '';
       }
@@ -2310,7 +2310,7 @@ class EditExcavacion extends React.Component {
                       </Form.Group>
 
                     </Form.Row>
-                    <Form.Label>Si seleccionó Denuncia, adjunte archivo(s) a continuación de la misma:</Form.Label>
+                    <Form.Label>Si seleccionó Denuncia, adjunte archivo(s) Pdf a continuación de la misma:</Form.Label>
                     <Form.Row>
                       <Form.Group className="col-sm-8">
                         <label>Archivo:</label>
