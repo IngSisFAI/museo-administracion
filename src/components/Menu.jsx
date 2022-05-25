@@ -14,6 +14,10 @@ import {
   faMap,
   faFileArchive,
   faIdCard,
+  faHandshake,
+  faDiagnoses,
+  faClone,
+  faHandHoldingHeart,
 } from "@fortawesome/free-solid-svg-icons";
 import { Link } from "react-router-dom";
 import Cookies from "universal-cookie";
@@ -65,6 +69,18 @@ class Menu extends React.Component {
                 </NavDropdown.Item>
                 <NavDropdown.Item as={Link} to={"/datosGeograficos"}>
                   <FontAwesomeIcon icon={faMap} /> Visualizar Datos Geográficos
+                </NavDropdown.Item>
+                <NavDropdown.Item as={Link} to={"/prestamos"}>
+                  <FontAwesomeIcon icon={faHandshake} /> Préstamos
+                </NavDropdown.Item>
+                <NavDropdown.Item as={Link} to={"/exhibiciones"}>
+                  <FontAwesomeIcon icon={faDiagnoses} /> Exhibiciones
+                </NavDropdown.Item>
+                <NavDropdown.Item as={Link} to={"/replicas"}>
+                  <FontAwesomeIcon icon={faClone} /> Replicas
+                </NavDropdown.Item>
+                <NavDropdown.Item as={Link} to={"/donaciones"}>
+                  <FontAwesomeIcon icon={faHandHoldingHeart} /> Donaciones
                 </NavDropdown.Item>
               </NavDropdown>
 
