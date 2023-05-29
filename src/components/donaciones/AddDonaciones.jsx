@@ -424,7 +424,7 @@ class AddDonaciones extends React.Component {
                   .then(response => {
                     $(".loader").fadeOut("slow");
                     if (response.statusText === "OK") {
-                      this.setState({ showSuccess: true, showError: false, urlImage: urlImage +'don_' +this.state.nroActa + '.' + this.state.extFoto });
+                      this.setState({ showSuccess: true, showError: false, urlImage: urlImage +'/don_' +this.state.nroActa + '.' + this.state.extFoto });
                       this.setState({ tableImage: this.renderTableDataFoto() })
                       document.getElementById('foto').value = '';
                     }
@@ -506,7 +506,7 @@ class AddDonaciones extends React.Component {
                     //  console.log(response);
                     $(".loader").fadeOut("slow");
                     if (response.statusText === "OK") {
-                      this.setState({ showSuccessDoc: true, showErrorDoc: false, urlDoc: urlDoc + 'don_' + this.state.nroActa + '.' + this.state.extDoc });
+                      this.setState({ showSuccessDoc: true, showErrorDoc: false, urlDoc: urlDoc + '/don_' + this.state.nroActa + '.' + this.state.extDoc });
                       this.setState({ tableDoc: this.renderTableDataDoc() })
                       document.getElementById('documentacion').value = '';
                     }
