@@ -9,6 +9,7 @@ import axios from "axios";
 import Menu from "./../Menu"
 import Cookies from 'universal-cookie';
 import $ from 'jquery';
+import Moment from 'moment';
 
 const cookies = new Cookies();
 
@@ -121,7 +122,7 @@ class AddDonaciones extends React.Component {
         var data = {
             nroActa: this.state.nroActa,
             descripcion: this.state.descripcion,
-            fecha: this.state.fecha,
+            fecha: (Moment(this.state.fecha).add(1, 'days')).format('YYYY-MM-DD'),
             cantidad: this.state.cantidad,
             donador: this.state.donador,
             foto: '',
@@ -160,7 +161,7 @@ class AddDonaciones extends React.Component {
         var data = {
             nroActa: this.state.nroActa,
             descripcion: this.state.descripcion,
-            fecha: this.state.fecha,
+            fecha: (Moment(this.state.fecha).add(1, 'days')).format('YYYY-MM-DD'),
             cantidad: this.state.cantidad,
             donador: this.state.donador
         };
@@ -191,6 +192,15 @@ class AddDonaciones extends React.Component {
   handleSelect = (key) => {
     this.setState({ key: key });
   }
+
+  fileDochandleChange = (event) => {
+    const file = event.target.files;
+    const name = file[0].name;
+    const lastDot = name.lastIndexOf('.');
+    const ext = name.substring(lastDot + 1);
+    this.setState({ archivoDoc: file, extDoc: ext });
+  }
+
   filehandleChange = (event) => {
     const file = event.target.files;
     const name = file[0].name;
@@ -206,12 +216,12 @@ class AddDonaciones extends React.Component {
       return (
         <tr key={Math.floor(Math.random() * 1000)}>
           <td>
-            <Button variant="danger" type="button" id="eliminarF" onClick={() => this.eliminarArchivoFoto(this.state.nroActa + '.' + this.state.extFoto)}>
+            <Button variant="danger" type="button" id="eliminarF" onClick={() => this.eliminarArchivoFoto('don_'+this.state.nroActa + '.' + this.state.extFoto)}>
               <FontAwesomeIcon icon={faTrash} />
             </Button>
           </td>
           <td>
-            <a href={this.state.urlImage} disabled target="_blank">{this.state.nroActa + '.' + this.state.extFoto}</a>
+            <a href={this.state.urlImage} disabled target="_blank">{'don_'+this.state.nroActa + '.' + this.state.extFoto}</a>
           </td>
         </tr>
       )
@@ -338,13 +348,7 @@ class AddDonaciones extends React.Component {
     }
   }
 
-  fileDochandleChange = (event) => {
-    const file = event.target.files;
-    const name = file[0].name;
-    const lastDot = name.lastIndexOf('.');
-    const ext = name.substring(lastDot + 1);
-    this.setState({ archivoDoc: file, extDoc: ext });
-  }
+ 
 
   renderTableDataDoc() {
     let cv = this.state.archivoDoc
@@ -352,12 +356,12 @@ class AddDonaciones extends React.Component {
       return (
         <tr key={Math.floor(Math.random() * 1000)}>
           <td>
-            <Button variant="danger" type="button" id="eliminarDoc" onClick={() => this.eliminarArchivoDoc('don_' + this.state.nroActa + '.' + this.state.extDoc)}>
+            <Button variant="danger" type="button" id="eliminarDoc" onClick={() => this.eliminarArchivoDoc('don_'+this.state.nroActa + '.' + this.state.extDoc)}>
               <FontAwesomeIcon icon={faTrash} />
             </Button>
           </td>
           <td>
-            <a href={this.state.urlDoc} disabled target="_blank">{'don_' + this.state.nroActa + '.' + this.state.extDoc}</a>
+            <a href={this.state.urlDoc} disabled target="_blank">{'don_'+this.state.nroActa + '.' + this.state.extDoc}</a>
           </td>
         </tr>
       )
@@ -373,7 +377,7 @@ class AddDonaciones extends React.Component {
     const types = ['image/jpg', 'image/jpeg', 'image/jpe', 'image/png', 'image/gif', 'image/bpm', 'image/tif', 'image/tiff'];
     var foto = this.state.archivoFoto
     if (foto !== null && foto.length !== 0) {
-      var namePhoto = '/' + this.state.nroActa + '.' + this.state.extFoto
+      var namePhoto = '/don_' + this.state.nroActa + '.' + this.state.extFoto
       var size = foto[0].size;
       var type = foto[0].type;
 
@@ -413,14 +417,14 @@ class AddDonaciones extends React.Component {
                   headers: {
                     "Content-Type": undefined,
                     path: rutaImg,
-                    "newfilename": this.state.nroActa,
+                    "newfilename": 'don_'+this.state.nroActa,
                     'Authorization': 'Bearer ' + cookies.get('token')
                   }
                 })
                   .then(response => {
                     $(".loader").fadeOut("slow");
                     if (response.statusText === "OK") {
-                      this.setState({ showSuccess: true, showError: false, urlImage: urlImage + this.state.nroActa + '.' + this.state.extFoto });
+                      this.setState({ showSuccess: true, showError: false, urlImage: urlImage +'don_' +this.state.nroActa + '.' + this.state.extFoto });
                       this.setState({ tableImage: this.renderTableDataFoto() })
                       document.getElementById('foto').value = '';
                     }
@@ -457,7 +461,7 @@ class AddDonaciones extends React.Component {
     const types = ['application/pdf'];
     var cv = this.state.archivoDoc
     if (cv !== null && cv.length !== 0) {
-      var nameCV = '/' + 'don_' + this.state.nroActa + '.' + this.state.extDoc
+      var nameCV =  '/don_' + this.state.nroActa + '.' + this.state.extDoc
       var size = cv[0].size;
       var type = cv[0].type;
       if (size > MAXIMO_TAMANIO_BYTES) {
@@ -681,6 +685,17 @@ class AddDonaciones extends React.Component {
                             El archivo no se pudo subir. Intente nuevamente.
                           </p>
                         </Alert>
+                      </Form.Group>
+                    </Form.Row>
+                    <hr />
+                    <Form.Row>
+                      <Form.Group className="mx-sm-3 mb-1">
+                        &nbsp;&nbsp;
+                        <Link to='/donaciones'>
+                          <Button variant="primary" type="button" id="volver">
+                            <FontAwesomeIcon icon={faTimesCircle} /> Volver a Donaciones
+                          </Button>
+                        </Link>
                       </Form.Group>
                     </Form.Row>
                   </Form>

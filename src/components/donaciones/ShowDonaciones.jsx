@@ -3,7 +3,7 @@ import { Form, Button, Tabs, Tab, Table, Alert } from 'react-bootstrap';
 import { ToastContainer, toast, Slide } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faClone, faTrash, faArrowLeft } from '@fortawesome/free-solid-svg-icons'
+import { faClone, faTimesCircle, faArrowLeft } from '@fortawesome/free-solid-svg-icons'
 import { Link, withRouter } from 'react-router-dom';
 import Moment from 'moment';
 import axios from 'axios';
@@ -138,7 +138,7 @@ class ShowDonacion extends React.Component {
               <div className="loader" style={{ display: 'none' }}></div>
               <br />
               <h3 className="page-header" align="left">
-                <FontAwesomeIcon icon={faClone} /> Mostrar Replica
+                <FontAwesomeIcon icon={faClone} /> Mostrar Donaciones
               </h3>
               <hr />
               <ToastContainer
@@ -233,6 +233,17 @@ class ShowDonacion extends React.Component {
                         </Table>
                       </Form.Group>
                     </Form.Row>
+                    </Form.Row>
+                    <hr />
+                    <Form.Row>
+                      <Form.Group className="mx-sm-3 mb-1">
+                        &nbsp;&nbsp;
+                        <Link to='/donaciones'>
+                          <Button variant="primary" type="button" id="volver">
+                            <FontAwesomeIcon icon={faTimesCircle} /> Volver a Donaciones
+                          </Button>
+                        </Link>
+                      </Form.Group>
                     </Form.Row>
                   </Form>
                 </Tab>

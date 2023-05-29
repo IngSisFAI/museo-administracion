@@ -28,7 +28,9 @@ class EditPrestamo extends React.Component {
         fechaFin: "",
         descripcion: "",
         paleontologoResponsable: "",
+        recibidorResponsable: "",
         institucion: "",
+        domicilio:"",
         ejemplar: "",
         observacion: "",
         foto: "",
@@ -73,7 +75,9 @@ class EditPrestamo extends React.Component {
               fechaInicio: (Moment(response.prestamoId.fechaInicio).add(0, 'days')).format('YYYY-MM-DD'),
               fechaFin: (Moment(response.prestamoId.fechaFin).add(0, 'days')).format('YYYY-MM-DD'),
               paleontologoResponsable: response.prestamoId.paleontologoResponsable,
+              receptorResponsable: response.prestamoId.receptorResponsable,
               institucion: response.prestamoId.institucion,
+              domicilio: response.prestamoId.domicilio,
               ejemplar: response.prestamoId.ejemplar,
               observacion: response.prestamoId.observacion,
               foto: response.prestamoId.foto,
@@ -102,8 +106,14 @@ class EditPrestamo extends React.Component {
   handlePaleontResChange = evt => {
     this.setState({ paleontologoResponsable: evt.target.value });
   };
+  handleReceptorResChange = evt => {
+    this.setState({ receptorResponsable: evt.target.value });
+  };
   handleInstitucionChange = evt => {
     this.setState({ institucion: evt.target.value });
+  };
+  handleDomicilioChange = evt => {
+    this.setState({ domicilio: evt.target.value });
   };
   handleObservacionesChange = evt => {
     this.setState({ observacion: evt.target.value });
@@ -124,10 +134,12 @@ class EditPrestamo extends React.Component {
       var data = {
         "nroActa": this.state.nroActa,
         "descripcion": this.state.descripcion,
-        "fechaInicio": this.state.fechaInicio,
-        "fechaFin": this.state.fechaFin,
+        "fechaInicio": (Moment(this.state.fechaInicio).add(1, 'days')).format('YYYY-MM-DD'),
+        "fechaFin": (Moment(this.state.fechaFin).add(1, 'days')).format('YYYY-MM-DD'),
         "paleontologoResponsable": this.state.paleontologoResponsable,
+        "receptorResponsable": this.state.receptorResponsable,
         "institucion": this.state.institucion,
+        "domicilio": this.state.domicilio,
         "observacion": this.state.observacion,
         "ejemplar": this.state.ejemplar
       };
@@ -344,7 +356,7 @@ class EditPrestamo extends React.Component {
     const types = ['image/jpg', 'image/jpeg', 'image/jpe', 'image/png', 'image/gif', 'image/bpm', 'image/tif', 'image/tiff'];
     var foto = this.state.archivoFoto
     if (foto !== null && foto.length !== 0) {
-      var namePhoto = '/' + this.state.nroActa + '.' + this.state.extFoto
+      var namePhoto = '/pre_' + this.state.nroActa + '.' + this.state.extFoto
       var size = foto[0].size;
       var type = foto[0].type;
       if (size > MAXIMO_TAMANIO_BYTES) {
@@ -381,14 +393,14 @@ class EditPrestamo extends React.Component {
                   headers: {
                     "Content-Type": undefined,
                     path: rutaImg,
-                    "newfilename": this.state.nroActa,
+                    "newfilename": 'pre_'+ this.state.nroActa,
                     'Authorization': 'Bearer ' + cookies.get('token')
                   }
                 })
                   .then(response => {
                     $(".loader").fadeOut("slow");
                     if (response.statusText === "OK") {
-                      this.setState({ showSuccess: true, showError: false, urlImage: urlImage + this.state.nroActa + '.' + this.state.extFoto });
+                      this.setState({ showSuccess: true, showError: false, urlImage: urlImage +'pre_'+ this.state.nroActa + '.' + this.state.extFoto });
                       this.setState({ tableImage: this.renderTableDataFoto() })
                       document.getElementById('foto').value = '';
                     }
@@ -425,7 +437,7 @@ class EditPrestamo extends React.Component {
     const types = ['application/pdf'];
     var cv = this.state.archivoDoc
     if (cv !== null && cv.length !== 0) {
-      var nameCV = '/' + 'pres_' + this.state.nroActa + '.' + this.state.extDoc
+      var nameCV = '/pre_' + this.state.nroActa + '.' + this.state.extDoc
       var size = cv[0].size;
       var type = cv[0].type;
       if (size > MAXIMO_TAMANIO_BYTES) {
@@ -463,14 +475,14 @@ class EditPrestamo extends React.Component {
                   headers: {
                     "Content-Type": undefined,
                     path: rutaDoc,
-                    "newfilename": 'pres_' + this.state.nroActa,
+                    "newfilename": 'pre_' + this.state.nroActa,
                     'Authorization': 'Bearer ' + cookies.get('token')
                   }
                 })
                   .then(response => {
                     $(".loader").fadeOut("slow");
                     if (response.statusText === "OK") {
-                      this.setState({ showSuccessdoc: true, showErrordoc: false, urlDoc: urlDoc + 'pres_' + this.state.nroActa + '.' + this.state.extDoc });
+                      this.setState({ showSuccessdoc: true, showErrordoc: false, urlDoc: urlDoc + 'pre_' + this.state.nroActa + '.' + this.state.extDoc });
                       this.setState({ tableDoc: this.renderTableDataDoc() })
                       document.getElementById('documentacion').value = '';
                     }
@@ -508,12 +520,12 @@ class EditPrestamo extends React.Component {
       return (
         <tr key={Math.floor(Math.random() * 1000)}>
           <td>
-            <Button variant="danger" type="button" id="eliminarF" onClick={() => this.eliminarArchivoFoto(this.state.nroActa + '.' + this.state.extFoto)}>
+            <Button variant="danger" type="button" id="eliminarF" onClick={() => this.eliminarArchivoFoto('pre_'+this.state.nroActa + '.' + this.state.extFoto)}>
               <FontAwesomeIcon icon={faTrash} />
             </Button>
           </td>
           <td>
-            <a href={this.state.urlImage} disabled target="_blank">{this.state.nroActa + '.' + this.state.extFoto}</a>
+            <a href={this.state.urlImage} disabled target="_blank">{'pre_'+this.state.nroActa + '.' + this.state.extFoto}</a>
           </td>
         </tr>
       )
@@ -529,12 +541,12 @@ class EditPrestamo extends React.Component {
       return (
         <tr key={Math.floor(Math.random() * 1000)}>
           <td>
-            <Button variant="danger" type="button" id="eliminarDoc" onClick={() => this.eliminarArchivoDoc('pres_' + this.state.nroActa + '.' + this.state.extDoc)}>
+            <Button variant="danger" type="button" id="eliminarDoc" onClick={() => this.eliminarArchivoDoc('pre_' + this.state.nroActa + '.' + this.state.extDoc)}>
               <FontAwesomeIcon icon={faTrash} />
             </Button>
           </td>
           <td>
-            <a href={this.state.urlCV} disabled target="_blank">{'pres_' + this.state.nroActa + '.' + this.state.extDoc}</a>
+            <a href={this.state.urlDoc} disabled target="_blank">{'pre_' + this.state.nroActa + '.' + this.state.extDoc}</a>
           </td>
         </tr>
       )
@@ -601,16 +613,32 @@ class EditPrestamo extends React.Component {
                     </Form.Row>
                     <Form.Row >
                       <Form.Group className="col-sm-6" controlId="paleontologoResponsable">
-                        <Form.Label>Paleontológo Responsable:</Form.Label>
-                        <Form.Control type="text" required onChange={this.handlePaleontResChange} value={this.state.paleontologoResponsable} />
+                        <Form.Label>Curador:</Form.Label>
+                        <Form.Control type="text" placeholder="Obligatorio" autoComplete="off" required onChange={this.handlePaleontResChange} value={this.state.paleontologoResponsable} />
                         <Form.Control.Feedback type="invalid">
-                          Por favor, ingrese el Paleontólogo.
+                          Por favor, ingrese el Curador.
                         </Form.Control.Feedback></Form.Group>
-                      <Form.Group className="col-sm-6" controlId="institución">
+                      <Form.Group className="col-sm-6" controlId="receptorResponsable">
+                        <Form.Label>Receptor Responsable:</Form.Label>
+                        <Form.Control type="text"  placeholder="Obligatorio" autoComplete="off" required value={this.state.receptorResponsable} onChange={this.handleReceptorResChange} />
+                        <Form.Control.Feedback type="invalid">
+                          Por favor, ingrese el responsable.
+                        </Form.Control.Feedback>
+                      </Form.Group>
+                    </Form.Row>
+                    <Form.Row >
+                    <Form.Group className="col-sm-6" controlId="institución">
                         <Form.Label>Institución:</Form.Label>
-                        <Form.Control type="text"  required value={this.state.institucion} onChange={this.handleInstitucionChange} />
+                        <Form.Control type="text"  placeholder="Obligatorio" autoComplete="off" required value={this.state.institucion} onChange={this.handleInstitucionChange} />
                         <Form.Control.Feedback type="invalid">
                           Por favor, ingrese la Institución.
+                        </Form.Control.Feedback>
+                      </Form.Group>
+                      <Form.Group className="col-sm-6" controlId="dirección">
+                        <Form.Label>Domicilio:</Form.Label>
+                        <Form.Control type="text"  placeholder="Obligatorio" autoComplete="off" required value={this.state.domicilio} onChange={this.handleDomicilioChange} />
+                        <Form.Control.Feedback type="invalid">
+                          Por favor, ingrese el Domicilio.
                         </Form.Control.Feedback>
                       </Form.Group>
                     </Form.Row>
@@ -720,6 +748,17 @@ class EditPrestamo extends React.Component {
                             El archivo no se pudo subir. Intente nuevamente.
                           </p>
                         </Alert>
+                      </Form.Group>
+                    </Form.Row>
+                    <hr />
+                    <Form.Row>
+                      <Form.Group className="mx-sm-3 mb-1">
+                        &nbsp;&nbsp;
+                        <Link to='/prestamos'>
+                          <Button variant="primary" type="button" id="volver">
+                            <FontAwesomeIcon icon={faTimesCircle} /> Volver a Prestamos
+                          </Button>
+                        </Link>
                       </Form.Group>
                     </Form.Row>
                   </Form>

@@ -3,7 +3,7 @@ import { Form, Button, Tabs, Tab, Table, Alert } from 'react-bootstrap';
 import { ToastContainer, toast, Slide } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faClone, faArrowLeft } from '@fortawesome/free-solid-svg-icons'
+import { faClone, faArrowLeft , faTimesCircle} from '@fortawesome/free-solid-svg-icons'
 import { Link, withRouter } from 'react-router-dom';
 import Moment from 'moment';
 import axios from 'axios';
@@ -28,7 +28,9 @@ class ShowPrestamo extends React.Component {
         fechaInicio: "",
         fechaFin: "",
         paleontologoResponsable: "",
+        recibidorResponsable: "",
         institucion: "",
+        domicilio:"",
         ejemplar: "",
         observacion: "",
         foto: "",
@@ -73,7 +75,9 @@ class ShowPrestamo extends React.Component {
               fechaInicio: (Moment(response.prestamoId.fechaInicio).add(0, 'days')).format('YYYY-MM-DD'),
               fechaFin: (Moment(response.prestamoId.fechaFin).add(0, 'days')).format('YYYY-MM-DD'),
                 paleontologoResponsable: response.prestamoId.paleontologoResponsable,
+                receptorResponsable: response.prestamoId.receptorResponsable,
                 institucion: response.prestamoId.institucion,
+                domicilio: response.prestamoId.domicilio,
                 ejemplar: response.prestamoId.ejemplar,
                 observacion: response.prestamoId.observacion,
               foto: response.prestamoId.foto,
@@ -143,7 +147,7 @@ class ShowPrestamo extends React.Component {
               <div className="loader" style={{ display: 'none' }}></div>
               <br />
               <h3 className="page-header" align="left">
-                <FontAwesomeIcon icon={faClone} /> Mostrar Replica
+                <FontAwesomeIcon icon={faClone} /> Mostrar Préstamo
               </h3>
               <hr />
               <ToastContainer
@@ -180,13 +184,22 @@ class ShowPrestamo extends React.Component {
                     </Form.Row>
                     <Form.Row >
                       <Form.Group className="col-sm-6" controlId="paleontologoResponsable">
-                        <Form.Label>Paleontológo Responsable:</Form.Label>
+                        <Form.Label>Curador:</Form.Label>
                         <Form.Control type="text"  value={this.state.paleontologoResponsable} />
                        </Form.Group>
+                      <Form.Group className="col-sm-6" controlId="receptorResponsable">
+                        <Form.Label>Receptor Responsable:</Form.Label>
+                        <Form.Control type="text"  value={this.state.receptorResponsable} />
+                      </Form.Group>
+                    </Form.Row>
+                    <Form.Row >
                       <Form.Group className="col-sm-6" controlId="institución">
                         <Form.Label>Institución:</Form.Label>
                         <Form.Control type="text"  value={this.state.institucion} />
-                        
+                      </Form.Group>
+                      <Form.Group className="col-sm-6" controlId="domicilio">
+                        <Form.Label>Domicilio:</Form.Label>
+                        <Form.Control type="text"  value={this.state.domicilio} />
                       </Form.Group>
                     </Form.Row>
                     <Form.Row>
@@ -250,6 +263,17 @@ class ShowPrestamo extends React.Component {
                         </Table>
                       </Form.Group>
                     </Form.Row>
+                    </Form.Row>
+                    <hr />
+                    <Form.Row>
+                      <Form.Group className="mx-sm-3 mb-1">
+                        &nbsp;&nbsp;
+                        <Link to='/prestamos'>
+                          <Button variant="primary" type="button" id="volver">
+                            <FontAwesomeIcon icon={faTimesCircle} /> Volver a Prestamos
+                          </Button>
+                        </Link>
+                      </Form.Group>
                     </Form.Row>
                   </Form>
                 </Tab>

@@ -9,6 +9,7 @@ import axios from "axios";
 import Menu from "./../Menu"
 import Cookies from 'universal-cookie';
 import $ from 'jquery';
+import Moment from 'moment';
 
 const cookies = new Cookies();
 
@@ -72,7 +73,7 @@ class AddExhibicion extends React.Component {
     this.setState({ descripcion: evt.target.value });
   };
   handleFechaChange = evt => {
-    this.setState({ fecha: evt.target.value });
+    this.setState({ fecha: evt.target.value});
   };
   handleFechaFinChange = evt => {
     this.setState({ fechaFin: evt.target.value });
@@ -138,8 +139,8 @@ class AddExhibicion extends React.Component {
         var data = {
             nroActa: this.state.nroActa,
             descripcion: this.state.descripcion,
-            fecha: this.state.fecha,
-            fechaFin: this.state.fechaFin,
+            fecha: (Moment(this.state.fecha).add(1, 'days')).format('YYYY-MM-DD'),
+            fechaFin: (Moment(this.state.fechaFin).add(1, 'days')).format('YYYY-MM-DD'),
             ubicacion: this.state.ubicacion,
             tipo: this.state.tipo,
             responsableMuseo: this.state.responsableMuseo,
@@ -181,8 +182,8 @@ class AddExhibicion extends React.Component {
         var data = {
             nroActa: this.state.nroActa,
             descripcion: this.state.descripcion,
-            fecha: this.state.fecha,
-            fechaFin: this.state.fechaFin,
+            fecha: (Moment(this.state.fecha).add(1, 'days')).format('YYYY-MM-DD'),
+            fechaFin: (Moment(this.state.fechaFin).add(1, 'days')).format('YYYY-MM-DD'),
             ubicacion: this.state.ubicacion,
             tipo: this.state.tipo,
             responsableMuseo: this.state.responsableMuseo,
@@ -230,12 +231,12 @@ class AddExhibicion extends React.Component {
       return (
         <tr key={Math.floor(Math.random() * 1000)}>
           <td>
-            <Button variant="danger" type="button" id="eliminarF" onClick={() => this.eliminarArchivoFoto(this.state.nroDoc + '.' + this.state.extFoto)}>
+            <Button variant="danger" type="button" id="eliminarF" onClick={() => this.eliminarArchivoFoto('exh_'+this.state.nroActa + '.' + this.state.extFoto)}>
               <FontAwesomeIcon icon={faTrash} />
             </Button>
           </td>
           <td>
-            <a href={this.state.urlImage} disabled target="_blank">{this.state.nroDoc + '.' + this.state.extFoto}</a>
+            <a href={this.state.urlImage} disabled target="_blank">{'exh_'+this.state.nroActa + '.' + this.state.extFoto}</a>
           </td>
 
         </tr>
@@ -377,12 +378,12 @@ class AddExhibicion extends React.Component {
       return (
         <tr key={Math.floor(Math.random() * 1000)}>
           <td>
-            <Button variant="danger" type="button" id="eliminarDoc" onClick={() => this.eliminarArchivoDoc('exb_' + this.state.nroActa + '.' + this.state.extDoc)}>
+            <Button variant="danger" type="button" id="eliminarDoc" onClick={() => this.eliminarArchivoDoc('exh_' + this.state.nroActa + '.' + this.state.extDoc)}>
               <FontAwesomeIcon icon={faTrash} />
             </Button>
           </td>
           <td>
-            <a href={this.state.urlDoc} disabled target="_blank">{'exb_' + this.state.nroActa + '.' + this.state.extDoc}</a>
+            <a href={this.state.urlDoc} disabled target="_blank">{'exh_' + this.state.nroActa + '.' + this.state.extDoc}</a>
           </td>
         </tr>
       )
@@ -398,7 +399,7 @@ class AddExhibicion extends React.Component {
     const types = ['image/jpg', 'image/jpeg', 'image/jpe', 'image/png', 'image/gif', 'image/bpm', 'image/tif', 'image/tiff'];
     var foto = this.state.archivoFoto
     if (foto !== null && foto.length !== 0) {
-      var namePhoto = '/' + this.state.nroDoc + '.' + this.state.extFoto
+      var namePhoto = '/exh_' + this.state.nroActa + '.' + this.state.extFoto
       var size = foto[0].size;
       var type = foto[0].type;
 
@@ -438,14 +439,14 @@ class AddExhibicion extends React.Component {
                   headers: {
                     "Content-Type": undefined,
                     path: rutaImg,
-                    "newfilename": this.state.nroDoc,
+                    "newfilename": 'exh_'+this.state.nroActa,
                     'Authorization': 'Bearer ' + cookies.get('token')
                   }
                 })
                   .then(response => {
                     $(".loader").fadeOut("slow");
                     if (response.statusText === "OK") {
-                      this.setState({ showSuccess: true, showError: false, urlImage: urlImage + this.state.nroDoc + '.' + this.state.extFoto });
+                      this.setState({ showSuccess: true, showError: false, urlImage: urlImage +'/exh_'+ this.state.nroActa + '.' + this.state.extFoto });
                       this.setState({ tableImage: this.renderTableDataFoto() })
                       document.getElementById('foto').value = '';
                     }
@@ -482,7 +483,7 @@ class AddExhibicion extends React.Component {
     const types = ['application/pdf'];
     var cv = this.state.archivoDoc
     if (cv !== null && cv.length !== 0) {
-      var nameCV = '/' + 'exb_' + this.state.nroActa + '.' + this.state.extDoc
+      var nameCV = '/exh_' + this.state.nroActa + '.' + this.state.extDoc
       var size = cv[0].size;
       var type = cv[0].type;
       if (size > MAXIMO_TAMANIO_BYTES) {
@@ -529,7 +530,7 @@ class AddExhibicion extends React.Component {
                     //  console.log(response);
                     $(".loader").fadeOut("slow");
                     if (response.statusText === "OK") {
-                      this.setState({ showSuccessdoc: true, showErrordoc: false, urlDoc: urlDoc + 'exh_' + this.state.nroActa + '.' + this.state.extDoc });
+                      this.setState({ showSuccessdoc: true, showErrordoc: false, urlDoc: urlDoc + '/exh_' + this.state.nroActa + '.' + this.state.extDoc });
                       this.setState({ tableDoc: this.renderTableDataDoc() })
                       document.getElementById('documentacion').value = '';
                     }
@@ -590,18 +591,19 @@ class AddExhibicion extends React.Component {
                     <br />
                     <Form.Row>
                     <Form.Group className="col-sm-6" controlId="nroActa">
-                        <Form.Label>Número Acta:</Form.Label>
+                    <Form.Label>Número Acta:</Form.Label>
                         <Form.Control type="number" placeholder="Ingrese Nro. de Acta" required onChange={this.handleNroActaChange} value={this.state.nroActa} />
                         <Form.Control.Feedback type="invalid">
                           Por favor, ingrese Nro. de Acta.
                         </Form.Control.Feedback>
                       </Form.Group>
                       <Form.Group className="col-sm-6" controlId="tipo">
-                        <Form.Label>Tipo</Form.Label>
-                        <Form.Control type="text" placeholder="Ingrese Tipo Exhibición: " required onChange={this.handleTipoChange} value={this.state.tipo} />
-                        <Form.Control.Feedback type="invalid">
-                          Por favor, ingrese el Tipo de Exhibición.
-                        </Form.Control.Feedback>
+                        <Form.Label>Tipo de Exhibición</Form.Label>
+                          <select id="Tipo de Exhibición" value={this.state.tipo} onChange={this.handleTipoChange}>
+                            <option value="Permanente">Permanente</option>
+                            <option value="Temporal">Temporal</option>
+                            </select>
+                            <Form.Control type="text" value={this.state.tipo} />
                       </Form.Group>
                       </Form.Row>
                     <Form.Row>
@@ -740,8 +742,20 @@ class AddExhibicion extends React.Component {
                         </Alert>
                       </Form.Group>
                     </Form.Row>
+                    <hr />
+                    <Form.Row>
+                      <Form.Group className="mx-sm-3 mb-1">
+                        &nbsp;&nbsp;
+                        <Link to='/exhibiciones'>
+                          <Button variant="primary" type="button" id="volver">
+                            <FontAwesomeIcon icon={faTimesCircle} /> Volver a Exhibiciones
+                          </Button>
+                        </Link>
+                      </Form.Group>
+                    </Form.Row>
                   </Form>
                 </Tab>
+                
               </Tabs>
             </div>
           </div>

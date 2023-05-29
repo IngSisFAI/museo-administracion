@@ -19,6 +19,7 @@ const urlImage = process.env.REACT_APP_IMAGEN_DONACION;
 const urlDoc = process.env.REACT_APP_DOC_DONACION;
 const rutaImg = process.env.REACT_APP_RUTA_IMG_DONACION;
 const rutaDoc = process.env.REACT_APP_RUTA_DOC_DONACION;
+const fechaAnterior = "";
 
 class EditDonaciones extends React.Component {
 
@@ -69,6 +70,7 @@ class EditDonaciones extends React.Component {
               this.setState({
                 nroActa: response.donacionId.nroActa,
                 descripcion: response.donacionId.descripcion,
+                fechaAnterior: (Moment(response.donacionId.fecha).add(0, 'days')).format('YYYY-MM-DD'),
                 fecha: (Moment(response.donacionId.fecha).add(0, 'days')).format('YYYY-MM-DD'),
                 cantidad: response.donacionId.cantidad,
                 donador: response.donacionId.donador,
@@ -107,10 +109,12 @@ class EditDonaciones extends React.Component {
     else {
       evt.preventDefault();
       $(".loader").removeAttr("style");
+      //if(fechaAnterior != this.state.fecha)
+
     var data = {
             "nroActa": this.state.nroActa,
             "descripcion": this.state.descripcion,
-            "fecha": this.state.fecha,
+            "fecha": (Moment(this.state.fecha).add(1, 'days')).format('YYYY-MM-DD'),
             "cantidad": this.state.cantidad,
             "donador": this.state.donador,
         };
@@ -327,7 +331,7 @@ class EditDonaciones extends React.Component {
     const types = ['image/jpg', 'image/jpeg', 'image/jpe', 'image/png', 'image/gif', 'image/bpm', 'image/tif', 'image/tiff'];
     var foto = this.state.archivoFoto
     if (foto !== null && foto.length !== 0) {
-      var namePhoto = '/' + this.state.nroActa + '.' + this.state.extFoto
+      var namePhoto = '/don_' + this.state.nroActa + '.' + this.state.extFoto
       var size = foto[0].size;
       var type = foto[0].type;
       if (size > MAXIMO_TAMANIO_BYTES) {
@@ -364,14 +368,14 @@ class EditDonaciones extends React.Component {
                   headers: {
                     "Content-Type": undefined,
                     path: rutaImg,
-                    "newfilename": this.state.nroActa,
+                    "newfilename": 'don_' + this.state.nroActa,
                     'Authorization': 'Bearer ' + cookies.get('token')
                   }
                 })
                   .then(response => {
                     $(".loader").fadeOut("slow");
                     if (response.statusText === "OK") {
-                      this.setState({ showSuccess: true, showError: false, urlImage: urlImage + this.state.nroActa + '.' + this.state.extFoto });
+                      this.setState({ showSuccess: true, showError: false, urlImage: urlImage + 'don_'+ this.state.nroActa + '.' + this.state.extFoto });
                       this.setState({ tableImage: this.renderTableDataFoto() })
                       document.getElementById('foto').value = '';
                     }
@@ -408,7 +412,7 @@ class EditDonaciones extends React.Component {
     const types = ['application/pdf'];
     var cv = this.state.archivoDoc
     if (cv !== null && cv.length !== 0) {
-      var nameCV = '/' + 'rep_' + this.state.nroActa + '.' + this.state.extDoc
+      var nameCV = '/don_' + this.state.nroActa + '.' + this.state.extDoc
       var size = cv[0].size;
       var type = cv[0].type;
       if (size > MAXIMO_TAMANIO_BYTES) {
@@ -453,7 +457,7 @@ class EditDonaciones extends React.Component {
                   .then(response => {
                     $(".loader").fadeOut("slow");
                     if (response.statusText === "OK") {
-                      this.setState({ showSuccessdoc: true, showErrordoc: false, urlDoc: urlDoc + 'rep_' + this.state.nroActa + '.' + this.state.extDoc });
+                      this.setState({ showSuccessdoc: true, showErrordoc: false, urlDoc: urlDoc + 'don_' + this.state.nroActa + '.' + this.state.extDoc });
                       this.setState({ tableDoc: this.renderTableDataDoc() })
                       document.getElementById('documentacion').value = '';
                     }
@@ -482,48 +486,6 @@ class EditDonaciones extends React.Component {
       }
     } else {
       toast.error("Seleccione una Documentación.");
-    }
-  }
-
-  renderTableDataFoto() {
-    let foto = this.state.archivoFoto
-    if (foto !== null) {
-      return (
-        <tr key={Math.floor(Math.random() * 1000)}>
-          <td>
-            <Button variant="danger" type="button" id="eliminarF" onClick={() => this.eliminarArchivoFoto(this.state.nroActa + '.' + this.state.extFoto)}>
-              <FontAwesomeIcon icon={faTrash} />
-            </Button>
-          </td>
-          <td>
-            <a href={this.state.urlImage} disabled target="_blank">{this.state.nroActa + '.' + this.state.extFoto}</a>
-          </td>
-        </tr>
-      )
-    }
-    else {
-      return (<></>)
-    }
-  }
-
-  renderTableDataDoc() {
-    let cv = this.state.archivoDoc
-    if (cv !== null) {
-      return (
-        <tr key={Math.floor(Math.random() * 1000)}>
-          <td>
-            <Button variant="danger" type="button" id="eliminarDoc" onClick={() => this.eliminarArchivoDoc('rep_' + this.state.nroActa + '.' + this.state.extDoc)}>
-              <FontAwesomeIcon icon={faTrash} />
-            </Button>
-          </td>
-          <td>
-            <a href={this.state.urlCV} disabled target="_blank">{'don_' + this.state.nroActa + '.' + this.state.extDoc}</a>
-          </td>
-        </tr>
-      )
-    }
-    else {
-      return (<></>)
     }
   }
 
@@ -677,6 +639,17 @@ class EditDonaciones extends React.Component {
                             El archivo no se pudo subir. Intente nuevamente.
                           </p>
                         </Alert>
+                      </Form.Group>
+                    </Form.Row>
+                    <hr />
+                    <Form.Row>
+                      <Form.Group className="mx-sm-3 mb-1">
+                        &nbsp;&nbsp;
+                        <Link to='/donaciones'>
+                          <Button variant="primary" type="button" id="volver">
+                            <FontAwesomeIcon icon={faTimesCircle} /> Volver a Donaciones
+                          </Button>
+                        </Link>
                       </Form.Group>
                     </Form.Row>
                   </Form>

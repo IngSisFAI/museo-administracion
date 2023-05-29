@@ -245,7 +245,7 @@ class MainReplica extends React.Component {
                   }
                 }}
               />
-            </div>
+            </div>  
           </Form.Row>
         </Form>
       </>

@@ -3,7 +3,7 @@ import { Form, Button, Tabs, Tab, Table, Alert } from 'react-bootstrap';
 import { ToastContainer, toast, Slide } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faClone, faTimesCircle, faArrowLeft } from '@fortawesome/free-solid-svg-icons'
+import { faClone, faTrash, faArrowLeft } from '@fortawesome/free-solid-svg-icons'
 import { Link, withRouter } from 'react-router-dom';
 import Moment from 'moment';
 import axios from 'axios';
@@ -14,24 +14,18 @@ import $ from 'jquery';
 const cookies = new Cookies();
 //Variables Globales
 const urlApi = process.env.REACT_APP_API_HOST
-const urlImage = process.env.REACT_APP_IMAGEN_EXHIBICION;
-const urlDoc = process.env.REACT_APP_DOC_EXHIBICION;
-const rutaImg = process.env.REACT_APP_RUTA_IMG_EXHIBICION;
-const rutaDoc = process.env.REACT_APP_RUTA_DOC_EXHIBICION;
+const urlImage = process.env.REACT_APP_IMAGEN_REPLICA;
+const urlDoc = process.env.REACT_APP_DOC_REPLICA;
+const rutaImg = process.env.REACT_APP_RUTA_IMG_REPLICA;
+const rutaDoc = process.env.REACT_APP_RUTA_DOC_REPLICA;
 
-class ShowExhibicion extends React.Component {
+class ShowEjemplar extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
         nroActa: "",
         descripcion: "",
         fecha: "",
-        fechaFin:  "",
-        ubicacion:  "",
-        tipo:  "",
-        responsableMuseo:  "",
-        responsableRecibe:  "",
-        institucion:  "",
         foto: "",
         documentacion: "",
 
@@ -58,7 +52,7 @@ class ShowExhibicion extends React.Component {
       window.location.href = '/';
     }
     else {
-      fetch(urlApi + '/exhibicionId/' + this.props.match.params.id,
+      fetch(urlApi + '/replicaId/' + this.props.match.params.id,
         {
           headers: {
             'Authorization': 'Bearer ' + cookies.get('token')
@@ -68,20 +62,14 @@ class ShowExhibicion extends React.Component {
         .then(
           (response) => {
             this.setState({
-              nroActa: response.exhibicionId.nroActa,
-              descripcion: response.exhibicionId.descripcion,
+              nroActa: response.replicaId.nroActa,
+              descripcion: response.replicaId.descripcion,
               //fecha: response.replicaId.fecha,
-              fecha: (Moment(response.exhibicionId.fecha).add(0, 'days')).format('YYYY-MM-DD'),
-              fechaFin: (Moment(response.exhibicionId.fechaFin).add(0, 'days')).format('YYYY-MM-DD'),
-                ubicacion:  response.exhibicionId.ubicacion,
-                tipo:  response.exhibicionId.tipo,
-                responsableMuseo:  response.exhibicionId.responsableMuseo,
-                responsableRecibe:  response.exhibicionId.responsableRecibe,
-                institucion:  response.exhibicionId.institucion,
-                foto: response.exhibicionId.foto,
-              documentacion: response.exhibicionId.documentacion,
-              tableDoc: this.cargarTableDataDoc(response.exhibicionId.documentacion),
-              tableImage: this.cargarTableDataFoto(response.exhibicionId.foto),
+              fecha: (Moment(response.replicaId.fecha).add(0, 'days')).format('YYYY-MM-DD'),
+              foto: response.replicaId.foto,
+              documentacion: response.replicaId.documentacion,
+              tableDoc: this.cargarTableDataDoc(response.replicaId.documentacion),
+              tableImage: this.cargarTableDataFoto(response.replicaId.foto),
             });
           }).catch(error => {
             console.log("Error:", error.message)
@@ -145,7 +133,7 @@ class ShowExhibicion extends React.Component {
               <div className="loader" style={{ display: 'none' }}></div>
               <br />
               <h3 className="page-header" align="left">
-                <FontAwesomeIcon icon={faClone} /> Mostrar Exhibición
+                <FontAwesomeIcon icon={faClone} /> Mostrar Replica
               </h3>
               <hr />
               <ToastContainer
@@ -165,44 +153,13 @@ class ShowExhibicion extends React.Component {
                       <Form.Group className="col-sm-6" controlId="nroActa">
                         <Form.Label>Número Acta:</Form.Label>
                         <Form.Control type="number" placeholder="Ingrese Nro. de Acta"  value={this.state.nroActa} />
+                        <Form.Control.Feedback type="invalid">
+                          Por favor, ingrese Nro. de Acta.
+                        </Form.Control.Feedback>
                       </Form.Group>
-                      <Form.Group className="col-sm-6" controlId="tipo">
-                        <Form.Label>Tipo</Form.Label>
-                        <Form.Control type="text" value={this.state.tipo} />
-                      </Form.Group>
-                      </Form.Row>
-                    <Form.Row>
                       <Form.Group className="col-sm-6" controlId="fecha">
-                        <Form.Label>Fecha Inicio:</Form.Label>
+                        <Form.Label>Fecha:</Form.Label>
                         <Form.Control type="date" value={this.state.fecha}  />
-                      </Form.Group>
-                      <Form.Group className="col-sm-6" controlId="fechaFin">
-                        <Form.Label>Fecha Finalización:</Form.Label>
-                        <Form.Control type="date" value={this.state.fechaFin}  />
-                      </Form.Group>
-                    </Form.Row>
-                    <Form.Row>
-                      <Form.Group className="col-sm-6" controlId="responsableMuseo">
-                        <Form.Label>Responsable Museo:</Form.Label>
-                        <Form.Control type="text" value={this.state.responsableMuseo} />
-        
-                      </Form.Group>
-                      <Form.Group className="col-sm-6" controlId="responsableRecibe">
-                        <Form.Label>Responsable recibe:</Form.Label>
-                        <Form.Control type="text" value={this.state.responsableRecibe} />
-                        
-                      </Form.Group>
-                    </Form.Row>    
-                    <Form.Row >
-                    <Form.Group className="col-sm-6" controlId="institucion">
-                        <Form.Label>Institución:</Form.Label>
-                        <Form.Control type="text"  value={this.state.institucion} />
-                        
-                      </Form.Group>
-                      <Form.Group className="col-sm-6" controlId="responsableRecibe">
-                        <Form.Label>Ubicación:</Form.Label>
-                        <Form.Control type="text"  value={this.state.ubicacion} />
-                        
                       </Form.Group>
                     </Form.Row>
                     <Form.Row>
@@ -214,7 +171,7 @@ class ShowExhibicion extends React.Component {
                     <hr />
                     <Form.Row>
                       <Form.Group className="mx-sm-3 mb-2">
-                        <Link to='/exhibiciones'>
+                        <Link to='/replicas'>
                         <Button variant="primary" type="button" id="volver">
                           <FontAwesomeIcon icon={faArrowLeft} /> Volver
                         </Button>
@@ -256,17 +213,6 @@ class ShowExhibicion extends React.Component {
                       </Form.Group>
                     </Form.Row>
                     </Form.Row>
-                    <hr />
-                    <Form.Row>
-                      <Form.Group className="mx-sm-3 mb-1">
-                        &nbsp;&nbsp;
-                        <Link to='/exhibiciones'>
-                          <Button variant="primary" type="button" id="volver">
-                            <FontAwesomeIcon icon={faTimesCircle} /> Volver a Exhibiciones
-                          </Button>
-                        </Link>
-                      </Form.Group>
-                    </Form.Row>
                   </Form>
                 </Tab>
               </Tabs>
@@ -278,4 +224,4 @@ class ShowExhibicion extends React.Component {
   }
 }
 
-export default withRouter(ShowExhibicion);
+export default withRouter(ShowEjemplar);

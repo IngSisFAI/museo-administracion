@@ -9,6 +9,7 @@ import axios from "axios";
 import Menu from "./../Menu"
 import Cookies from 'universal-cookie';
 import $ from 'jquery';
+import Moment from 'moment';
 
 const cookies = new Cookies();
 
@@ -29,7 +30,9 @@ class AddPrestamo extends React.Component {
       fechaFin: "",
       descripcion: "",
       paleontologoResponsable: "",
+      recibidorResponsable: "",
       institucion: "",
+      domicilio: "",
       ejemplar: "",
       observacion: "",
       foto: "",
@@ -78,8 +81,14 @@ class AddPrestamo extends React.Component {
   handlePaleontResChange = evt => {
     this.setState({ paleontologoResponsable: evt.target.value });
   };
+  handleReceptorResChange = evt => {
+    this.setState({ receptorResponsable: evt.target.value });
+  };
   handleInstitucionChange = evt => {
     this.setState({ institucion: evt.target.value });
+  };
+  handleDomicilioChange = evt => {
+    this.setState({ domicilio: evt.target.value });
   };
   handleObservacionesChange = evt => {
     this.setState({ observacion: evt.target.value });
@@ -133,10 +142,12 @@ class AddPrestamo extends React.Component {
         var data = {
             nroActa: this.state.nroActa,
             descripcion: this.state.descripcion,
-            fechaInicio: this.state.fechaInicio,
-            fechaFin: this.state.fechaFin,
+            fechaInicio: (Moment(this.state.fechaInicio).add(1, 'days')).format('YYYY-MM-DD'),
+            fechaFin: (Moment(this.state.fechaFin).add(1, 'days')).format('YYYY-MM-DD'),
             paleontologoResponsable: this.state.paleontologoResponsable,
+            receptorResponsable: this.state.receptorResponsable,
             institucion: this.state.institucion,
+            domicilio: this-this.state.domicilio,
             ejemplar: this.state.ejemplar,
             observacion: this.state.observacion,
             foto: '',
@@ -175,10 +186,12 @@ class AddPrestamo extends React.Component {
         var data = {
           nroActa: this.state.nroActa,
           descripcion: this.state.descripcion,
-          fechaInicio: this.state.fechaInicio,
-          fechaFin: this.state.fechaFin,
+          fechaInicio: (Moment(this.state.fechaInicio).add(1, 'days')).format('YYYY-MM-DD'),
+          fechaFin: (Moment(this.state.fechaFin).add(1, 'days')).format('YYYY-MM-DD'),
           paleontologoResponsable: this.state.paleontologoResponsable,
+          receptorResponsable: this.state.receptorResponsable,
           institucion: this.state.institucion,
+          domicilio: this-this.state.domicilio,
           ejemplar: this.state.ejemplar,
           observacion: this.state.observacion
         };
@@ -206,9 +219,18 @@ class AddPrestamo extends React.Component {
     this.setState({ validated: true });
   }
 
+  fileDochandleChange = (event) => {
+    const file = event.target.files;
+    const name = file[0].name;
+    const lastDot = name.lastIndexOf('.');
+    const ext = name.substring(lastDot + 1);
+    this.setState({ archivoDoc: file, extDoc: ext });
+  }
+
   handleSelect = (key) => {
     this.setState({ key: key });
   }
+
   filehandleChange = (event) => {
     const file = event.target.files;
     const name = file[0].name;
@@ -217,19 +239,40 @@ class AddPrestamo extends React.Component {
     this.setState({ archivoFoto: file, extFoto: ext });
     // console.log('SALIDA::', file)
   }
+  cargarTableDataDoc(cv) {
+    //let cv= this.state.curriculum
 
-  renderTableDataFoto() {
-    let foto = this.state.archivoFoto
-    if (foto !== null) {
+    if (cv !== null && cv !== "") {
       return (
         <tr key={Math.floor(Math.random() * 1000)}>
           <td>
-            <Button variant="danger" type="button" id="eliminarF" onClick={() => this.eliminarArchivoFoto(this.state.nroActa + '.' + this.state.extFoto)}>
+            <Button variant="danger" type="button" id="eliminarDoc" onClick={() => this.eliminarArchivoDoc(cv)}>
               <FontAwesomeIcon icon={faTrash} />
             </Button>
           </td>
           <td>
-            <a href={this.state.urlImage} disabled target="_blank">{this.state.nroActa + '.' + this.state.extFoto}</a>
+            <a href={urlDoc + cv} disabled target="_blank">{cv}</a>
+          </td>
+        </tr>
+      )
+    }
+    else {
+      return (<></>)
+    }
+  }
+
+  cargarTableDataFoto(foto) {
+    // alert(foto);
+    if (foto !== null && foto !== "") {
+      return (
+        <tr key={Math.floor(Math.random() * 1000)}>
+          <td>
+            <Button variant="danger" type="button" id="eliminarF" onClick={() => this.eliminarArchivoFoto(foto)}>
+              <FontAwesomeIcon icon={faTrash} />
+            </Button>
+          </td>
+          <td>
+            <a href={urlImage + foto} disabled target="_blank">{foto}</a>
           </td>
         </tr>
       )
@@ -248,7 +291,7 @@ class AddPrestamo extends React.Component {
         "foto": ""
       }
       $(".loader").removeAttr("style");
-      fetch(urlApi + '/prestamo/' + this.state.idPrestamo, {
+      fetch(urlApi + '/prestamo/' + this.props.match.params.id, {
         method: 'put',
         body: JSON.stringify(data),
         headers: {
@@ -280,6 +323,7 @@ class AddPrestamo extends React.Component {
                 toast.success("¡Se eliminó el Archivo con Éxito!");
                 this.setState({ archivoFoto: null, extFoto: '', tableImage: null })
               } else {
+                $(".loader").fadeOut("slow");
                 console.log('error');
                 toast.error("¡Se produjo un error al eliminar archivo!");
               }
@@ -306,7 +350,7 @@ class AddPrestamo extends React.Component {
         "documentacion": ""
       }
       $(".loader").removeAttr("style");
-      fetch(urlApi + '/prestamo/' + this.state.idPrestamo, {
+      fetch(urlApi + '/prestamo/' + this.props.match.params.id, {
         method: 'put',
         body: JSON.stringify(data),
         headers: {
@@ -337,6 +381,7 @@ class AddPrestamo extends React.Component {
                 console.log('ok');
                 toast.success("¡Se eliminó el Archivo con Éxito!");
                 this.setState({ archivoDoc: null, extDoc: '', tableDoc: null })
+
               } else {
                 $(".loader").fadeOut("slow");
                 console.log('error');
@@ -356,45 +401,15 @@ class AddPrestamo extends React.Component {
     }
   }
 
-  fileDochandleChange = (event) => {
-    const file = event.target.files;
-    const name = file[0].name;
-    const lastDot = name.lastIndexOf('.');
-    const ext = name.substring(lastDot + 1);
-    this.setState({ archivoDoc: file, extDoc: ext });
-  }
-
-  renderTableDataDoc() {
-    let cv = this.state.archivoDoc
-    if (cv !== null) {
-      return (
-        <tr key={Math.floor(Math.random() * 1000)}>
-          <td>
-            <Button variant="danger" type="button" id="eliminarDoc" onClick={() => this.eliminarArchivoDoc('pres_' + this.state.nroActa + '.' + this.state.extDoc)}>
-              <FontAwesomeIcon icon={faTrash} />
-            </Button>
-          </td>
-          <td>
-            <a href={this.state.urlDoc} disabled target="_blank">{'pres_' + this.state.nroActa + '.' + this.state.extDoc}</a>
-          </td>
-        </tr>
-      )
-    }
-    else {
-      return (<></>)
-    }
-  }
-
   subirFoto = () => {
-    //console.log(this.state.archivoFoto);
+    console.log(this.state.archivoFoto);
     const MAXIMO_TAMANIO_BYTES = 5000000;
     const types = ['image/jpg', 'image/jpeg', 'image/jpe', 'image/png', 'image/gif', 'image/bpm', 'image/tif', 'image/tiff'];
     var foto = this.state.archivoFoto
     if (foto !== null && foto.length !== 0) {
-      var namePhoto = '/' + this.state.nroActa + '.' + this.state.extFoto
+      var namePhoto = '/pre_' + this.state.nroActa + '.' + this.state.extFoto
       var size = foto[0].size;
       var type = foto[0].type;
-
       if (size > MAXIMO_TAMANIO_BYTES) {
         var tamanio = 5000000 / 1000000;
         toast.error("El archivo seleccionado supera los " + tamanio + 'Mb. permitidos.');
@@ -404,15 +419,14 @@ class AddPrestamo extends React.Component {
         if (!types.includes(type)) {
           toast.error("El archivo seleccionado tiene una extensión inválida.");
           document.getElementById('foto').value = '';
-
         }
         else {
-          $(".loader").removeAttr("style"); 
+          $(".loader").removeAttr("style");
           var data1 = {
             foto: namePhoto,
           };
           document.getElementById('subir').setAttribute('disabled', 'disabled');
-          fetch(urlApi + '/prestamo/' + this.state.idPrestamo, {
+          fetch(urlApi + '/prestamo/' + this.props.match.params.id, {
             method: 'put',
             body: JSON.stringify(data1),
             headers: {
@@ -423,7 +437,6 @@ class AddPrestamo extends React.Component {
             .then(function (response) {
               if (response.ok) {
                 console.log("¡Se actualizaron los datos del Préstamo con Éxito!");
-                //const destino = rutaImg;                      
                 const data = new FormData();
                 data.append("file", foto[0]);
                 // console.log(foto);
@@ -431,14 +444,14 @@ class AddPrestamo extends React.Component {
                   headers: {
                     "Content-Type": undefined,
                     path: rutaImg,
-                    "newfilename": this.state.nroActa,
+                    "newfilename": 'pre_' + this.state.nroActa,
                     'Authorization': 'Bearer ' + cookies.get('token')
                   }
                 })
                   .then(response => {
                     $(".loader").fadeOut("slow");
                     if (response.statusText === "OK") {
-                      this.setState({ showSuccess: true, showError: false, urlImage: urlImage + this.state.nroActa + '.' + this.state.extFoto });
+                      this.setState({ showSuccess: true, showError: false, urlImage: urlImage +'/pre_'+ this.state.nroActa + '.' + this.state.extFoto });
                       this.setState({ tableImage: this.renderTableDataFoto() })
                       document.getElementById('foto').value = '';
                     }
@@ -475,7 +488,7 @@ class AddPrestamo extends React.Component {
     const types = ['application/pdf'];
     var cv = this.state.archivoDoc
     if (cv !== null && cv.length !== 0) {
-      var nameCV = '/' + 'pres_' + this.state.nroActa + '.' + this.state.extDoc
+      var nameCV = '/pre_' + this.state.nroActa + '.' + this.state.extDoc
       var size = cv[0].size;
       var type = cv[0].type;
       if (size > MAXIMO_TAMANIO_BYTES) {
@@ -484,6 +497,7 @@ class AddPrestamo extends React.Component {
         document.getElementById('documentacion').value = '';
       }
       else {
+
         if (!types.includes(type)) {
           toast.error("El archivo seleccionado tiene una extensión inválida.");
           document.getElementById('documentacion').value = '';
@@ -494,7 +508,7 @@ class AddPrestamo extends React.Component {
             documentacion: nameCV,
           };
           document.getElementById('subirDoc').setAttribute('disabled', 'disabled');
-          fetch(urlApi + '/prestamo/' + this.state.idPrestamo, {
+          fetch(urlApi + '/prestamo/' + this.props.match.params.id, {
             method: 'put',
             body: JSON.stringify(data1),
             headers: {
@@ -504,23 +518,22 @@ class AddPrestamo extends React.Component {
           })
             .then(function (response) {
               if (response.ok) {
-                console.log("¡Se actualizaron los datos del Préstamo con Éxito!");
-                //  const destino = rutaDoc;                      
+                console.log("¡Se actualizaron los datos del Prestamo con Éxito!");
                 const data = new FormData();
                 data.append("file", cv[0]);
+                // console.log(foto);
                 axios.post(urlApi + "/uploadArchivo", data, {
                   headers: {
                     "Content-Type": undefined,
                     path: rutaDoc,
-                    "newfilename": 'pres_' + this.state.nroActa,
+                    "newfilename": 'pre_' + this.state.nroActa,
                     'Authorization': 'Bearer ' + cookies.get('token')
                   }
                 })
                   .then(response => {
-                    //  console.log(response);
                     $(".loader").fadeOut("slow");
                     if (response.statusText === "OK") {
-                      this.setState({ showSuccessDoc: true, showErrorDoc: false, urlDoc: urlDoc + 'pres_' + this.state.nroActa + '.' + this.state.extDoc });
+                      this.setState({ showSuccessdoc: true, showErrordoc: false, urlDoc: urlDoc + '/pre_' + this.state.nroActa + '.' + this.state.extDoc });
                       this.setState({ tableDoc: this.renderTableDataDoc() })
                       document.getElementById('documentacion').value = '';
                     }
@@ -528,25 +541,69 @@ class AddPrestamo extends React.Component {
                       this.setState({ showSuccess: false, showError: true });
                     }
                     document.getElementById('subirDoc').removeAttribute('disabled');
+
                     setTimeout(() => {
                       this.setState({ showSuccessdoc: false, showErrordoc: false });
                     }, 2500);
                   })
                   .catch(error => {
-                    $(".loader").fadeOut("slow");  
+                    $(".loader").fadeOut("slow");
                     console.log(error);
                   });
               }
             }.bind(this))
             .catch(function (error) {
+              $(".loader").fadeOut("slow");
               toast.error("Error al subir el archivo. Intente nuevamente.");
-              document.getElementById('subirDoc').removeAttribute('disabled');
+              document.getElementById('subirCV').removeAttribute('disabled');
               console.log('Hubo un problema con la petición Fetch:' + error.message);
             });
         }
       }
     } else {
       toast.error("Seleccione una Documentación.");
+    }
+  }
+
+  renderTableDataFoto() {
+    let foto = this.state.archivoFoto
+    if (foto !== null) {
+      return (
+        <tr key={Math.floor(Math.random() * 1000)}>
+          <td>
+            <Button variant="danger" type="button" id="eliminarF" onClick={() => this.eliminarArchivoFoto('pre_'+this.state.nroActa + '.' + this.state.extFoto)}>
+              <FontAwesomeIcon icon={faTrash} />
+            </Button>
+          </td>
+          <td>
+            <a href={this.state.urlImage} disabled target="_blank">{'pre_'+this.state.nroActa + '.' + this.state.extFoto}</a>
+          </td>
+        </tr>
+      )
+    }
+    else {
+      return (<></>)
+    }
+  }
+
+  renderTableDataDoc() {
+    let cv = this.state.archivoDoc
+    if (cv !== null) {
+      return (
+        <tr key={Math.floor(Math.random() * 1000)}>
+          <td>
+            <Button variant="danger" type="button" id="eliminarDoc" onClick={() => this.eliminarArchivoDoc('pre_' + this.state.nroActa + '.' + this.state.extDoc)}>
+              <FontAwesomeIcon icon={faTrash} />
+            </Button>
+          </td>
+          <td>
+            <a href={this.state.urlDoc} disabled target="_blank">{'pre_' + this.state.nroActa + '.' + this.state.extDoc}</a>
+          </td>
+        </tr>
+      )
+    }
+    else {
+      return (<></>)
     }
   }
 
@@ -607,16 +664,32 @@ class AddPrestamo extends React.Component {
                     </Form.Row>
                     <Form.Row >
                       <Form.Group className="col-sm-6" controlId="paleontologoResponsable">
-                        <Form.Label>Paleontológo Responsable:</Form.Label>
+                        <Form.Label>Curador:</Form.Label>
                         <Form.Control type="text" placeholder="Obligatorio" autoComplete="off" required onChange={this.handlePaleontResChange} value={this.state.paleontologoResponsable} />
                         <Form.Control.Feedback type="invalid">
-                          Por favor, ingrese el Paleontólogo.
+                          Por favor, ingrese el Curador.
                         </Form.Control.Feedback></Form.Group>
-                      <Form.Group className="col-sm-6" controlId="institución">
+                      <Form.Group className="col-sm-6" controlId="receptorResponsable">
+                        <Form.Label>Receptor Responsable:</Form.Label>
+                        <Form.Control type="text"  placeholder="Obligatorio" autoComplete="off" required value={this.state.receptorResponsable} onChange={this.handleReceptorResChange} />
+                        <Form.Control.Feedback type="invalid">
+                          Por favor, ingrese el responsable.
+                        </Form.Control.Feedback>
+                      </Form.Group>
+                    </Form.Row>
+                    <Form.Row >
+                    <Form.Group className="col-sm-6" controlId="institución">
                         <Form.Label>Institución:</Form.Label>
                         <Form.Control type="text"  placeholder="Obligatorio" autoComplete="off" required value={this.state.institucion} onChange={this.handleInstitucionChange} />
                         <Form.Control.Feedback type="invalid">
                           Por favor, ingrese la Institución.
+                        </Form.Control.Feedback>
+                      </Form.Group>
+                      <Form.Group className="col-sm-6" controlId="dirección">
+                        <Form.Label>Domicilio:</Form.Label>
+                        <Form.Control type="text"  placeholder="Obligatorio" autoComplete="off" required value={this.state.domicilio} onChange={this.handleDomicilioChange} />
+                        <Form.Control.Feedback type="invalid">
+                          Por favor, ingrese el Domicilio.
                         </Form.Control.Feedback>
                       </Form.Group>
                     </Form.Row>
@@ -726,6 +799,17 @@ class AddPrestamo extends React.Component {
                             El archivo no se pudo subir. Intente nuevamente.
                           </p>
                         </Alert>
+                      </Form.Group>
+                    </Form.Row>
+                    <hr />
+                    <Form.Row>
+                      <Form.Group className="mx-sm-3 mb-1">
+                        &nbsp;&nbsp;
+                        <Link to='/prestamos'>
+                          <Button variant="primary" type="button" id="volver">
+                            <FontAwesomeIcon icon={faTimesCircle} /> Volver a Préstamos
+                          </Button>
+                        </Link>
                       </Form.Group>
                     </Form.Row>
                   </Form>

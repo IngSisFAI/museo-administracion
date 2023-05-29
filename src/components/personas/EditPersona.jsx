@@ -10,7 +10,7 @@ import axios from 'axios';
 import Menu from "./../Menu"
 import Cookies from 'universal-cookie';
 import $ from 'jquery';
-
+  
 const cookies = new Cookies();
 
 //Variables Globales

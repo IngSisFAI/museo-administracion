@@ -9,15 +9,16 @@ import axios from "axios";
 import Menu from "./../Menu"
 import Cookies from 'universal-cookie';
 import $ from 'jquery';
+import Moment from 'moment';
 
 const cookies = new Cookies();
 
 //Variables Globales
 const urlApi = process.env.REACT_APP_API_HOST
-const urlImage = process.env.REACT_APP_IMAGEN_REPLICA;
-const urlDoc = process.env.REACT_APP_DOC_REPLICA;
-const rutaImg = process.env.REACT_APP_RUTA_IMG_REPLICA;
-const rutaDoc = process.env.REACT_APP_RUTA_DOC_REPLICA;
+const urlImage = process.env.REACT_APP_URL_REPLICA;
+const urlDoc = process.env.REACT_APP_URL_REPLICA;
+const rutaImg = process.env.REACT_APP_RUTA_REPLICA;
+const rutaDoc = process.env.REACT_APP_RUTA_REPLICA;
 
 
 class AddReplica extends React.Component {
@@ -113,7 +114,7 @@ class AddReplica extends React.Component {
         var data = {
             nroActa: this.state.nroActa,
             descripcion: this.state.descripcion,
-            fecha: this.state.fecha,
+            fecha: (Moment(this.state.fecha).add(1, 'days')).format('YYYY-MM-DD'),
             foto: '',
             documentacion: '',
         };
@@ -150,7 +151,7 @@ class AddReplica extends React.Component {
         var data = {
             nroActa: this.state.nroActa,
             descripcion: this.state.descripcion,
-            fecha: this.state.fecha,
+            fecha: (Moment(this.state.fecha).add(1, 'days')).format('YYYY-MM-DD'),
         };
         fetch(urlApi + '/replica/' + this.state.idReplica, {
           method: 'put',
@@ -190,16 +191,17 @@ class AddReplica extends React.Component {
 
   renderTableDataFoto() {
     let foto = this.state.archivoFoto
+    const name = (foto[0].name).lastIndexOf('.');
     if (foto !== null) {
       return (
         <tr key={Math.floor(Math.random() * 1000)}>
           <td>
-            <Button variant="danger" type="button" id="eliminarF" onClick={() => this.eliminarArchivoFoto(this.state.nroActa + '.' + this.state.extFoto)}>
+            <Button variant="danger" type="button" id="eliminarF" onClick={() => this.eliminarArchivoFoto('rep_'+ this.state.nroActa +'.' + this.state.extFoto)}>
               <FontAwesomeIcon icon={faTrash} />
             </Button>
           </td>
           <td>
-            <a href={this.state.urlImage} disabled target="_blank">{this.state.nroActa + '.' + this.state.extFoto}</a>
+            <a href={this.state.urlImage} disabled target="_blank">{'rep_'+ this.state.nroActa +'.' + this.state.extFoto}</a>
           </td>
         </tr>
       )
@@ -336,6 +338,7 @@ class AddReplica extends React.Component {
 
   renderTableDataDoc() {
     let cv = this.state.archivoDoc
+    let name = cv[0].name.lastIndexOf('.');
     if (cv !== null) {
       return (
         <tr key={Math.floor(Math.random() * 1000)}>
@@ -360,10 +363,13 @@ class AddReplica extends React.Component {
     const MAXIMO_TAMANIO_BYTES = 5000000;
     const types = ['image/jpg', 'image/jpeg', 'image/jpe', 'image/png', 'image/gif', 'image/bpm', 'image/tif', 'image/tiff'];
     var foto = this.state.archivoFoto
+    var name = (foto[0].name).lastIndexOf('.');
     if (foto !== null && foto.length !== 0) {
-      var namePhoto = '/' + this.state.nroActa + '.' + this.state.extFoto
+      var namePhoto = '/rep_'+ this.state.nroActa + '.' + this.state.extFoto
+      
       var size = foto[0].size;
       var type = foto[0].type;
+      console.log("Paso por acá!");
 
       if (size > MAXIMO_TAMANIO_BYTES) {
         var tamanio = 5000000 / 1000000;
@@ -401,14 +407,14 @@ class AddReplica extends React.Component {
                   headers: {
                     "Content-Type": undefined,
                     path: rutaImg,
-                    "newfilename": this.state.nroActa,
+                    "newfilename": 'rep_' + this.state.nroActa,
                     'Authorization': 'Bearer ' + cookies.get('token')
                   }
                 })
                   .then(response => {
                     $(".loader").fadeOut("slow");
                     if (response.statusText === "OK") {
-                      this.setState({ showSuccess: true, showError: false, urlImage: urlImage + this.state.nroActa + '.' + this.state.extFoto });
+                      this.setState({ showSuccess: true, showError: false, urlImage: urlImage + '/rep_'+ this.state.nroActa + '.' + this.state.extFoto });
                       this.setState({ tableImage: this.renderTableDataFoto() })
                       document.getElementById('foto').value = '';
                     }
@@ -445,7 +451,7 @@ class AddReplica extends React.Component {
     const types = ['application/pdf'];
     var cv = this.state.archivoDoc
     if (cv !== null && cv.length !== 0) {
-      var nameCV = '/' + 'rep_' + this.state.nroActa + '.' + this.state.extDoc
+      var nameCV = '/rep_' + this.state.nroActa + '.' + this.state.extDoc
       var size = cv[0].size;
       var type = cv[0].type;
       if (size > MAXIMO_TAMANIO_BYTES) {
@@ -490,7 +496,7 @@ class AddReplica extends React.Component {
                     //  console.log(response);
                     $(".loader").fadeOut("slow");
                     if (response.statusText === "OK") {
-                      this.setState({ showSuccessDoc: true, showErrorDoc: false, urlDoc: urlDoc + 'rep_' + this.state.nroActa + '.' + this.state.extDoc });
+                      this.setState({ showSuccessDoc: true, showErrorDoc: false, urlDoc: urlDoc + '/rep_' + this.state.nroActa + '.' + this.state.extDoc });
                       this.setState({ tableDoc: this.renderTableDataDoc() })
                       document.getElementById('documentacion').value = '';
                     }
@@ -654,6 +660,17 @@ class AddReplica extends React.Component {
                             El archivo no se pudo subir. Intente nuevamente.
                           </p>
                         </Alert>
+                      </Form.Group>
+                    </Form.Row>
+                    <hr />
+                    <Form.Row>
+                      <Form.Group className="mx-sm-3 mb-1">
+                        &nbsp;&nbsp;
+                        <Link to='/replicas'>
+                          <Button variant="primary" type="button" id="volver">
+                            <FontAwesomeIcon icon={faTimesCircle} /> Volver a Replicas
+                          </Button>
+                        </Link>
                       </Form.Group>
                     </Form.Row>
                   </Form>

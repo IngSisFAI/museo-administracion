@@ -3,7 +3,7 @@ import { Form, Button, Tabs, Tab, Table, Alert } from 'react-bootstrap';
 import { ToastContainer, toast, Slide } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faClone, faTrash, faArrowLeft } from '@fortawesome/free-solid-svg-icons'
+import { faClone, faTimesCircle, faArrowLeft } from '@fortawesome/free-solid-svg-icons'
 import { Link, withRouter } from 'react-router-dom';
 import Moment from 'moment';
 import axios from 'axios';
@@ -14,8 +14,8 @@ import $ from 'jquery';
 const cookies = new Cookies();
 //Variables Globales
 const urlApi = process.env.REACT_APP_API_HOST
-const urlImage = process.env.REACT_APP_IMAGEN_REPLICA;
-const urlDoc = process.env.REACT_APP_DOC_REPLICA;
+const urlImage = process.env.REACT_APP_URL_REPLICA;
+const urlDoc = process.env.REACT_APP_URL_REPLICA;
 const rutaImg = process.env.REACT_APP_RUTA_IMG_REPLICA;
 const rutaDoc = process.env.REACT_APP_RUTA_DOC_REPLICA;
 
@@ -81,6 +81,23 @@ class ShowReplica extends React.Component {
     this.setState({ key: key });
   }
 
+  fileDochandleChange = (event) => {
+    const file = event.target.files;
+    const name = file[0].name;
+    const lastDot = name.lastIndexOf('.');
+    const ext = name.substring(lastDot + 1);
+    this.setState({ archivoDoc: file, extDoc: ext });
+  }
+
+  filehandleChange = (event) => {
+    const file = event.target.files;
+    const name = file[0].name;
+    const lastDot = name.lastIndexOf('.');
+    const ext = name.substring(lastDot + 1);
+    this.setState({ archivoFoto: file, extFoto: ext });
+    // console.log('SALIDA::', file)
+  }
+
   cargarTableDataDoc(cv) {
     //let cv= this.state.curriculum
 
@@ -110,7 +127,7 @@ class ShowReplica extends React.Component {
             
           </td>
           <td>
-            <a href={urlImage + foto} disabled target="_blank">{foto}</a>
+            <a href={urlImage +foto} disabled target="_blank">{foto}</a>
           </td>
         </tr>
       )
@@ -212,6 +229,17 @@ class ShowReplica extends React.Component {
                         </Table>
                       </Form.Group>
                     </Form.Row>
+                    </Form.Row>
+                    <hr />
+                    <Form.Row>
+                      <Form.Group className="mx-sm-3 mb-1">
+                        &nbsp;&nbsp;
+                        <Link to='/replicas'>
+                          <Button variant="primary" type="button" id="volver">
+                            <FontAwesomeIcon icon={faTimesCircle} /> Volver a Replicas
+                          </Button>
+                        </Link>
+                      </Form.Group>
                     </Form.Row>
                   </Form>
                 </Tab>

@@ -10,6 +10,7 @@ import Menu from "./../Menu"
 import Cookies from 'universal-cookie';
 import $ from 'jquery';
 import axios from "axios";
+import { ObjViewer } from 'react-obj-viewer'
 
 const cookies = new Cookies();
 
@@ -77,6 +78,8 @@ class AddEjemplar extends React.Component {
       validatedfotos: false,
       tabvideos: true,
       validatedvideos: false,
+      tabvideos3D: true,
+      validated3Dvideos: false,
       prestamos: [],
       fprestamo: '',
       fdevolucion: '',
@@ -1954,6 +1957,7 @@ class AddEjemplar extends React.Component {
     const { validatedotros } = this.state;
     const { validatedfotos } = this.state;
     const { validatedvideos } = this.state;
+    const {validated3Dvideos} = this.state;    
 
 
 
@@ -2620,6 +2624,60 @@ class AddEjemplar extends React.Component {
 
                   </Form>
                 </Tab>
+
+                <Tab eventKey="videos3D" title="Videos 3D" disabled={this.state.tabvideos3D}>
+                    <Form id="form8" noValidate validated={validated3Dvideos}>
+                    <legend>Videos 3D</legend>
+                      <hr />
+                    <Form.Row>
+                      <Form.Group className="col-sm-8">
+                        <label>Archivos:</label>
+                        <input type="file" className="form-control" id="filesVideo" accept="video/*" onChange={this.filesVideohandleChange.bind(this)} />
+                      </Form.Group>
+                    </Form.Row>
+                    <Form.Row>
+                      <Form.Group className="col-sm-2" >
+                        <Button variant="primary" type="button" id="subirVideo" onClick={() => this.subirVideo()} >
+                        <FontAwesomeIcon icon={faUpload} /> Subir
+                        </Button>
+                      </Form.Group>
+                      <Form.Group className="col-sm-6">
+                        <Alert show={this.state.showSuccessVideo} variant="success">
+                          <p>
+                            Se subió el archivo con Éxito!!
+                          </p>
+                        </Alert>
+
+      <Alert show={this.state.showErrorVideo} variant="danger">
+        <p>
+          El archivo no se pudo subir. Intente nuevamente.
+        </p>
+      </Alert>
+    </Form.Group>
+  </Form.Row>
+
+  <Form.Row>
+    <Form.Group className="col-sm-8" controlId="archivospdf">
+
+      <Table striped bordered hover responsive>
+        <thead className="thead-dark">
+          <tr>
+            <th>Acción</th>
+            <th>Nombre</th>
+          </tr>
+        </thead>
+        <tbody>
+          {this.state.tableArchivosVideos}
+        </tbody>
+      </Table>
+
+
+    </Form.Group>
+  </Form.Row>
+
+</Form>
+</Tab>
+
 
 
               </Tabs>
