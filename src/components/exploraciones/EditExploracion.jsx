@@ -97,7 +97,7 @@ class EditExploracion extends React.Component {
       window.location.href = '/';
     }
     else {
-      axios.get('http://museo.fi.uncoma.edu.ar:3006/api/exploracionId/' + this.props.match.params.id, {
+      axios.get(urlApi+'/exploracionId/' + this.props.match.params.id, {
         method: 'GET',
         headers: {
           'Authorization': 'Bearer ' + cookies.get('token')

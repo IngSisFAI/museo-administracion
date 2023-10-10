@@ -14,6 +14,12 @@ import {
   faMap,
   faFileArchive,
   faIdCard,
+  faExchangeAlt,
+  faHandshake,
+  faClone,
+  faDiagnoses,
+  faHandHoldingHeart,
+  faSearchLocation,
 } from "@fortawesome/free-solid-svg-icons";
 import { Link } from "react-router-dom";
 import Cookies from "universal-cookie";
@@ -55,17 +61,37 @@ class Menu extends React.Component {
                 <NavDropdown.Item as={Link} to={"/ejemplares"}>
                   <FontAwesomeIcon icon={faIdCard} /> Inventario MUC
                 </NavDropdown.Item>
-
-               
                 {/*   <NavDropdown.Item as={Link} to={"/bochones"}>
                   <FontAwesomeIcon icon={faHandLizard} /> Bochones
     </NavDropdown.Item>*/}
                 <NavDropdown.Item as={Link} to={"/documentacion"}>
                   <FontAwesomeIcon icon={faFileArchive} /> Documentación
                 </NavDropdown.Item>
+
                 <NavDropdown.Item as={Link} to={"/datosGeograficos"}>
                   <FontAwesomeIcon icon={faMap} /> Visualizar Datos Geográficos
                 </NavDropdown.Item>
+
+                <NavDropdown.Item as={Link} to={"/Denuncias"}>
+                  <FontAwesomeIcon icon={faSearchLocation} /> Denuncias
+                </NavDropdown.Item>
+
+                <NavDropdown.Item as={Link} to={"/prestamos"}>
+                  <FontAwesomeIcon icon={faHandshake} /> Préstamos
+                </NavDropdown.Item>
+
+                <NavDropdown.Item as={Link} to={"/exhibiciones"}>
+                  <FontAwesomeIcon icon={faDiagnoses} /> Exhibiciones
+                </NavDropdown.Item>
+
+                <NavDropdown.Item as={Link} to={"/replicas"}>
+                  <FontAwesomeIcon icon={faClone} /> Replicas
+                </NavDropdown.Item>
+
+                <NavDropdown.Item as={Link} to={"/donaciones"}>
+                  <FontAwesomeIcon icon={faHandHoldingHeart} /> Donaciones
+                </NavDropdown.Item>
+
               </NavDropdown>
 
               <NavDropdown title="Sistema" id="basic-nav-dropdown">

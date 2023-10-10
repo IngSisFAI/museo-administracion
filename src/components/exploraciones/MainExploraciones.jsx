@@ -181,6 +181,13 @@ class MainExploraciones extends React.Component {
                 data={this.state.exploraciones}
                 actions={[
                   {
+                    icon: 'visibility',   
+                    tooltip: 'Mostrar Exploración',
+                    onClick: (event, rowData) => {
+                      this.props.history.push(`/showExploracion/${rowData._id}`);
+                  }
+                },
+                  {
                     icon: "edit",
                     tooltip: "Editar Exploración",
                     onClick: (event, rowData) => {

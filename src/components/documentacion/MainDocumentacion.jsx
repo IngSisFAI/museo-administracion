@@ -20,7 +20,7 @@ const urlApi = process.env.REACT_APP_API_HOST;
 const urlArchivo = process.env.REACT_APP_URL_DOCUMENTACION;
 const rutaDocumentacion = process.env.REACT_APP_RUTA_DOCUMENTACION;
 
-const optionsTipo = [{ label: 'Nota Enviada', value: 'Nota Enviada' }, { label: 'Nota Recibida', value: 'Nota Recibida' }]
+const optionsTipo = [{ label: 'Nota', value: 'Nota' }, { label: 'Memo', value: 'Memo' }, { label: 'Resolución', value: 'Resolución' }, { label: 'Ordenanza', value: 'Ordenanza' },{ label: 'Convenio', value: 'Convenio' },{ label: 'Otros', value: 'Otros' }]
 
 
 

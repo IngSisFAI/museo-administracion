@@ -11,6 +11,9 @@ import Descripcion from "./Descripcion";
 
 delete L.Icon.Default.prototype._getIconUrl;
 
+const urlApi = process.env.REACT_APP_API_HOST
+
+
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: require("leaflet/dist/images/marker-icon-2x.png"),
   iconUrl: require("leaflet/dist/images/marker-icon.png"),
@@ -28,19 +31,34 @@ export default class CrearExcavacion extends Component {
       puntoGPSExcavacion: null,
       setAreaDisabled: true,
       setPuntoGpsDisabled: true,
-      poligonoExploracion: null
+      poligonoExploracion: null,
+      idExploracion: ""
     };
   }
 
   componentDidMount() {
-    const mapOptions = {
-      center: [-38.9517, -68.0592],
-      zoom: 14
-    };
-    const map = new L.map("map", mapOptions);
-    L.tileLayer("http://{s}.tile.osm.org/{z}/{x}/{y}.png").addTo(map);
-    this.setState({ map });
-    map.on("click", this.onClickMap);
+    var calles = L.tileLayer('https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
+      maxZoom: 20,
+       subdomains:['mt0','mt1','mt2','mt3']
+   })
+   
+   var satelite = L.tileLayer('https://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}', {
+       maxZoom: 20,
+       subdomains:['mt0','mt1','mt2','mt3']
+   })
+
+   const mapOptions = {
+       center: [-38.9517, -68.0592],
+       zoom: 14,
+       layers: [satelite,calles]
+   };
+   const map = new L.map("map", mapOptions);
+   L.control.layers({"Satelite": satelite,"Ciudad": calles}).addTo(map).setPosition('topleft');
+  this.setState({ map });
+
+  map.on("click", this.onClickMap);
+
+  
   }
 
   componentWillReceiveProps(nextProps) {
@@ -70,7 +88,7 @@ export default class CrearExcavacion extends Component {
   obtenerExploracion = async idExploracion => {
     const exploracionId = idExploracion;
 
-    const response = await fetch(`http://museo.fi.uncoma.edu.ar:3006/api/areaExploracion/${exploracionId}`, {
+    const response = await fetch(`${urlApi}/areaExploracion/${exploracionId}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json"
@@ -85,7 +103,8 @@ export default class CrearExcavacion extends Component {
     const exploracion = resultado.exploracion;
     this.setState({
       areaExploracion: exploracion.areaExploracion.locacion.coordinates[0],
-      areasExcavaciones: exploracion.excavaciones
+      areasExcavaciones: exploracion.excavaciones,
+      idExploracion:  exploracionId
     });
 
     const poligonoExploracion = dibujarPoligono(
@@ -208,10 +227,11 @@ export default class CrearExcavacion extends Component {
     const body = {
       puntoGPSExcavacion: this.state.puntoGPSExcavacion,
       areaExcavacion: this.state.areaExcavacion.getLatLngs()[0],
-      exploracionId: "5cfe8d0c385be24fc56da297"
+      exploracionId: this.state.idExploracion // -----
     };
 
-    const response = await fetch("http://museo.fi.uncoma.edu.ar:3006/api/areaExcavacion", {
+    console.log(body)
+    const response = await fetch(`${urlApi}/areaExcavacion`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -225,6 +245,7 @@ export default class CrearExcavacion extends Component {
       toast.success("Area de Excavacion creada con exito");
 
       const resultado = await response.json();
+      console.log("Resultado: ", resultado)
       this.props.setIdAreaExcavacion(resultado.areaId);
       this.props.setPuntoGpsExcavacion(resultado.puntoGps);
     }
@@ -232,6 +253,7 @@ export default class CrearExcavacion extends Component {
 
   render() {
     return (
+      <div className="container">
       <div style={{ position: "relative" }}>
         <ToastContainer
           position="top-right"
@@ -251,7 +273,7 @@ export default class CrearExcavacion extends Component {
             <input
               type="button"
               value="Setear nueva Area"
-              style={{ width: "200px", height: "40px" }}
+              style={{ width: "200px", height: "50px" }}
               disabled={this.state.setAreaDisabled}
               className="btn btn-outline-primary"
               onClick={this.setearAreaExcavacion}
@@ -261,7 +283,7 @@ export default class CrearExcavacion extends Component {
             <input
               type="button"
               value="Setear nuevo Punto GPS"
-              style={{ width: "200px", height: "40px" }}
+              style={{ width: "200px", height: "50px" }}
               disabled={this.state.setPuntoGpsDisabled}
               className="btn btn-outline-primary"
               onClick={this.setearPuntoExcavacion}
@@ -273,7 +295,7 @@ export default class CrearExcavacion extends Component {
               disabled={
                 !(this.state.puntoGPSExcavacion && this.state.areaExcavacion)
               }
-              style={{ width: "250px", height: "40px" }}
+              style={{ width: "200px", height: "50px" }}
               className="btn btn-outline-primary"
               onClick={this.altaExcavacion}
               value="Alta Area de Excavacion"
@@ -281,6 +303,7 @@ export default class CrearExcavacion extends Component {
           </div>
           <Descripcion />
         </div>
+      </div>
       </div>
     );
   }

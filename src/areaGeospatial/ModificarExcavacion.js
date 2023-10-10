@@ -12,7 +12,11 @@ import {
 } from "./helpers";
 import Descripcion from "./Descripcion";
 
+
+
 delete L.Icon.Default.prototype._getIconUrl;
+
+const urlApi = process.env.REACT_APP_API_HOST
 
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: require("leaflet/dist/images/marker-icon-2x.png"),
@@ -26,26 +30,41 @@ export default class ModificarExcavacion extends Component {
     this.state = {
       marcadoresPoligonoExcavacion: [],
       areaDisabled: true,
-      puntoDisabled: true
+      puntoDisabled: true,
+      mostrarBotonera: true
     };
   }
 
   componentDidMount() {
-    const mapOptions = {
-      center: [-38.9517, -68.0592],
-      zoom: 14
-    };
+    var calles = L.tileLayer('https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
+      maxZoom: 20,
+       subdomains:['mt0','mt1','mt2','mt3']
+   })
+   
+   var satelite = L.tileLayer('https://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}', {
+       maxZoom: 20,
+       subdomains:['mt0','mt1','mt2','mt3']
+   })
 
-    const map = new L.map("map", mapOptions);
-    L.tileLayer("http://{s}.tile.osm.org/{z}/{x}/{y}.png").addTo(map);
+   const mapOptions = {
+       center: [-38.9517, -68.0592],
+       zoom: 13,
+       layers: [satelite,calles]
+   };
+   const map = new L.map("map", mapOptions);
+   L.control.layers({"Satelite": satelite,"Ciudad": calles}).addTo(map).setPosition('topleft');
     this.setState({ map });
 
     this.obtenerExcavacion();
+    if(this.props.show){
+      this.setState({mostrarBotonera:false})
+  }
   }
 
   obtenerExcavacion = async () => {
     const idExcavacion = this.props.excavacionId;
-    const response = await fetch(`http://museo.fi.uncoma.edu.ar:3006/api/areaExcavacion/${idExcavacion}`, {
+    console.log(idExcavacion)
+    const response = await fetch(`${urlApi}/areaExcavacion/${idExcavacion}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json"
@@ -58,6 +77,9 @@ export default class ModificarExcavacion extends Component {
     const excavacion = await response.json();
     const excavacionCompleta = excavacion.excavacion;
 
+    if (!excavacionCompleta.areaExcavacion) {
+      return toast.error("El área de excavación no está definida");
+    }
     let coordenadasExcavacion =
       excavacionCompleta.areaExcavacion.locacion.coordinates[0];
     coordenadasExcavacion = coordenadasExcavacion.map(c => ({
@@ -70,7 +92,7 @@ export default class ModificarExcavacion extends Component {
       lat: c[0],
       lng: c[1]
     }));
-    const coordenadasPuntoGps = this.dibujarPuntoGPS(
+    const coordenadasPuntoGps = this.dibujarPuntoGPS( //esto me devuelve un marcador
       excavacionCompleta.puntoGps.coordinates
     );
 
@@ -116,7 +138,7 @@ export default class ModificarExcavacion extends Component {
     this.setState({
       coordenadasPuntoGps: nuevoMarcador.getLatLng()
     });
-    return nuevoMarcador;
+    return nuevoMarcador.getLatLng(); ////
   };
 
   setearCoordenadas = coordenadas =>
@@ -221,6 +243,7 @@ export default class ModificarExcavacion extends Component {
       this.state.coordenadasPuntoGps,
       this.state.coordenadasExcavacion
     );
+    //console.log("punto GPS",this.state.coordenadasPuntoGps.getLatLng())
     if (pertenece) {
       const body = {
         puntoGPSExcavacion: this.state.coordenadasPuntoGps
@@ -250,7 +273,7 @@ export default class ModificarExcavacion extends Component {
     marcadoresPoligono
   ) => {
     const response = await fetch(
-      `http://museo.fi.uncoma.edu.ar:3006/api/areaExcavacion/${this.state.idExcavacion}`,
+      `${urlApi}/areaExcavacion/${this.state.idExcavacion}`,
       {
         method: "PUT",
         headers: {
@@ -302,7 +325,7 @@ export default class ModificarExcavacion extends Component {
           pauseOnHover
         />
         <div id="map" className="contenedorMapa" />
-
+        {this.state.mostrarBotonera? (
         <div className="contenedorMenu">
           <div className="button-container">
             {!this.state.modificarAreaExcavacion ? (
@@ -335,6 +358,7 @@ export default class ModificarExcavacion extends Component {
           </div>
           <Descripcion />
         </div>
+        ):(<div></div>)} 
       </div>
     );
   }

@@ -3,13 +3,23 @@ import { Form, Button, Tabs, Tab, Table, Modal, Alert } from "react-bootstrap";
 import { ToastContainer, toast, Slide } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faSave, faReply, faCompass, faTrash, faPlus, faShare, faEdit, faTimesCircle, faUpload } from "@fortawesome/free-solid-svg-icons";
+import {
+  faSave,
+  faReply,
+  faCompass,
+  faTrash,
+  faPlus,
+  faShare,
+  faEdit,
+  faTimesCircle,
+  faUpload,
+} from "@fortawesome/free-solid-svg-icons";
 import { Link } from "react-router-dom";
 import Select from "react-select";
 import CrearExcavacion from "../../areaGeospatial/CrearExcavacion";
 import Menu from "./../Menu";
 import Cookies from "universal-cookie";
-import $ from 'jquery';
+import $ from "jquery";
 import axios from "axios";
 import { Error } from "@material-ui/icons";
 
@@ -20,11 +30,11 @@ const urlApi = process.env.REACT_APP_API_HOST;
 const urlArchivo = process.env.REACT_APP_URL_EXCAVACIONES;
 const rutaExcavaciones = process.env.REACT_APP_RUTA_EXCAVACIONES;
 
-
-const optHallazgo = [{ "value": "Fortuito", "label": "Fortuito" },
-{ "value": "Denuncia", "label": "Denuncia" },
-{ "value": "Exploración", "label": "Exploración" }]
-
+const optHallazgo = [
+  { value: "Fortuito", label: "Fortuito" },
+  { value: "Denuncia", label: "Denuncia" },
+  { value: "Exploración", label: "Exploración" },
+];
 
 class AddExcavacion extends React.Component {
   constructor(props) {
@@ -58,24 +68,23 @@ class AddExcavacion extends React.Component {
       validatedgeo: false,
       tabtax: true,
       validatedtax: false,
-      geologicos: '',
-      taxonomicos: '',
+      geologicos: "",
+      taxonomicos: "",
       tabfotos: true,
       validatedfotos: false,
       tabvideos: true,
       validatedvideos: false,
       tabbochon: true,
       validatedbochon: false,
-      nombrePieza: '',
-      identificador: '',
-      nroBochon: '',
-      infoAdicional: '',
+      nombrePieza: "",
+      identificador: "",
+      nroBochon: "",
+      infoAdicional: "",
       piezasAsociadas: [],
       piezas: [],
-      codigoCampoB: '',
-      identificadorPieza: '',
-      nombrePieza: '',
-      descripcionPieza: '',
+      codigoCampoB: "",
+      identificadorPieza: "",
+      descripcionPieza: "",
       modalActualizarPieza: false,
       selectedPieza: null,
       piezasId: [],
@@ -84,13 +93,13 @@ class AddExcavacion extends React.Component {
       piezasNames: [],
       modalActualizarBochon: false,
       selectedPiezaM: null,
-      key: 'dbasicos',
+      key: "dbasicos",
       selectedHallazgo: null,
       archivoDenuncia: null,
-      excavacionId: '',
-      op: 'I',
+      excavacionId: "",
+      op: "I",
       listArchivosDen: [],
-      urlArchivo: '',
+      urlArchivo: "",
       showSuccess: false,
       showError: false,
       tableArchivosDen: null,
@@ -100,27 +109,25 @@ class AddExcavacion extends React.Component {
       showErrorVideo: false,
       archivoVideo: null,
       archivoFoto: null,
-      descripcionFoto: '',
+      descripcionFoto: "",
       listArchivosFotos: [],
       listArchivosVideo: [],
       tableArchivosFotos: null,
       ejemplares: [],
       selectedEjemplar: null,
       selectedEjemplarM: null,
-      piezas: [],
       listBochones: [],
-      selectedPiezaM: null,
       piezasMId: [],
       piezasM: [],
       piezasMNames: [],
-      bochonMId: '',
+      bochonMId: "",
       validatedMBochon: false,
-      idExploracionCrear: '',
+      idExploracionCrear: "",
       tablaBochones: [],
-      ejemplar:'',
-      piezasAsoc:'',
-      ejemplarM:'',
-      piezasAsocM:''
+      ejemplar: "",
+      piezasAsoc: "",
+      ejemplarM: "",
+      piezasAsocM: "",
     };
   }
 
@@ -128,11 +135,11 @@ class AddExcavacion extends React.Component {
     if (!cookies.get("user") && !cookies.get("password")) {
       window.location.href = "/";
     } else {
-      fetch(urlApi + '/personas', {
-        method: 'GET',
+      fetch(urlApi + "/personas", {
+        method: "GET",
         headers: {
-          'Authorization': 'Bearer ' + cookies.get('token')
-        }
+          Authorization: "Bearer " + cookies.get("token"),
+        },
       })
         .then((response) => {
           return response.json();
@@ -145,10 +152,10 @@ class AddExcavacion extends React.Component {
           });
 
           fetch(urlApi + "/exploracion", {
-            method: 'GET',
+            method: "GET",
             headers: {
-              'Authorization': 'Bearer ' + cookies.get('token')
-            }
+              Authorization: "Bearer " + cookies.get("token"),
+            },
           })
             .then((response) => {
               return response.json();
@@ -156,23 +163,21 @@ class AddExcavacion extends React.Component {
             .then((explorations) => {
               //console.log(explorations.exploraciones)
               this.setState({ exploraciones: explorations.exploraciones });
-            }).catch(function (error) {
+            })
+            .catch(function (error) {
               toast.error("Error al consultar. Intente nuevamente.");
               console.log(
                 "Hubo un problema con la petición Fetch:",
                 error.message
               );
             });
-
-        }).catch(function (error) {
+        })
+        .catch(function (error) {
           toast.error("Error al consultar. Intente nuevamente.");
-          console.log(
-            "Hubo un problema con la petición Fetch:",
-            error.message
-          );
+          console.log("Hubo un problema con la petición Fetch:", error.message);
         });
 
-     /* fetch(urlApi + '/ejemplares', {
+      /* fetch(urlApi + '/ejemplares', {
         method: 'GET',
         headers: {
           'Authorization': 'Bearer ' + cookies.get('token')
@@ -193,8 +198,6 @@ class AddExcavacion extends React.Component {
             error.message
           );
         });*/
-
-
     }
   }
 
@@ -203,22 +206,21 @@ class AddExcavacion extends React.Component {
   setPuntoGpsExcavacion = (puntoGps) =>
     this.setState({ puntoGpsExcavacion: puntoGps });
 
+  handleEjemplarChange = (evt) => {
+    this.setState({ ejemplar: evt.target.value });
+  };
 
-    handleEjemplarChange = (evt) => {
-      this.setState({ ejemplar: evt.target.value });
-    }; 
-    
-    handleEjemplarMChange = (evt) => {
-      this.setState({ ejemplarM: evt.target.value });
-    };
+  handleEjemplarMChange = (evt) => {
+    this.setState({ ejemplarM: evt.target.value });
+  };
 
-    handlePiezasAsocChange = (evt) => {
-      this.setState({ piezasAsoc: evt.target.value });
-    };
-    
-    handlePiezasAsocMChange = (evt) => {
-      this.setState({ piezasAsocM: evt.target.value });
-    }; 
+  handlePiezasAsocChange = (evt) => {
+    this.setState({ piezasAsoc: evt.target.value });
+  };
+
+  handlePiezasAsocMChange = (evt) => {
+    this.setState({ piezasAsocM: evt.target.value });
+  };
 
   handleMuestraChange(evt) {
     this.setState({ muestraHome: evt.target.checked });
@@ -227,7 +229,6 @@ class AddExcavacion extends React.Component {
   handleNombreAreaChange = (evt) => {
     this.setState({ nombreArea: evt.target.value });
   };
-
 
   handleCodigoCampoChange = (evt) => {
     this.setState({ codigoCampo: evt.target.value });
@@ -246,7 +247,7 @@ class AddExcavacion extends React.Component {
   };
 
   handleAuxiliaresChange = (selectedAuxiliar) => {
-    let auxiliares = Array.from(selectedAuxiliar, option => option.value);
+    let auxiliares = Array.from(selectedAuxiliar, (option) => option.value);
     this.setState({ selectedAuxiliar });
     this.setState({ auxiliaresId: auxiliares });
   };
@@ -260,7 +261,10 @@ class AddExcavacion extends React.Component {
   };
 
   handleProfesionalesChange = (selectedProfesional) => {
-    let profesionales = Array.from(selectedProfesional, option => option.value);
+    let profesionales = Array.from(
+      selectedProfesional,
+      (option) => option.value
+    );
     this.setState({ selectedProfesional });
     this.setState({ profesionalesId: profesionales });
   };
@@ -271,9 +275,6 @@ class AddExcavacion extends React.Component {
     if (selectedExploracion !== null) {
       this.setState({ idExploracionCrear: selectedExploracion.value });
     }
-
-
-
   };
 
   /*handleEjemplarChange = (selectedEjemplar) => {
@@ -378,7 +379,6 @@ class AddExcavacion extends React.Component {
     this.setState({ infoAdicionalM: evt.target.value });
   };
 
-
   handleNroBochonChange = (evt) => {
     this.setState({ nroBochon: evt.target.value });
   };
@@ -388,66 +388,58 @@ class AddExcavacion extends React.Component {
   };
 
   filehandleChange = (event) => {
-
     const file = event.target.files;
     const name = file[0].name;
     this.setState({ archivoDenuncia: file });
-
-  }
-
+  };
 
   handleForm1 = (event) => {
-
     const form = document.getElementById("form1");
     var op = this.state.op;
     event.preventDefault();
     if (form.checkValidity() === false) {
       event.stopPropagation();
     } else {
-
-
       if (op === "I") {
-
         $(".loader").removeAttr("style");
         var directorName = "";
         var directorId = "";
         if (this.state.selectedDirector !== null) {
           directorName = this.state.selectedDirector.label;
-          directorId = this.state.selectedDirector.value
+          directorId = this.state.selectedDirector.value;
         }
 
         var data = {
-          "nombreArea": this.state.nombreArea,
-          "codigoCampo": this.state.codigoCampo,
-          "fechaInicio": this.state.fechaInicio,
-          "fechaTermino": this.state.fechaTermino,
-          "director": directorName,
-          "directorId": directorId,
-          "auxiliares": this.state.auxiliaresId,
-          "profesionales": this.state.profesionalesId,
-          "muestraHome": this.state.muestraHome,
-          "tipoHallazgo": "",
-          "archivoDenuncia": "",
-          "idExploracion": "",
-          "datosGeologicos": "",
-          "datosTaxonomicos": "",
-          "idArea": this.state.idAreaExcavacion,
-          "puntoGps": this.state.puntoGpsExcavacion,
-          "idCiudad": "",
-          "idProvincia": "",
-          "idPais": "",
-          "bochonesEncontrados": [],
-          "fotosExcavacion": [],
-          "videosExcavacion": []
-
-        }
+          nombreArea: this.state.nombreArea,
+          codigoCampo: this.state.codigoCampo,
+          fechaInicio: this.state.fechaInicio,
+          fechaTermino: this.state.fechaTermino,
+          director: directorName,
+          directorId: directorId,
+          auxiliares: this.state.auxiliaresId,
+          profesionales: this.state.profesionalesId,
+          muestraHome: this.state.muestraHome,
+          tipoHallazgo: "",
+          archivoDenuncia: "",
+          idExploracion: "",
+          datosGeologicos: "",
+          datosTaxonomicos: "",
+          idArea: this.state.idAreaExcavacion,
+          puntoGps: this.state.puntoGpsExcavacion,
+          idCiudad: "",
+          idProvincia: "",
+          idPais: "",
+          bochonesEncontrados: [],
+          fotosExcavacion: [],
+          videosExcavacion: [],
+        };
 
         fetch(urlApi + "/excavacion", {
           method: "post",
           body: JSON.stringify(data),
           headers: {
             "Content-Type": "application/json",
-            'Authorization': 'Bearer ' + cookies.get('token')
+            Authorization: "Bearer " + cookies.get("token"),
           },
         })
           .then(function (response) {
@@ -457,9 +449,16 @@ class AddExcavacion extends React.Component {
               return response.json();
             }
           })
-          .then(function (data) {
-            this.setState({ tabh: false, key: 'dhallazgo', op: 'U', excavacionId: data.excavacion._id });
-          }.bind(this))
+          .then(
+            function (data) {
+              this.setState({
+                tabh: false,
+                key: "dhallazgo",
+                op: "U",
+                excavacionId: data.excavacion._id,
+              });
+            }.bind(this)
+          )
           .catch(function (error) {
             $(".loader").fadeOut("slow");
             toast.error("Error al guardar. Intente nuevamente.");
@@ -468,45 +467,49 @@ class AddExcavacion extends React.Component {
               error.message
             );
           });
-
-      }
-      else { //op=U
+      } else {
+        //op=U
         $(".loader").removeAttr("style");
         var directorName = "";
         var directorId = "";
         if (this.state.selectedDirector !== null) {
           directorName = this.state.selectedDirector.label;
-          directorId = this.state.selectedDirector.value
+          directorId = this.state.selectedDirector.value;
         }
 
         var data = {
-          "nombreArea": this.state.nombreArea,
-          "codigoCampo": this.state.codigoCampo,
-          "fechaInicio": this.state.fechaInicio,
-          "fechaTermino": this.state.fechaTermino,
-          "director": directorName,
-          "directorId": directorId,
-          "auxiliares": this.state.auxiliaresId,
-          "profesionales": this.state.profesionalesId,
-          "muestraHome": this.state.muestraHome
-        }
-        fetch(urlApi + '/excavacion/' + this.state.excavacionId, {
-          method: 'put',
+          nombreArea: this.state.nombreArea,
+          codigoCampo: this.state.codigoCampo,
+          fechaInicio: this.state.fechaInicio,
+          fechaTermino: this.state.fechaTermino,
+          director: directorName,
+          directorId: directorId,
+          auxiliares: this.state.auxiliaresId,
+          profesionales: this.state.profesionalesId,
+          muestraHome: this.state.muestraHome,
+        };
+        fetch(urlApi + "/excavacion/" + this.state.excavacionId, {
+          method: "put",
           body: JSON.stringify(data),
           headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + cookies.get('token')
-          }
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + cookies.get("token"),
+          },
         })
           .then(function (response) {
             if (response.ok) {
-              console.log("¡Se actualizaron los datos de la Excavación con Éxito!");
+              console.log(
+                "¡Se actualizaron los datos de la Excavación con Éxito!"
+              );
               $(".loader").fadeOut("slow");
               return response.json();
-
             }
           })
-          .then(function (data) { this.setState({ key: 'dhallazgo' }); }.bind(this))
+          .then(
+            function (data) {
+              this.setState({ key: "dhallazgo" });
+            }.bind(this)
+          )
           .catch(function (error) {
             $(".loader").fadeOut("slow");
             toast.error("Error al guardar. Intente nuevamente.");
@@ -515,16 +518,14 @@ class AddExcavacion extends React.Component {
               error.message
             );
           });
-
       }
     }
     this.setState({ validateddb: true });
-  }
+  };
 
   handleSelect = (key) => {
     this.setState({ key: key });
-
-  }
+  };
 
   handleForm2 = (event) => {
     const form = document.getElementById("form2");
@@ -532,17 +533,14 @@ class AddExcavacion extends React.Component {
     if (form.checkValidity() === false) {
       event.stopPropagation();
     } else {
-      this.setState({ tabgeo: false, key: 'dgeo' });
-
+      this.setState({ tabgeo: false, key: "dgeo" });
     }
     this.setState({ validatedh: true });
-  }
+  };
 
   handleAntForm2 = (event) => {
-
-    this.setState({ tabbas: false, key: 'dbasicos' });
-
-  }
+    this.setState({ tabbas: false, key: "dbasicos" });
+  };
 
   handleForm3 = (event) => {
     const form = document.getElementById("form3");
@@ -550,191 +548,200 @@ class AddExcavacion extends React.Component {
     if (form.checkValidity() === false) {
       event.stopPropagation();
     } else {
-      this.setState({ tabtax: false, key: 'dtax' });
-
+      this.setState({ tabtax: false, key: "dtax" });
     }
-    this.setState({ validatedgeo: true, tabbochon: false, tabfotos: false, tabvideos: false });
-  }
+    this.setState({
+      validatedgeo: true,
+      tabbochon: false,
+      tabfotos: false,
+      tabvideos: false,
+    });
+
+    document.getElementById("guardar").click();
+
+  };
 
   handleAntForm3 = (event) => {
-
-    this.setState({ tabh: false, key: 'dhallazgo' });
-
-  }
-
-
-
+    this.setState({ tabh: false, key: "dhallazgo" });
+  };
 
   handlePiezasChange = (selectedPieza) => {
-    let piezas = Array.from(selectedPieza, option => option.value);
-    let names = Array.from(selectedPieza, option => option.label);
+    let piezas = Array.from(selectedPieza, (option) => option.value);
+    let names = Array.from(selectedPieza, (option) => option.label);
 
     this.setState({ selectedPieza });
     this.setState({ piezasId: piezas, piezasNames: names });
   };
 
   handlePiezasMChange = (selectedPiezaM) => {
-    let piezas = Array.from(selectedPiezaM, option => option.value);
-    let names = Array.from(selectedPiezaM, option => option.label);
+    let piezas = Array.from(selectedPiezaM, (option) => option.value);
+    let names = Array.from(selectedPiezaM, (option) => option.label);
 
     this.setState({ selectedPiezaM });
     this.setState({ piezasMId: piezas, piezasMNames: names });
   };
 
   insertarBochon = (event) => {
-
     const form = document.getElementById("form6");
     event.preventDefault();
     if (form.checkValidity() === false) {
       event.stopPropagation();
     } else {
-          $(".loader").removeAttr("style");
-          var data = {
-            "nombre": "",
-            "codigoCampo": this.state.codigoCampoB,
-            "nroBochon": this.state.nroBochon,
-            "preparador": "",
-            "preparadorID": "",
-            "tipoPreparacion": "",
-            "acidosAplicados": [],
-            "ejemplarAsociado": "",
-            "excavacionId": this.state.excavacionId,
-            "piezasId": [],
-            "piezasNames": [],
-            "infoAdicional": this.state.infoAdicional,
-            "ejemplarDescripcion": this.state.ejemplar,
-            "piezasDescripcion": this.state.piezasAsoc
+      $(".loader").removeAttr("style");
+      var data = {
+        nombre: "",
+        codigoCampo: this.state.codigoCampoB,
+        nroBochon: this.state.nroBochon,
+        preparador: "",
+        preparadorID: "",
+        tipoPreparacion: "",
+        acidosAplicados: [],
+        ejemplarAsociado: "",
+        excavacionId: this.state.excavacionId,
+        piezasId: [],
+        piezasNames: [],
+        infoAdicional: this.state.infoAdicional,
+        ejemplarDescripcion: this.state.ejemplar,
+        piezasDescripcion: this.state.piezasAsoc,
+      };
+
+      fetch(urlApi + "/bochon", {
+        method: "post",
+        body: JSON.stringify(data),
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + cookies.get("token"),
+        },
+      })
+        .then(function (response) {
+          if (response.ok) {
+            toast.success("¡Se guardó el Bochón con Éxito!");
+            $(".loader").fadeOut("slow");
+            return response.json();
           }
+        })
+        .then(
+          function (data) {
+            var listB = this.state.listBochones;
+            listB.push(data.bochon._id);
+            this.setState({
+              listBochones: listB,
+            });
 
-          fetch(urlApi + "/bochon", {
-            method: "post",
-            body: JSON.stringify(data),
-            headers: {
-              "Content-Type": "application/json",
-              'Authorization': 'Bearer ' + cookies.get('token')
-            },
-          })
-            .then(function (response) {
-              if (response.ok) {
-                toast.success("¡Se guardó el Bochón con Éxito!");
-                $(".loader").fadeOut("slow");
-                return response.json();
-
-              }
+            fetch(urlApi + "/bochonExca/" + this.state.excavacionId, {
+              method: "GET",
+              headers: {
+                Authorization: "Bearer " + cookies.get("token"),
+              },
             })
-            .then(function (data) {
-              var listB = this.state.listBochones;
-              listB.push(data.bochon._id);
-              this.setState({
-                listBochones: listB
-              });
-
-              fetch(urlApi + '/bochonExca/' + this.state.excavacionId, {
-                method: 'GET',
-                headers: {
-                  'Authorization': 'Bearer ' + cookies.get('token')
-                }
+              .then((response) => {
+                return response.json();
               })
-                .then((response) => {
-                  return response.json()
-                })
-                .then(result => {
-
-                  this.setState({
-                    bochones: result.bochones
-                  });
-                  this.setState({ codigoCampoB: "", nroBochon: "", piezasId: [], piezasNames: [], selectedPieza: null, infoAdicional: "", ejemplar:'', piezasAsoc:'' });
-                  return result;
-
-
-                })
-                .then(function (data) {
-                  this.setState({ tablaBochones: this.renderTableBochones() })
-                }.bind(this))
-                .then(function () {
+              .then((result) => {
+                this.setState({
+                  bochones: result.bochones,
+                });
+                this.setState({
+                  codigoCampoB: "",
+                  nroBochon: "",
+                  piezasId: [],
+                  piezasNames: [],
+                  selectedPieza: null,
+                  infoAdicional: "",
+                  ejemplar: "",
+                  piezasAsoc: "",
+                });
+                return result;
+              })
+              .then(
+                function (data) {
+                  this.setState({ tablaBochones: this.renderTableBochones() });
+                }.bind(this)
+              )
+              .then(
+                function () {
                   //Actualizo lista de bochones encontrados
                   var datos = {
-                    "bochonesEncontrados": this.state.listBochones
-                  }
-                  fetch(urlApi + '/excavacion/' + this.state.excavacionId, {
-                    method: 'put',
+                    bochonesEncontrados: this.state.listBochones,
+                  };
+                  fetch(urlApi + "/excavacion/" + this.state.excavacionId, {
+                    method: "put",
                     body: JSON.stringify(datos),
                     headers: {
-                      'Content-Type': 'application/json',
-                      'Authorization': 'Bearer ' + cookies.get('token')
-                    }
+                      "Content-Type": "application/json",
+                      Authorization: "Bearer " + cookies.get("token"),
+                    },
                   })
-                    .then(function (response) {
-                      if (response.ok) {
-                        console.log("¡Se actualizaron los datos de la Excavación con Éxito!");
-
-                      }
-                    }.bind(this))
+                    .then(
+                      function (response) {
+                        if (response.ok) {
+                          console.log(
+                            "¡Se actualizaron los datos de la Excavación con Éxito!"
+                          );
+                        }
+                      }.bind(this)
+                    )
                     .catch(function (error) {
                       console.log(
                         "Hubo un problema con la petición Fetch:",
                         error.message
                       );
-                    })
+                    });
+                }.bind(this)
+              )
 
-
-                }.bind(this))
-
-                .catch(function (error) {
-                  toast.error("Error al consultar Bochones. Intente nuevamente.");
-                  console.log(
-                    "Hubo un problema con la petición Fetch:",
-                    error.message
-                  );
-                });
-
-
-            }.bind(this))
-            .catch(function (error) {
-              $(".loader").fadeOut("slow");
-              toast.error("Error al guardar. Intente nuevamente.");
-              console.log(
-                "Hubo un problema con la petición Fetch:",
-                error.message
-              );
-            });
-
-
-
+              .catch(function (error) {
+                toast.error("Error al consultar Bochones. Intente nuevamente.");
+                console.log(
+                  "Hubo un problema con la petición Fetch:",
+                  error.message
+                );
+              });
+          }.bind(this)
+        )
+        .catch(function (error) {
+          $(".loader").fadeOut("slow");
+          toast.error("Error al guardar. Intente nuevamente.");
+          console.log("Hubo un problema con la petición Fetch:", error.message);
+        });
     }
     this.setState({ validatedbochon: true });
-
-
-  }
+  };
 
   renderTableBochones() {
-
-
     return this.state.bochones.map((bochon, index) => {
-
       return (
         <tr key={index}>
-          <td><Button variant="secondary" type="button" id="editar" onClick={() => this.mostrarModalActualizarBochon(bochon)}>
-            <FontAwesomeIcon icon={faEdit} />
-          </Button>
+          <td>
+            <Button
+              variant="secondary"
+              type="button"
+              id="editar"
+              onClick={() => this.mostrarModalActualizarBochon(bochon)}
+            >
+              <FontAwesomeIcon icon={faEdit} />
+            </Button>
             &nbsp;
-            <Button variant="danger" type="button" id="eliminar" onClick={() => this.eliminarBochon(bochon._id)}>
+            <Button
+              variant="danger"
+              type="button"
+              id="eliminar"
+              onClick={() => this.eliminarBochon(bochon._id)}
+            >
               <FontAwesomeIcon icon={faTrash} />
-            </Button></td>
+            </Button>
+          </td>
           <td>{bochon.codigoCampo}</td>
           <td>{bochon.nroBochon}</td>
           <td>{bochon.ejemplarDescripcion}</td>
           <td>{bochon.piezasDescripcion}</td>
           <td>{bochon.infoAdicional}</td>
-
         </tr>
-      )
-    })
-
+      );
+    });
   }
 
   mostrarModalActualizarBochon = (dato) => {
-
     /*if (dato.ejemplarAsociado[0]._id !== null && dato.ejemplarAsociado[0]._id !== '') {
      
       fetch(urlApi + '/piezasEjemplar/' + dato.ejemplarAsociado[0]._id, {
@@ -786,596 +793,706 @@ class AddExcavacion extends React.Component {
       ejemplarM: dato.ejemplarDescripcion,
       piezasAsocM: dato.piezasDescripcion,
       modalActualizarBochon: true,
-      bochonMId: dato._id
+      bochonMId: dato._id,
     });
-
-
-
-
-  }
+  };
 
   cerrarModalActualizarBochon = () => {
     this.setState({ modalActualizarBochon: false });
   };
 
   handlePiezasModalChange = (selectedPiezaM) => {
-    let piezas = Array.from(selectedPiezaM, option => option.value);
-    let names = Array.from(selectedPiezaM, option => option.label);
+    let piezas = Array.from(selectedPiezaM, (option) => option.value);
+    let names = Array.from(selectedPiezaM, (option) => option.label);
 
-    console.log(selectedPiezaM)
+    console.log(selectedPiezaM);
     this.setState({ selectedPiezaM });
     this.setState({ piezasId: piezas, piezasNames: names });
   };
 
-
-
-
   editarBochon = (e) => {
-
     const formx = document.getElementById("form9");
     e.preventDefault();
     if (formx.checkValidity() === false) {
       toast.error("¡Verique datos obligatorios!");
       e.stopPropagation();
-
     } else {
+      $(".loader").removeAttr("style");
+      var data = {
+        codigoCampo: this.state.codigoCampoM,
+        nroBochon: this.state.nroBochonM,
+        ejemplarDescripcion: this.state.ejemplarM,
+        piezasDescripcion: this.state.piezasAsocM,
+        infoAdicional: this.state.infoAdicionalM,
+      };
 
-
-          $(".loader").removeAttr("style");
-          var data = {
-            "codigoCampo": this.state.codigoCampoM,
-            "nroBochon": this.state.nroBochonM,
-            "ejemplarDescripcion": this.state.ejemplarM,
-            "piezasDescripcion": this.state.piezasAsocM,
-            "infoAdicional": this.state.infoAdicionalM
+      fetch(urlApi + "/bochon/" + this.state.bochonMId, {
+        method: "put",
+        body: JSON.stringify(data),
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + cookies.get("token"),
+        },
+      })
+        .then(function (response) {
+          if (response.ok) {
+            toast.success("¡Se actualizó el Bochón con Éxito!");
+            $(".loader").fadeOut("slow");
+            return response.json();
           }
+        })
+        .then(
+          function (data) {
+            var listB = this.state.listBochones;
+            listB.push(data.bochon._id);
+            this.setState({
+              listBochones: listB,
+            });
 
-          fetch(urlApi + "/bochon/" + this.state.bochonMId, {
-            method: "put",
-            body: JSON.stringify(data),
-            headers: {
-              "Content-Type": "application/json",
-              'Authorization': 'Bearer ' + cookies.get('token')
-            },
-          })
-            .then(function (response) {
-              if (response.ok) {
-                toast.success("¡Se actualizó el Bochón con Éxito!");
-                $(".loader").fadeOut("slow");
-                return response.json();
-
-              }
+            fetch(urlApi + "/bochonExca/" + this.state.excavacionId, {
+              method: "GET",
+              headers: {
+                Authorization: "Bearer " + cookies.get("token"),
+              },
             })
-            .then(function (data) {
-              var listB = this.state.listBochones;
-              listB.push(data.bochon._id);
-              this.setState({
-                listBochones: listB
-              });
-
-              fetch(urlApi + '/bochonExca/' + this.state.excavacionId, {
-                method: 'GET',
-                headers: {
-                  'Authorization': 'Bearer ' + cookies.get('token')
-                }
+              .then((response) => {
+                return response.json();
               })
-                .then((response) => {
-                  return response.json()
-                })
-                .then(result => {
-
-                  this.setState({
-                    bochones: result.bochones
-                  });
-                  this.setState({ codigoCampoM: "", nroBochonM: "", selectedEjemplarM: null, piezasMId: [], piezasMNames: [], selectedPiezaM: null, infoAdicionalM: "", modalActualizarBochon: false, ejemplarM:'', piezasAsocM:'' });
-                  return result;
-
-
-                })
-                .then(function (data) {
-                  this.setState({ tablaBochones: this.renderTableBochones() })
-                }.bind(this))
-                .then(function () {
+              .then((result) => {
+                this.setState({
+                  bochones: result.bochones,
+                });
+                this.setState({
+                  codigoCampoM: "",
+                  nroBochonM: "",
+                  selectedEjemplarM: null,
+                  piezasMId: [],
+                  piezasMNames: [],
+                  selectedPiezaM: null,
+                  infoAdicionalM: "",
+                  modalActualizarBochon: false,
+                  ejemplarM: "",
+                  piezasAsocM: "",
+                });
+                return result;
+              })
+              .then(
+                function (data) {
+                  this.setState({ tablaBochones: this.renderTableBochones() });
+                }.bind(this)
+              )
+              .then(
+                function () {
                   //Actualizo lista de bochones encontrados
                   var datos = {
-                    "bochonesEncontrados": this.state.listBochones
-                  }
-                  fetch(urlApi + '/excavacion/' + this.state.excavacionId, {
-                    method: 'put',
+                    bochonesEncontrados: this.state.listBochones,
+                  };
+                  fetch(urlApi + "/excavacion/" + this.state.excavacionId, {
+                    method: "put",
                     body: JSON.stringify(datos),
                     headers: {
-                      'Content-Type': 'application/json',
-                      'Authorization': 'Bearer ' + cookies.get('token')
-                    }
+                      "Content-Type": "application/json",
+                      Authorization: "Bearer " + cookies.get("token"),
+                    },
                   })
-                    .then(function (response) {
-                      if (response.ok) {
-                        console.log("¡Se actualizaron los datos de la Excavación con Éxito!");
-
-                      }
-                    }.bind(this))
+                    .then(
+                      function (response) {
+                        if (response.ok) {
+                          console.log(
+                            "¡Se actualizaron los datos de la Excavación con Éxito!"
+                          );
+                        }
+                      }.bind(this)
+                    )
                     .catch(function (error) {
                       console.log(
                         "Hubo un problema con la petición Fetch:",
                         error.message
                       );
-                    })
-
-
-                }.bind(this))
-                .catch(function (error) {
-                  toast.error("Error al consultar Bochones. Intente nuevamente.");
-                  console.log(
-                    "Hubo un problema con la petición Fetch:",
-                    error.message
-                  );
-                });
-
-
-            }.bind(this))
-            .catch(function (error) {
-              $(".loader").fadeOut("slow");
-              toast.error("Error al guardar. Intente nuevamente.");
-              console.log(
-                "Hubo un problema con la petición Fetch:",
-                error.message
-              );
-            });
-
-
+                    });
+                }.bind(this)
+              )
+              .catch(function (error) {
+                toast.error("Error al consultar Bochones. Intente nuevamente.");
+                console.log(
+                  "Hubo un problema con la petición Fetch:",
+                  error.message
+                );
+              });
+          }.bind(this)
+        )
+        .catch(function (error) {
+          $(".loader").fadeOut("slow");
+          toast.error("Error al guardar. Intente nuevamente.");
+          console.log("Hubo un problema con la petición Fetch:", error.message);
+        });
     }
 
     this.setState({ validatedMbochon: true });
-
-
-  }
-
+  };
 
   eliminarBochon = (idBochon) => {
     var opcion = window.confirm("¿Está seguro que deseas eliminar el Bochón?");
     if (opcion == true) {
       //Primero busco la excavación, para luego actualizo
-      fetch(urlApi + '/excavacionId/' + this.state.excavacionId, {
-        method: 'get',
+      fetch(urlApi + "/excavacionId/" + this.state.excavacionId, {
+        method: "get",
         headers: {
-          'Authorization': 'Bearer ' + cookies.get('token')
-        }
+          Authorization: "Bearer " + cookies.get("token"),
+        },
       })
-        .then(response => {
+        .then((response) => {
           return response.json();
         })
-        .then(function (response) {
-          //aca ya tengo la excavacion, tengo que obtener los bochones encontrados y quitar el candidato a eliminar
-          $(".loader").removeAttr("style");
-          //elimino bochon del array
-          var listaB = response.excavacionId.bochonesEncontrados;
-          var contador = 0;
-          listaB.map((registro) => {
-            if (idBochon == registro) {
-              listaB.splice(contador, 1);
-            }
-            contador++;
-          });
-          var dataB = {
-            "bochonesEncontrados": listaB
-          }
-
-          //Actualizo la Excavacion
-          fetch(urlApi + '/excavacion/' + this.state.excavacionId, {
-            method: 'put',
-            body: JSON.stringify(dataB),
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': 'Bearer ' + cookies.get('token')
-            }
-          }).then(function (response) {
-            if (response.ok) {
-              console.log("¡Se actualizaron los datos de la Excavación con Éxito!");
-              this.setState({ listBochones: listaB });
-
-            }
-          }.bind(this))
-            .then(function (response) {
-              //Elimino Bochon 
-              fetch(urlApi + '/bochon/' + idBochon, {
-                method: 'DELETE',
-                headers: {
-                  'Authorization': 'Bearer ' + cookies.get('token')
-                }
-              })
-                .then(function (response) {
-
-                  if (response.ok) {
-                    toast.success("¡Se eliminó al Bochon con Éxito!");
-                  }
-                  $(".loader").fadeOut("slow");
-                })
-                .then(function () {
-                  //Actualizo la lista de bochones
-    
-                  fetch(urlApi + '/bochonExca/' + this.state.excavacionId, {
-                    method: 'GET',
-                    headers: {
-                      'Authorization': 'Bearer ' + cookies.get('token')
-                    }
-                  })
-                    .then((response) => {
-                      return response.json()
-                    })
-                    .then(result => {
-                      this.setState({
-                        bochones: result.bochones
-                      });
-                      return result;
-    
-                    })
-                    .then(function () {
-    
-                      setTimeout(function () { this.setState({ tablaBochones: this.renderTableBochones() }) }.bind(this), 1500);
-                    }.bind(this))
-                    .catch(function (error) {
-                      console.log('Hubo un problema con la petición Fetch (2):' + error.message);
-                    })
-    
-    
-                }.bind(this))
-                .catch(function (error) {
-                  $(".loader").fadeOut("slow");
-                  toast.error("Error al Eliminar Bochon. Intente nuevamente.");
-                  console.log('Hubo un problema con la petición Fetch (2):' + error.message);
-                });
-
-            }.bind(this))
-           
-            .catch(function (error) {
-              $(".loader").fadeOut("slow");
-              toast.error("Error al Actualizar Excavacion. Intente nuevamente.");
-              console.log('Hubo un problema con la petición Fetch (2):' + error.message);
+        .then(
+          function (response) {
+            //aca ya tengo la excavacion, tengo que obtener los bochones encontrados y quitar el candidato a eliminar
+            $(".loader").removeAttr("style");
+            //elimino bochon del array
+            var listaB = response.excavacionId.bochonesEncontrados;
+            var contador = 0;
+            listaB.map((registro) => {
+              if (idBochon == registro) {
+                listaB.splice(contador, 1);
+              }
+              contador++;
             });
+            var dataB = {
+              bochonesEncontrados: listaB,
+            };
 
-        }.bind(this))
+            //Actualizo la Excavacion
+            fetch(urlApi + "/excavacion/" + this.state.excavacionId, {
+              method: "put",
+              body: JSON.stringify(dataB),
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: "Bearer " + cookies.get("token"),
+              },
+            })
+              .then(
+                function (response) {
+                  if (response.ok) {
+                    console.log(
+                      "¡Se actualizaron los datos de la Excavación con Éxito!"
+                    );
+                    this.setState({ listBochones: listaB });
+                  }
+                }.bind(this)
+              )
+              .then(
+                function (response) {
+                  //Elimino Bochon
+                  fetch(urlApi + "/bochon/" + idBochon, {
+                    method: "DELETE",
+                    headers: {
+                      Authorization: "Bearer " + cookies.get("token"),
+                    },
+                  })
+                    .then(function (response) {
+                      if (response.ok) {
+                        toast.success("¡Se eliminó al Bochon con Éxito!");
+                      }
+                      $(".loader").fadeOut("slow");
+                    })
+                    .then(
+                      function () {
+                        //Actualizo la lista de bochones
+
+                        fetch(
+                          urlApi + "/bochonExca/" + this.state.excavacionId,
+                          {
+                            method: "GET",
+                            headers: {
+                              Authorization: "Bearer " + cookies.get("token"),
+                            },
+                          }
+                        )
+                          .then((response) => {
+                            return response.json();
+                          })
+                          .then((result) => {
+                            this.setState({
+                              bochones: result.bochones,
+                            });
+                            return result;
+                          })
+                          .then(
+                            function () {
+                              setTimeout(
+                                function () {
+                                  this.setState({
+                                    tablaBochones: this.renderTableBochones(),
+                                  });
+                                }.bind(this),
+                                1500
+                              );
+                            }.bind(this)
+                          )
+                          .catch(function (error) {
+                            console.log(
+                              "Hubo un problema con la petición Fetch (2):" +
+                                error.message
+                            );
+                          });
+                      }.bind(this)
+                    )
+                    .catch(function (error) {
+                      $(".loader").fadeOut("slow");
+                      toast.error(
+                        "Error al Eliminar Bochon. Intente nuevamente."
+                      );
+                      console.log(
+                        "Hubo un problema con la petición Fetch (2):" +
+                          error.message
+                      );
+                    });
+                }.bind(this)
+              )
+
+              .catch(function (error) {
+                $(".loader").fadeOut("slow");
+                toast.error(
+                  "Error al Actualizar Excavacion. Intente nuevamente."
+                );
+                console.log(
+                  "Hubo un problema con la petición Fetch (2):" + error.message
+                );
+              });
+          }.bind(this)
+        )
         .catch(function (error) {
           $(".loader").fadeOut("slow");
           toast.error("Error al consultar. Intente nuevamente.");
-          console.log('Hubo un problema con la petición Fetch (1):' + error.message);
+          console.log(
+            "Hubo un problema con la petición Fetch (1):" + error.message
+          );
         });
-
     }
-  }
-
-
+  };
 
   eliminarArchivoDenuncia = (dato) => {
-    var destino = rutaExcavaciones + 'Denuncias/' + this.state.excavacionId + "/" + dato;
+    var destino =
+      rutaExcavaciones + "Denuncias/" + this.state.excavacionId + "/" + dato;
     var opcion = window.confirm("¿Está seguro que deseas eliminar el Archivo?");
     if (opcion == true) {
-
-      fetch(urlApi + '/excavacionId/' + this.state.excavacionId, {
-        method: 'get',
+      fetch(urlApi + "/excavacionId/" + this.state.excavacionId, {
+        method: "get",
         headers: {
-          'Authorization': 'Bearer ' + cookies.get('token')
-        }
+          Authorization: "Bearer " + cookies.get("token"),
+        },
       })
-        .then(response => {
+        .then((response) => {
           return response.json();
         })
-        .then(function (response) {
-          //aca ya tengo la excavacion, tengo que obtener los archivos de autorizacion y quitar el candidato a eliminar
-          $(".loader").removeAttr("style");
-          //elimino archivo del array
-          var archivos = response.excavacionId.archivosDenuncia;
-          var contador = 0;
-          archivos.map((registro) => {
-            if (dato == registro) {
-              archivos.splice(contador, 1);
-            }
-            contador++;
-          });
-
-          var dataDen = {
-            "archivosDenuncia": archivos
-
-          }
-
-          //Actualizo la Exploracion
-          fetch(urlApi + '/excavacion/' + this.state.excavacionId, {
-            method: 'put',
-            body: JSON.stringify(dataDen),
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': 'Bearer ' + cookies.get('token')
-            }
-          })
-            .then(function (response) {
-              if (response.ok) {
-                console.log("¡Se actualizaron los datos de la Excavación con Éxito!");
-                this.setState({ listArchivosDen: archivos });
-
+        .then(
+          function (response) {
+            //aca ya tengo la excavacion, tengo que obtener los archivos de autorizacion y quitar el candidato a eliminar
+            $(".loader").removeAttr("style");
+            //elimino archivo del array
+            var archivos = response.excavacionId.archivosDenuncia;
+            var contador = 0;
+            archivos.map((registro) => {
+              if (dato == registro) {
+                archivos.splice(contador, 1);
               }
-            }.bind(this))
-            .then(function (response) {
-              //Elimino Archivo del Server
-              fetch(urlApi + '/deleteArchivo', {
-                method: 'get',
-                headers: {
-                  'Content-Type': undefined,
-                  'path': destino,
-                  'Authorization': 'Bearer ' + cookies.get('token')
-                }
-              })
-                .then(response => {
-                  return response.json();
-                })
-                .then(function (response) {
-                  $(".loader").fadeOut("slow");
-                  if ((response.msg).trim() === 'OK') {
-                    console.log('ok');
-                    toast.success("¡Se eliminó el Archivo con Éxito!");
-                    this.setState({ archivoDen: null, tableArchivosDen: this.renderTableArchivosDen() })
-
-                  } else {
-                    console.log('error');
-                    toast.error("¡Se produjo un error al eliminar archivo!");
-                  }
-                }.bind(this)).catch(function (error) {
-                  $(".loader").fadeOut("slow");
-                  toast.error("Error al eliminar. Intente nuevamente.");
-                  console.log('Hubo un problema con la petición Fetch (3):' + error.message);
-                });
-
-
-            }.bind(this))
-            .catch(function (error) {
-              $(".loader").fadeOut("slow");
-              toast.error("Error al Actualizar Exploracion. Intente nuevamente.");
-              console.log('Hubo un problema con la petición Fetch (2):' + error.message);
+              contador++;
             });
 
-        }.bind(this))
+            var dataDen = {
+              archivosDenuncia: archivos,
+            };
+
+            //Actualizo la Exploracion
+            fetch(urlApi + "/excavacion/" + this.state.excavacionId, {
+              method: "put",
+              body: JSON.stringify(dataDen),
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: "Bearer " + cookies.get("token"),
+              },
+            })
+              .then(
+                function (response) {
+                  if (response.ok) {
+                    console.log(
+                      "¡Se actualizaron los datos de la Excavación con Éxito!"
+                    );
+                    this.setState({ listArchivosDen: archivos });
+                  }
+                }.bind(this)
+              )
+              .then(
+                function (response) {
+                  //Elimino Archivo del Server
+                  fetch(urlApi + "/deleteArchivo", {
+                    method: "get",
+                    headers: {
+                      "Content-Type": undefined,
+                      path: destino,
+                      Authorization: "Bearer " + cookies.get("token"),
+                    },
+                  })
+                    .then((response) => {
+                      return response.json();
+                    })
+                    .then(
+                      function (response) {
+                        $(".loader").fadeOut("slow");
+                        if (response.msg.trim() === "OK") {
+                          console.log("ok");
+                          toast.success("¡Se eliminó el Archivo con Éxito!");
+                          this.setState({
+                            archivoDen: null,
+                            tableArchivosDen: this.renderTableArchivosDen(),
+                          });
+                        } else {
+                          console.log("error");
+                          toast.error(
+                            "¡Se produjo un error al eliminar archivo!"
+                          );
+                        }
+                      }.bind(this)
+                    )
+                    .catch(function (error) {
+                      $(".loader").fadeOut("slow");
+                      toast.error("Error al eliminar. Intente nuevamente.");
+                      console.log(
+                        "Hubo un problema con la petición Fetch (3):" +
+                          error.message
+                      );
+                    });
+                }.bind(this)
+              )
+              .catch(function (error) {
+                $(".loader").fadeOut("slow");
+                toast.error(
+                  "Error al Actualizar Exploracion. Intente nuevamente."
+                );
+                console.log(
+                  "Hubo un problema con la petición Fetch (2):" + error.message
+                );
+              });
+          }.bind(this)
+        )
         .catch(function (error) {
           $(".loader").fadeOut("slow");
           toast.error("Error al consultar. Intente nuevamente.");
-          console.log('Hubo un problema con la petición Fetch (1):' + error.message);
+          console.log(
+            "Hubo un problema con la petición Fetch (1):" + error.message
+          );
         });
-
-
-
     }
-
   };
 
   subirDenuncia = () => {
-
     const MAXIMO_TAMANIO_BYTES = 15000000;
-    const types = ['application/pdf'];
-    var file = this.state.archivoDenuncia
+    const types = ["application/pdf"];
+    var file = this.state.archivoDenuncia;
 
     if (file !== null && file.length !== 0) {
-      var nameFile = (file[0].name).replace(/\s+/g, "_");
+      var nameFile = file[0].name.replace(/\s+/g, "_");
       nameFile = this.reemplazar(nameFile);
       var size = file[0].size;
       var type = file[0].type;
 
       if (size > MAXIMO_TAMANIO_BYTES) {
         var tamanio = 15000000 / 1000000;
-        toast.error("El archivo seleccionado supera los " + tamanio + 'Mb. permitidos.');
-        document.getElementById('filesAut').value = '';
-      }
-      else {
+        toast.error(
+          "El archivo seleccionado supera los " + tamanio + "Mb. permitidos."
+        );
+        document.getElementById("filesAut").value = "";
+      } else {
         if (!types.includes(type)) {
           toast.error("El archivo seleccionado tiene una extensión inválida.");
-          document.getElementById('filesAut').value = '';
-
-        }
-        else {
+          document.getElementById("filesAut").value = "";
+        } else {
           $(".loader").removeAttr("style");
-          document.getElementById('subirArch').setAttribute('disabled', 'disabled');
-          fetch(urlApi + '/excavacionId/' + this.state.excavacionId, {
-            method: 'get',
+          document
+            .getElementById("subirArch")
+            .setAttribute("disabled", "disabled");
+          fetch(urlApi + "/excavacionId/" + this.state.excavacionId, {
+            method: "get",
             headers: {
-              'Authorization': 'Bearer ' + cookies.get('token')
-            }
+              Authorization: "Bearer " + cookies.get("token"),
+            },
           })
-            .then(response => {
+            .then((response) => {
               return response.json();
             })
-            .then(function (response) {
+            .then(
+              function (response) {
+                var listArchivosDen = response.excavacionId.archivosDenuncia;
+                listArchivosDen.push(nameFile);
 
-              var listArchivosDen = response.excavacionId.archivosDenuncia;
-              listArchivosDen.push(nameFile);
+                var dataDen = {
+                  archivosDenuncia: listArchivosDen,
+                };
 
-              var dataDen = {
-                "archivosDenuncia": listArchivosDen,
-              };
-
-              //Primero Actualizo la Exploracion
-              fetch(urlApi + '/excavacion/' + this.state.excavacionId, {
-                method: 'put',
-                body: JSON.stringify(dataDen),
-                headers: {
-                  'Content-Type': 'application/json',
-                  'Authorization': 'Bearer ' + cookies.get('token')
-                }
-              })
-                .then(function (response) {
-                  if (response.ok) {
-                    console.log("¡Se actualizaron los datos de la Excavación con Éxito!");
-                    this.setState({ listArchivosDen: listArchivosDen });
-
-                  }
-                }.bind(this))
-                .then(function (response) {
-                  //segundo subo archivo al server
-
-                  const destino = rutaExcavaciones + 'Denuncias/' + this.state.excavacionId;
-                  const data = new FormData();
-                  data.append("file", file[0]);
-
-
-                  axios.post(urlApi + "/uploadArchivo", data, {
-                    headers: {
-                      "Content-Type": undefined,
-                      path: destino,
-                      "newfilename": '',
-                      'Authorization': 'Bearer ' + cookies.get('token')
-                    }
-                  })
-                    .then(response => {
-                      $(".loader").fadeOut("slow");
-                      if (response.statusText === "OK") {
-                        this.setState({ archivoDenuncia: null, showSuccess: true, showError: false, urlArchivo: urlArchivo + 'Denuncias/' + this.state.excavacionId + '/' + nameFile });
-                        this.setState({ tableArchivosDen: this.renderTableArchivosDen() })
-                        document.getElementById('filesAut').value = '';
+                //Primero Actualizo la Exploracion
+                fetch(urlApi + "/excavacion/" + this.state.excavacionId, {
+                  method: "put",
+                  body: JSON.stringify(dataDen),
+                  headers: {
+                    "Content-Type": "application/json",
+                    Authorization: "Bearer " + cookies.get("token"),
+                  },
+                })
+                  .then(
+                    function (response) {
+                      if (response.ok) {
+                        console.log(
+                          "¡Se actualizaron los datos de la Excavación con Éxito!"
+                        );
+                        this.setState({ listArchivosDen: listArchivosDen });
                       }
-                      else {
-                        this.setState({ showSuccess: false, showError: true });
-                      }
-                      document.getElementById('subirArch').removeAttribute('disabled');
+                    }.bind(this)
+                  )
+                  .then(
+                    function (response) {
+                      //segundo subo archivo al server
 
-                      setTimeout(() => {
-                        this.setState({ showSuccess: false, showError: false });
-                      }, 5000);
+                      const destino =
+                        rutaExcavaciones +
+                        "Denuncias/" +
+                        this.state.excavacionId;
+                      const data = new FormData();
+                      data.append("file", file[0]);
 
+                      axios
+                        .post(urlApi + "/uploadArchivo", data, {
+                          headers: {
+                            "Content-Type": undefined,
+                            path: destino,
+                            newfilename: "",
+                            Authorization: "Bearer " + cookies.get("token"),
+                          },
+                        })
+                        .then((response) => {
+                          $(".loader").fadeOut("slow");
+                          if (response.statusText === "OK") {
+                            this.setState({
+                              archivoDenuncia: null,
+                              showSuccess: true,
+                              showError: false,
+                              urlArchivo:
+                                urlArchivo +
+                                "Denuncias/" +
+                                this.state.excavacionId +
+                                "/" +
+                                nameFile,
+                            });
+                            this.setState({
+                              tableArchivosDen: this.renderTableArchivosDen(),
+                            });
+                            document.getElementById("filesAut").value = "";
+                          } else {
+                            this.setState({
+                              showSuccess: false,
+                              showError: true,
+                            });
+                          }
+                          document
+                            .getElementById("subirArch")
+                            .removeAttribute("disabled");
 
-                    })
-                    .catch(error => {
-                      $(".loader").fadeOut("slow");
-                      this.setState({ showSuccess: false, showError: true });
-                      console.log(error);
-                    });
-
-
-
-
-                }.bind(this))
-                .catch(function (error) {
-                  $(".loader").fadeOut("slow");
-                  toast.error("Error al Actualizar Exploracion. Intente nuevamente.");
-                  console.log('Hubo un problema con la petición Fetch (1):' + error.message);
-                });
-
-
-            }.bind(this))
+                          setTimeout(() => {
+                            this.setState({
+                              showSuccess: false,
+                              showError: false,
+                            });
+                          }, 5000);
+                        })
+                        .catch((error) => {
+                          $(".loader").fadeOut("slow");
+                          this.setState({
+                            showSuccess: false,
+                            showError: true,
+                          });
+                          console.log(error);
+                        });
+                    }.bind(this)
+                  )
+                  .catch(function (error) {
+                    $(".loader").fadeOut("slow");
+                    toast.error(
+                      "Error al Actualizar Exploracion. Intente nuevamente."
+                    );
+                    console.log(
+                      "Hubo un problema con la petición Fetch (1):" +
+                        error.message
+                    );
+                  });
+              }.bind(this)
+            )
             .catch(function (error) {
               $(".loader").fadeOut("slow");
               toast.error("Error al consultar. Intente nuevamente.");
-              console.log('Hubo un problema con la petición Fetch (2):' + error.message);
+              console.log(
+                "Hubo un problema con la petición Fetch (2):" + error.message
+              );
             });
-
         }
-
       }
-
     } else {
       toast.error("Seleccione un Archivo.");
     }
-  }
+  };
 
   reemplazar(cadena) {
-
     var chars = {
+      á: "a",
+      é: "e",
+      í: "i",
+      ó: "o",
+      ú: "u",
 
-      "á": "a", "é": "e", "í": "i", "ó": "o", "ú": "u",
+      à: "a",
+      è: "e",
+      ì: "i",
+      ò: "o",
+      ù: "u",
+      ñ: "n",
 
-      "à": "a", "è": "e", "ì": "i", "ò": "o", "ù": "u", "ñ": "n",
+      Á: "A",
+      É: "E",
+      Í: "I",
+      Ó: "O",
+      Ú: "U",
 
-      "Á": "A", "É": "E", "Í": "I", "Ó": "O", "Ú": "U",
+      À: "A",
+      È: "E",
+      Ì: "I",
+      Ò: "O",
+      Ù: "U",
+      Ñ: "N",
 
-      "À": "A", "È": "E", "Ì": "I", "Ò": "O", "Ù": "U", "Ñ": "N",
+      ä: "a",
+      ë: "e",
+      ï: "i",
+      ö: "o",
+      ü: "u",
 
-      "ä": "a", "ë": "e", "ï": "i", "ö": "o", "ü": "u",
+      Ä: "A",
+      Ä: "A",
+      Ë: "E",
+      Ï: "I",
+      Ö: "O",
+      Ü: "U",
+    };
 
-      "Ä": "A", "Ä": "A", "Ë": "E", "Ï": "I", "Ö": "O", "Ü": "U"
-    }
+    var expr = /[áàéèíìóòúùñäëïöü]/gi;
 
-    var expr = /[áàéèíìóòúùñäëïöü]/ig;
-
-    var res = cadena.replace(expr, function (e) { return chars[e] });
+    var res = cadena.replace(expr, function (e) {
+      return chars[e];
+    });
 
     return res;
-
   }
 
   renderTableArchivosDen() {
-
-
     return this.state.listArchivosDen.map((file, index) => {
-
       return (
         <tr key={index}>
           <td>
-            <Button variant="danger" type="button" id="eliminarArch" onClick={() => this.eliminarArchivoDenuncia(file)}>
+            <Button
+              variant="danger"
+              type="button"
+              id="eliminarArch"
+              onClick={() => this.eliminarArchivoDenuncia(file)}
+            >
               <FontAwesomeIcon icon={faTrash} />
             </Button>
           </td>
           <td>
-            <a href={urlArchivo + 'Denuncias/' + this.state.excavacionId + '/' + file} disabled target="_blank">{file}</a>
+            <a
+              href={
+                urlArchivo + "Denuncias/" + this.state.excavacionId + "/" + file
+              }
+              disabled
+              target="_blank"
+            >
+              {file}
+            </a>
           </td>
-
         </tr>
-      )
-    })
-
-
-
+      );
+    });
   }
 
   renderTableArchivosFotos() {
-
-
     return this.state.listArchivosFotos.map((file, index) => {
-
       return (
         <tr key={index}>
           <td>
-            <Button variant="danger" type="button" id="eliminarArch" onClick={() => this.eliminarArchivoFoto(file.nombre)}>
+            <Button
+              variant="danger"
+              type="button"
+              id="eliminarArch"
+              onClick={() => this.eliminarArchivoFoto(file.nombre)}
+            >
               <FontAwesomeIcon icon={faTrash} />
             </Button>
           </td>
           <td>
-            <a href={urlArchivo + 'Fotos/' + this.state.excavacionId + '/' + file.nombre} disabled target="_blank">{file.nombre}</a>
+            <a
+              href={
+                urlArchivo +
+                "Fotos/" +
+                this.state.excavacionId +
+                "/" +
+                file.nombre
+              }
+              disabled
+              target="_blank"
+            >
+              {file.nombre}
+            </a>
           </td>
-          <td>
-            {file.descripcion}
-          </td>
-
+          <td>{file.descripcion}</td>
         </tr>
-      )
-    })
-
-
-
+      );
+    });
   }
 
   renderTableArchivosVideos() {
-
-
     return this.state.listArchivosVideo.map((file, index) => {
-
       return (
         <tr key={index}>
           <td>
-            <Button variant="danger" type="button" id="eliminarArch" onClick={() => this.eliminarArchivoVideo(file)}>
+            <Button
+              variant="danger"
+              type="button"
+              id="eliminarArch"
+              onClick={() => this.eliminarArchivoVideo(file)}
+            >
               <FontAwesomeIcon icon={faTrash} />
             </Button>
           </td>
           <td>
-            <a href={urlArchivo + 'Videos/' + this.state.excavacionId + '/' + file} disabled target="_blank">{file}</a>
+            <a
+              href={
+                urlArchivo + "Videos/" + this.state.excavacionId + "/" + file
+              }
+              disabled
+              target="_blank"
+            >
+              {file}
+            </a>
           </td>
         </tr>
-      )
-    })
-
-
-
+      );
+    });
   }
-
 
   handleForm4 = (event) => {
     $(".loader").removeAttr("style");
 
     var exploracionId = "";
-    if (this.state.selectedExploracion !== null && this.state.selectedExploracion !== "") {
+    if (
+      this.state.selectedExploracion !== null &&
+      this.state.selectedExploracion !== ""
+    ) {
       exploracionId = this.state.selectedExploracion.value;
     }
 
@@ -1384,652 +1501,755 @@ class AddExcavacion extends React.Component {
       hallazgo = this.state.selectedHallazgo.value;
     }
 
-    console.log('PTO GPS:', this.state.puntoGpsExcavacion);
+    console.log("PTO GPS:", this.state.puntoGpsExcavacion);
 
     var data = {
-      "nombreArea": this.state.nombreArea,
-      "codigoCampo": this.state.codigoCampo,
-      "fechaInicio": this.state.fechaInicio,
-      "fechaTermino": this.state.fechaTermino,
-      "director": this.state.director,
-      "directorId": this.state.directorId,
-      "auxiliares": this.state.auxiliaresId,
-      "profesionales": this.state.profesionalesId,
-      "muestraHome": this.state.muestraHome,
-      "tipoHallazgo": hallazgo,
-      "idExploracion": exploracionId,
-      "datosGeologicos": this.state.geologicos,
-      "datosTaxonomicos": this.state.taxonomicos,
-      "idArea": this.state.idAreaExcavacion,
-      "puntoGps": this.state.puntoGpsExcavacion
-    }
-
-
-
+      nombreArea: this.state.nombreArea,
+      codigoCampo: this.state.codigoCampo,
+      fechaInicio: this.state.fechaInicio,
+      fechaTermino: this.state.fechaTermino,
+      director: this.state.director,
+      directorId: this.state.directorId,
+      auxiliares: this.state.auxiliaresId,
+      profesionales: this.state.profesionalesId,
+      muestraHome: this.state.muestraHome,
+      tipoHallazgo: hallazgo,
+      idExploracion: exploracionId,
+      datosGeologicos: this.state.geologicos,
+      datosTaxonomicos: this.state.taxonomicos,
+      idArea: this.state.idAreaExcavacion,
+      puntoGps: this.state.puntoGpsExcavacion,
+    };
 
     fetch(urlApi + "/excavacion/" + this.state.excavacionId, {
       method: "put",
       body: JSON.stringify(data),
       headers: {
         "Content-Type": "application/json",
-        'Authorization': 'Bearer ' + cookies.get('token')
+        Authorization: "Bearer " + cookies.get("token"),
       },
     })
       .then(function (response) {
-
         if (response.ok) {
           console.log("¡Se guardó la Excavación con Éxito!");
         }
-      }).then(function () {
-        if (this.state.selectedExploracion !== null) {
-          fetch(urlApi + "/exploracionId/" + this.state.selectedExploracion.value, {
-            method: 'get',
-            headers: {
-              'Authorization': 'Bearer ' + cookies.get('token')
-            }
-          })
-            .then(response => response.json())
-            .then(data => {
-              var excavaciones = data.exploracionId.idExcavaciones
-              if (!excavaciones.includes(this.state.excavacionId)) {
-                //si no existe en el arreglo lo agrego
-                excavaciones.push(this.state.excavacionId)
+      })
+      .then(
+        function () {
+          if (this.state.selectedExploracion !== null) {
+            fetch(
+              urlApi + "/exploracionId/" + this.state.selectedExploracion.value,
+              {
+                method: "get",
+                headers: {
+                  Authorization: "Bearer " + cookies.get("token"),
+                },
+              }
+            )
+              .then((response) => response.json())
+              .then((data) => {
+                var excavaciones = data.exploracionId.idExcavaciones;
+                if (!excavaciones.includes(this.state.excavacionId)) {
+                  //si no existe en el arreglo lo agrego
+                  excavaciones.push(this.state.excavacionId);
 
-                var data = {
-                  "idExcavaciones": excavaciones
-                }
-                fetch(urlApi + "/exploracion/" + this.state.selectedExploracion.value, {
-                  method: "put",
-                  body: JSON.stringify(data),
-                  headers: {
-                    "Content-Type": "application/json",
-                    'Authorization': 'Bearer ' + cookies.get('token')
-                  },
-                })
-                  .then(function (response) {
-                    $(".loader").fadeOut("slow");
-                    if (response.ok) {
-                      console.log("¡Se guardó la Exploracion con Éxito!");
-                      toast.success("¡Se guardó la Excavación con Éxito!");
+                  var data = {
+                    idExcavaciones: excavaciones,
+                  };
+                  fetch(
+                    urlApi +
+                      "/exploracion/" +
+                      this.state.selectedExploracion.value,
+                    {
+                      method: "put",
+                      body: JSON.stringify(data),
+                      headers: {
+                        "Content-Type": "application/json",
+                        Authorization: "Bearer " + cookies.get("token"),
+                      },
                     }
-                  }.bind(this))
-                  .catch(function (error) {
-                    $(".loader").fadeOut("slow");
-                    toast.error("Error al guardar. Intente nuevamente.");
-                    console.log(
-                      "Hubo un problema con la petición Fetch:" + error.message
-                    );
+                  )
+                    .then(
+                      function (response) {
+                        $(".loader").fadeOut("slow");
+                        if (response.ok) {
+                          console.log("¡Se guardó la Exploracion con Éxito!");
+                          toast.success("¡Se guardó la Excavación con Éxito!");
+                        }
+                      }.bind(this)
+                    )
+                    .catch(function (error) {
+                      $(".loader").fadeOut("slow");
+                      toast.error("Error al guardar. Intente nuevamente.");
+                      console.log(
+                        "Hubo un problema con la petición Fetch:" +
+                          error.message
+                      );
+                    });
+                } else {
+                  $(".loader").fadeOut("slow");
+                }
+              })
+              .catch(function (error) {
+                console.log("Error:", Error);
+              });
+          } else {
+            $(".loader").fadeOut("slow");
+          }
+        }.bind(this)
+      )
+      .then(
+        function () {
+          if (this.state.selectedExploracionAnt !== null) {
+            fetch(
+              urlApi +
+                "/exploracionId/" +
+                this.state.selectedExploracionAnt.value,
+              {
+                method: "get",
+                headers: {
+                  Authorization: "Bearer " + cookies.get("token"),
+                },
+              }
+            )
+              .then((response) => response.json())
+              .then((data) => {
+                var excavaciones = data.exploracionId.idExcavaciones;
+                if (excavaciones.includes(this.state.excavacionId)) {
+                  //borro de la exploracion anterior la excavacion
+                  var contador = 0;
+                  excavaciones.map((registro) => {
+                    if (registro === this.state.excavacionId) {
+                      excavaciones.splice(contador, 1);
+                    }
+                    contador++;
                   });
 
-              }
-              else {
-                $(".loader").fadeOut("slow");
-              }
-
-
-            })
-            .catch(function (error) {
-              console.log('Error:', Error)
-            })
-
-        }
-        else {
-          $(".loader").fadeOut("slow");
-        }
-
-      }.bind(this))
-      .then(function () {
-        if (this.state.selectedExploracionAnt !== null) {
-          fetch(urlApi + "/exploracionId/" + this.state.selectedExploracionAnt.value, {
-            method: 'get',
-            headers: {
-              'Authorization': 'Bearer ' + cookies.get('token')
-            }
-          })
-            .then(response => response.json())
-            .then(data => {
-              var excavaciones = data.exploracionId.idExcavaciones
-              if (excavaciones.includes(this.state.excavacionId)) {
-
-                //borro de la exploracion anterior la excavacion
-                var contador = 0;
-                excavaciones.map((registro) => {
-                  if (registro === this.state.excavacionId) {
-                    excavaciones.splice(contador, 1);
-                  }
-                  contador++;
-                });
-
-                var data = {
-                  "idExcavaciones": excavaciones
-                }
-                fetch(urlApi + "/exploracion/" + this.state.selectedExploracionAnt.value, {
-                  method: "put",
-                  body: JSON.stringify(data),
-                  headers: {
-                    "Content-Type": "application/json",
-                    'Authorization': 'Bearer ' + cookies.get('token')
-                  },
-                })
-                  .then(function (response) {
-                    $(".loader").fadeOut("slow");
-                    if (response.ok) {
-                      console.log("¡Se guardó la Exploracion con Éxito!");
-                      toast.success("¡Se guardó la Excavación con Éxito!");
+                  var data = {
+                    idExcavaciones: excavaciones,
+                  };
+                  fetch(
+                    urlApi +
+                      "/exploracion/" +
+                      this.state.selectedExploracionAnt.value,
+                    {
+                      method: "put",
+                      body: JSON.stringify(data),
+                      headers: {
+                        "Content-Type": "application/json",
+                        Authorization: "Bearer " + cookies.get("token"),
+                      },
                     }
-                  }.bind(this))
-                  .catch(function (error) {
-                    $(".loader").fadeOut("slow");
-                    toast.error("Error al guardar. Intente nuevamente.");
-                    console.log(
-                      "Hubo un problema con la petición Fetch:" + error.message
-                    );
-                  });
-
-              }
-              else {
-                $(".loader").fadeOut("slow");
-              }
-
-
-            })
-            .catch(function (error) {
-              console.log('Error:', Error)
-            })
-
-        }
-
-
-      }.bind(this))
+                  )
+                    .then(
+                      function (response) {
+                        $(".loader").fadeOut("slow");
+                        if (response.ok) {
+                          console.log("¡Se guardó la Exploracion con Éxito!");
+                          toast.success("¡Se guardó la Excavación con Éxito!");
+                        }
+                      }.bind(this)
+                    )
+                    .catch(function (error) {
+                      $(".loader").fadeOut("slow");
+                      toast.error("Error al guardar. Intente nuevamente.");
+                      console.log(
+                        "Hubo un problema con la petición Fetch:" +
+                          error.message
+                      );
+                    });
+                } else {
+                  $(".loader").fadeOut("slow");
+                }
+              })
+              .catch(function (error) {
+                console.log("Error:", Error);
+              });
+          }
+        }.bind(this)
+      )
       .catch(function (error) {
         $(".loader").fadeOut("slow");
         toast.error("Error al guardar. Intente nuevamente.");
-        console.log(
-          "Hubo un problema con la petición Fetch:" + error.message
-        );
+        console.log("Hubo un problema con la petición Fetch:" + error.message);
       });
-
-
-  }
+  };
 
   filesImagehandleChange = (event) => {
     const file = event.target.files;
     const name = file[0].name;
     this.setState({ archivoFoto: file });
-
-  }
+  };
 
   filesVideohandleChange = (event) => {
     const file = event.target.files;
     const name = file[0].name;
     this.setState({ archivoVideo: file });
-  }
+  };
 
   subirFoto = () => {
-
     const MAXIMO_TAMANIO_BYTES = 5000000;
-    const types = ['image/gif', 'image/png', 'image/jpg', 'image/jpeg', 'image/bmp', 'image/webp'];
-    var file = this.state.archivoFoto
+    const types = [
+      "image/gif",
+      "image/png",
+      "image/jpg",
+      "image/jpeg",
+      "image/bmp",
+      "image/webp",
+    ];
+    var file = this.state.archivoFoto;
 
     if (file !== null && file.length !== 0) {
-      var nameFile = (file[0].name).replace(/\s+/g, "_");
+      var nameFile = file[0].name.replace(/\s+/g, "_");
       nameFile = this.reemplazar(nameFile);
       var size = file[0].size;
       var type = file[0].type;
 
       if (size > MAXIMO_TAMANIO_BYTES) {
         var tamanio = 5000000 / 1000000;
-        toast.error("El archivo seleccionado supera los " + tamanio + 'Mb. permitidos.');
-        document.getElementById('fileFoto').value = '';
-      }
-      else {
+        toast.error(
+          "El archivo seleccionado supera los " + tamanio + "Mb. permitidos."
+        );
+        document.getElementById("fileFoto").value = "";
+      } else {
         if (!types.includes(type)) {
           toast.error("El archivo seleccionado tiene una extensión inválida.");
-          document.getElementById('fileFoto').value = '';
-
-        }
-        else {
+          document.getElementById("fileFoto").value = "";
+        } else {
           $(".loader").removeAttr("style");
-          document.getElementById('subirFoto').setAttribute('disabled', 'disabled');
-          fetch(urlApi + '/excavacionId/' + this.state.excavacionId, {
-            method: 'get',
+          document
+            .getElementById("subirFoto")
+            .setAttribute("disabled", "disabled");
+          fetch(urlApi + "/excavacionId/" + this.state.excavacionId, {
+            method: "get",
             headers: {
-              'Authorization': 'Bearer ' + cookies.get('token')
-            }
+              Authorization: "Bearer " + cookies.get("token"),
+            },
           })
-            .then(response => {
+            .then((response) => {
               return response.json();
             })
-            .then(function (response) {
+            .then(
+              function (response) {
+                var listArchivosFotos = response.excavacionId.fotosExcavacion;
+                var fotoSubir = {
+                  nombre: nameFile,
+                  descripcion: this.state.descripcionFoto,
+                };
 
-              var listArchivosFotos = response.excavacionId.fotosExcavacion;
-              var fotoSubir = {
-                "nombre": nameFile,
-                "descripcion": this.state.descripcionFoto
-              }
+                listArchivosFotos.push(fotoSubir);
 
-              listArchivosFotos.push(fotoSubir);
+                //  console.log('LAS FOTOS::', listArchivosFotos);
 
-              //  console.log('LAS FOTOS::', listArchivosFotos);
+                var dataFoto = {
+                  fotosExcavacion: listArchivosFotos,
+                };
 
-              var dataFoto = {
-                "fotosExcavacion": listArchivosFotos,
-              };
-
-              //Primero Actualizo la Excavacion
-              fetch(urlApi + '/excavacion/' + this.state.excavacionId, {
-                method: 'put',
-                body: JSON.stringify(dataFoto),
-                headers: {
-                  'Content-Type': 'application/json',
-                  'Authorization': 'Bearer ' + cookies.get('token')
-                }
-              })
-                .then(function (response) {
-                  if (response.ok) {
-                    console.log("¡Se actualizaron los datos de la Excavación con Éxito!");
-                    this.setState({ listArchivosFotos: listArchivosFotos });
-
-                  }
-                }.bind(this))
-                .then(function (response) {
-                  //segundo subo archivo al server
-
-                  const destino = rutaExcavaciones + 'Fotos/' + this.state.excavacionId;
-                  const data = new FormData();
-                  data.append("file", file[0]);
-
-
-                  axios.post(urlApi + "/uploadArchivo", data, {
-                    headers: {
-                      "Content-Type": undefined,
-                      path: destino,
-                      "newfilename": '',
-                      'Authorization': 'Bearer ' + cookies.get('token')
-                    }
-                  })
-                    .then(response => {
-                      $(".loader").fadeOut("slow");
-                      if (response.statusText === "OK") {
-                        this.setState({ archivoFoto: null, descripcionFoto: "", showSuccessFoto: true, showErrorFoto: false, urlArchivo: urlArchivo + 'Fotos/' + this.state.excavacionId + '/' + nameFile });
-                        this.setState({ tableArchivosFotos: this.renderTableArchivosFotos() })
-                        document.getElementById('fileFoto').value = '';
+                //Primero Actualizo la Excavacion
+                fetch(urlApi + "/excavacion/" + this.state.excavacionId, {
+                  method: "put",
+                  body: JSON.stringify(dataFoto),
+                  headers: {
+                    "Content-Type": "application/json",
+                    Authorization: "Bearer " + cookies.get("token"),
+                  },
+                })
+                  .then(
+                    function (response) {
+                      if (response.ok) {
+                        console.log(
+                          "¡Se actualizaron los datos de la Excavación con Éxito!"
+                        );
+                        this.setState({ listArchivosFotos: listArchivosFotos });
                       }
-                      else {
-                        this.setState({ showSuccessFoto: false, showErrorFoto: true });
-                      }
-                      document.getElementById('subirFoto').removeAttribute('disabled');
+                    }.bind(this)
+                  )
+                  .then(
+                    function (response) {
+                      //segundo subo archivo al server
 
-                      setTimeout(() => {
-                        this.setState({ showSuccessFoto: false, showErrorFoto: false });
-                      }, 5000);
+                      const destino =
+                        rutaExcavaciones + "Fotos/" + this.state.excavacionId;
+                      const data = new FormData();
+                      data.append("file", file[0]);
 
+                      axios
+                        .post(urlApi + "/uploadArchivo", data, {
+                          headers: {
+                            "Content-Type": undefined,
+                            path: destino,
+                            newfilename: "",
+                            Authorization: "Bearer " + cookies.get("token"),
+                          },
+                        })
+                        .then((response) => {
+                          $(".loader").fadeOut("slow");
+                          if (response.statusText === "OK") {
+                            this.setState({
+                              archivoFoto: null,
+                              descripcionFoto: "",
+                              showSuccessFoto: true,
+                              showErrorFoto: false,
+                              urlArchivo:
+                                urlArchivo +
+                                "Fotos/" +
+                                this.state.excavacionId +
+                                "/" +
+                                nameFile,
+                            });
+                            this.setState({
+                              tableArchivosFotos:
+                                this.renderTableArchivosFotos(),
+                            });
+                            document.getElementById("fileFoto").value = "";
+                          } else {
+                            this.setState({
+                              showSuccessFoto: false,
+                              showErrorFoto: true,
+                            });
+                          }
+                          document
+                            .getElementById("subirFoto")
+                            .removeAttribute("disabled");
 
-                    })
-                    .catch(error => {
-                      $(".loader").fadeOut("slow");
-                      this.setState({ showSuccessFoto: false, showErrorFoto: true });
-                      console.log(error);
-                    });
-
-
-
-
-                }.bind(this))
-                .catch(function (error) {
-                  $(".loader").fadeOut("slow");
-                  toast.error("Error al Actualizar Exploracion. Intente nuevamente.");
-                  console.log('Hubo un problema con la petición Fetch (1):' + error.message);
-                });
-
-
-            }.bind(this))
+                          setTimeout(() => {
+                            this.setState({
+                              showSuccessFoto: false,
+                              showErrorFoto: false,
+                            });
+                          }, 5000);
+                        })
+                        .catch((error) => {
+                          $(".loader").fadeOut("slow");
+                          this.setState({
+                            showSuccessFoto: false,
+                            showErrorFoto: true,
+                          });
+                          console.log(error);
+                        });
+                    }.bind(this)
+                  )
+                  .catch(function (error) {
+                    $(".loader").fadeOut("slow");
+                    toast.error(
+                      "Error al Actualizar Exploracion. Intente nuevamente."
+                    );
+                    console.log(
+                      "Hubo un problema con la petición Fetch (1):" +
+                        error.message
+                    );
+                  });
+              }.bind(this)
+            )
             .catch(function (error) {
               $(".loader").fadeOut("slow");
               toast.error("Error al consultar. Intente nuevamente.");
-              console.log('Hubo un problema con la petición Fetch (2):' + error.message);
+              console.log(
+                "Hubo un problema con la petición Fetch (2):" + error.message
+              );
             });
-
         }
-
       }
-
     } else {
       toast.error("Seleccione un Archivo.");
     }
-  }
-
+  };
 
   eliminarArchivoFoto = (dato) => {
-    var destino = rutaExcavaciones + 'Fotos/' + this.state.excavacionId + "/" + dato;
+    var destino =
+      rutaExcavaciones + "Fotos/" + this.state.excavacionId + "/" + dato;
     var opcion = window.confirm("¿Está seguro que deseas eliminar el Archivo?");
     if (opcion == true) {
-
-      fetch(urlApi + '/excavacionId/' + this.state.excavacionId, {
-        method: 'get',
+      fetch(urlApi + "/excavacionId/" + this.state.excavacionId, {
+        method: "get",
         headers: {
-          'Authorization': 'Bearer ' + cookies.get('token')
-        }
+          Authorization: "Bearer " + cookies.get("token"),
+        },
       })
-        .then(response => {
+        .then((response) => {
           return response.json();
         })
-        .then(function (response) {
-          //aca ya tengo la excavacion, tengo que obtener los archivos de autorizacion y quitar el candidato a eliminar
-          $(".loader").removeAttr("style");
-          //elimino archivo del array
-          var archivos = response.excavacionId.fotosExcavacion;
-          var contador = 0;
-          archivos.map((registro) => {
-            if (dato == registro.nombre) {
-              archivos.splice(contador, 1);
-            }
-            contador++;
-          });
-
-          var dataFoto = {
-            "fotosExcavacion": archivos
-
-          }
-
-          //Actualizo la Exploracion
-          fetch(urlApi + '/excavacion/' + this.state.excavacionId, {
-            method: 'put',
-            body: JSON.stringify(dataFoto),
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': 'Bearer ' + cookies.get('token')
-            }
-          })
-            .then(function (response) {
-              if (response.ok) {
-                console.log("¡Se actualizaron los datos de la Excavación con Éxito!");
-                this.setState({ listArchivosFotos: archivos });
-
+        .then(
+          function (response) {
+            //aca ya tengo la excavacion, tengo que obtener los archivos de autorizacion y quitar el candidato a eliminar
+            $(".loader").removeAttr("style");
+            //elimino archivo del array
+            var archivos = response.excavacionId.fotosExcavacion;
+            var contador = 0;
+            archivos.map((registro) => {
+              if (dato == registro.nombre) {
+                archivos.splice(contador, 1);
               }
-            }.bind(this))
-            .then(function (response) {
-              //Elimino Archivo del Server
-              fetch(urlApi + '/deleteArchivo', {
-                method: 'get',
-                headers: {
-                  'Content-Type': undefined,
-                  'path': destino,
-                  'Authorization': 'Bearer ' + cookies.get('token')
-                }
-              })
-                .then(response => {
-                  return response.json();
-                })
-                .then(function (response) {
-                  $(".loader").fadeOut("slow");
-                  if ((response.msg).trim() === 'OK') {
-                    console.log('ok');
-                    toast.success("¡Se eliminó el Archivo con Éxito!");
-                    this.setState({ archivoFoto: null, tableArchivosFotos: this.renderTableArchivosFotos() })
-
-                  } else {
-                    console.log('error');
-                    toast.error("¡Se produjo un error al eliminar archivo!");
-                  }
-                }.bind(this)).catch(function (error) {
-                  $(".loader").fadeOut("slow");
-                  toast.error("Error al eliminar. Intente nuevamente.");
-                  console.log('Hubo un problema con la petición Fetch (3):' + error.message);
-                });
-
-
-            }.bind(this))
-            .catch(function (error) {
-              $(".loader").fadeOut("slow");
-              toast.error("Error al Actualizar Exploracion. Intente nuevamente.");
-              console.log('Hubo un problema con la petición Fetch (2):' + error.message);
+              contador++;
             });
 
-        }.bind(this))
+            var dataFoto = {
+              fotosExcavacion: archivos,
+            };
+
+            //Actualizo la Exploracion
+            fetch(urlApi + "/excavacion/" + this.state.excavacionId, {
+              method: "put",
+              body: JSON.stringify(dataFoto),
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: "Bearer " + cookies.get("token"),
+              },
+            })
+              .then(
+                function (response) {
+                  if (response.ok) {
+                    console.log(
+                      "¡Se actualizaron los datos de la Excavación con Éxito!"
+                    );
+                    this.setState({ listArchivosFotos: archivos });
+                  }
+                }.bind(this)
+              )
+              .then(
+                function (response) {
+                  //Elimino Archivo del Server
+                  fetch(urlApi + "/deleteArchivo", {
+                    method: "get",
+                    headers: {
+                      "Content-Type": undefined,
+                      path: destino,
+                      Authorization: "Bearer " + cookies.get("token"),
+                    },
+                  })
+                    .then((response) => {
+                      return response.json();
+                    })
+                    .then(
+                      function (response) {
+                        $(".loader").fadeOut("slow");
+                        if (response.msg.trim() === "OK") {
+                          console.log("ok");
+                          toast.success("¡Se eliminó el Archivo con Éxito!");
+                          this.setState({
+                            archivoFoto: null,
+                            tableArchivosFotos: this.renderTableArchivosFotos(),
+                          });
+                        } else {
+                          console.log("error");
+                          toast.error(
+                            "¡Se produjo un error al eliminar archivo!"
+                          );
+                        }
+                      }.bind(this)
+                    )
+                    .catch(function (error) {
+                      $(".loader").fadeOut("slow");
+                      toast.error("Error al eliminar. Intente nuevamente.");
+                      console.log(
+                        "Hubo un problema con la petición Fetch (3):" +
+                          error.message
+                      );
+                    });
+                }.bind(this)
+              )
+              .catch(function (error) {
+                $(".loader").fadeOut("slow");
+                toast.error(
+                  "Error al Actualizar Exploracion. Intente nuevamente."
+                );
+                console.log(
+                  "Hubo un problema con la petición Fetch (2):" + error.message
+                );
+              });
+          }.bind(this)
+        )
         .catch(function (error) {
           $(".loader").fadeOut("slow");
           toast.error("Error al consultar. Intente nuevamente.");
-          console.log('Hubo un problema con la petición Fetch (1):' + error.message);
+          console.log(
+            "Hubo un problema con la petición Fetch (1):" + error.message
+          );
         });
-
     }
-
   };
 
-
   subirVideo = () => {
-
     const MAXIMO_TAMANIO_BYTES = 50000000;
-    const types = ['video/x-msvideo', 'video/mpeg', 'video/ogg', 'video/x-flv', 'video/mp4', 'video/x-ms-wmv', 'video/quicktime', 'video/3gpp', 'video/MP2T'];
-    var file = this.state.archivoVideo
+    const types = [
+      "video/x-msvideo",
+      "video/mpeg",
+      "video/ogg",
+      "video/x-flv",
+      "video/mp4",
+      "video/x-ms-wmv",
+      "video/quicktime",
+      "video/3gpp",
+      "video/MP2T",
+    ];
+    var file = this.state.archivoVideo;
 
     if (file !== null && file.length !== 0) {
-      var nameFile = (file[0].name).replace(/\s+/g, "_");
+      var nameFile = file[0].name.replace(/\s+/g, "_");
       nameFile = this.reemplazar(nameFile);
       var size = file[0].size;
       var type = file[0].type;
 
       if (size > MAXIMO_TAMANIO_BYTES) {
         var tamanio = MAXIMO_TAMANIO_BYTES / 1000000;
-        toast.error("El archivo seleccionado supera los " + tamanio + 'Mb. permitidos.');
-        document.getElementById('filesVideo').value = '';
-      }
-      else {
+        toast.error(
+          "El archivo seleccionado supera los " + tamanio + "Mb. permitidos."
+        );
+        document.getElementById("filesVideo").value = "";
+      } else {
         if (!types.includes(type)) {
           toast.error("El archivo seleccionado tiene una extensión inválida.");
-          document.getElementById('filesVideo').value = '';
-
-        }
-        else {
+          document.getElementById("filesVideo").value = "";
+        } else {
           $(".loader").removeAttr("style");
-          document.getElementById('subirVideo').setAttribute('disabled', 'disabled');
-          fetch(urlApi + '/excavacionId/' + this.state.excavacionId, {
-            method: 'get',
+          document
+            .getElementById("subirVideo")
+            .setAttribute("disabled", "disabled");
+          fetch(urlApi + "/excavacionId/" + this.state.excavacionId, {
+            method: "get",
             headers: {
-              'Authorization': 'Bearer ' + cookies.get('token')
-            }
+              Authorization: "Bearer " + cookies.get("token"),
+            },
           })
-            .then(response => {
+            .then((response) => {
               return response.json();
             })
-            .then(function (response) {
+            .then(
+              function (response) {
+                var listArchivosVideo = response.excavacionId.videosExcavacion;
+                listArchivosVideo.push(nameFile);
 
-              var listArchivosVideo = response.excavacionId.videosExcavacion;
-              listArchivosVideo.push(nameFile);
+                var dataVideo = {
+                  videosExcavacion: listArchivosVideo,
+                };
 
-              var dataVideo = {
-                "videosExcavacion": listArchivosVideo,
-              };
-
-              //Primero Actualizo la Exploracion
-              fetch(urlApi + '/excavacion/' + this.state.excavacionId, {
-                method: 'put',
-                body: JSON.stringify(dataVideo),
-                headers: {
-                  'Content-Type': 'application/json',
-                  'Authorization': 'Bearer ' + cookies.get('token')
-                }
-              })
-                .then(function (response) {
-                  if (response.ok) {
-                    console.log("¡Se actualizaron los datos de la Excavación con Éxito!");
-                    this.setState({ listArchivosVideo: listArchivosVideo });
-
-                  }
-                }.bind(this))
-                .then(function (response) {
-                  //segundo subo archivo al server
-
-                  const destino = rutaExcavaciones + 'Videos/' + this.state.excavacionId;
-                  const data = new FormData();
-                  data.append("file", file[0]);
-
-
-                  axios.post(urlApi + "/uploadArchivo", data, {
-                    headers: {
-                      "Content-Type": undefined,
-                      path: destino,
-                      "newfilename": '',
-                      'Authorization': 'Bearer ' + cookies.get('token')
-                    }
-                  })
-                    .then(response => {
-                      $(".loader").fadeOut("slow");
-                      if (response.statusText === "OK") {
-                        this.setState({ archivoVideo: null, showSuccessVideo: true, showErrorVideo: false, urlArchivo: urlArchivo + 'Videos/' + this.state.excavacionId + '/' + nameFile });
-                        this.setState({ tableArchivosVideos: this.renderTableArchivosVideos() })
-                        document.getElementById('filesVideo').value = '';
+                //Primero Actualizo la Exploracion
+                fetch(urlApi + "/excavacion/" + this.state.excavacionId, {
+                  method: "put",
+                  body: JSON.stringify(dataVideo),
+                  headers: {
+                    "Content-Type": "application/json",
+                    Authorization: "Bearer " + cookies.get("token"),
+                  },
+                })
+                  .then(
+                    function (response) {
+                      if (response.ok) {
+                        console.log(
+                          "¡Se actualizaron los datos de la Excavación con Éxito!"
+                        );
+                        this.setState({ listArchivosVideo: listArchivosVideo });
                       }
-                      else {
-                        this.setState({ showSuccessVideo: false, showErrorVideo: true });
-                      }
-                      document.getElementById('subirVideo').removeAttribute('disabled');
+                    }.bind(this)
+                  )
+                  .then(
+                    function (response) {
+                      //segundo subo archivo al server
 
-                      setTimeout(() => {
-                        this.setState({ showSuccessVideo: false, showErrorVideo: false });
-                      }, 5000);
+                      const destino =
+                        rutaExcavaciones + "Videos/" + this.state.excavacionId;
+                      const data = new FormData();
+                      data.append("file", file[0]);
 
+                      axios
+                        .post(urlApi + "/uploadArchivo", data, {
+                          headers: {
+                            "Content-Type": undefined,
+                            path: destino,
+                            newfilename: "",
+                            Authorization: "Bearer " + cookies.get("token"),
+                          },
+                        })
+                        .then((response) => {
+                          $(".loader").fadeOut("slow");
+                          if (response.statusText === "OK") {
+                            this.setState({
+                              archivoVideo: null,
+                              showSuccessVideo: true,
+                              showErrorVideo: false,
+                              urlArchivo:
+                                urlArchivo +
+                                "Videos/" +
+                                this.state.excavacionId +
+                                "/" +
+                                nameFile,
+                            });
+                            this.setState({
+                              tableArchivosVideos:
+                                this.renderTableArchivosVideos(),
+                            });
+                            document.getElementById("filesVideo").value = "";
+                          } else {
+                            this.setState({
+                              showSuccessVideo: false,
+                              showErrorVideo: true,
+                            });
+                          }
+                          document
+                            .getElementById("subirVideo")
+                            .removeAttribute("disabled");
 
-                    })
-                    .catch(error => {
-                      $(".loader").fadeOut("slow");
-                      this.setState({ showSuccessVideo: false, showErrorVideo: true });
-                      console.log(error);
-                    });
-
-
-
-
-                }.bind(this))
-                .catch(function (error) {
-                  $(".loader").fadeOut("slow");
-                  toast.error("Error al Actualizar Exploracion. Intente nuevamente.");
-                  console.log('Hubo un problema con la petición Fetch (1):' + error.message);
-                });
-
-
-            }.bind(this))
+                          setTimeout(() => {
+                            this.setState({
+                              showSuccessVideo: false,
+                              showErrorVideo: false,
+                            });
+                          }, 5000);
+                        })
+                        .catch((error) => {
+                          $(".loader").fadeOut("slow");
+                          this.setState({
+                            showSuccessVideo: false,
+                            showErrorVideo: true,
+                          });
+                          console.log(error);
+                        });
+                    }.bind(this)
+                  )
+                  .catch(function (error) {
+                    $(".loader").fadeOut("slow");
+                    toast.error(
+                      "Error al Actualizar Exploracion. Intente nuevamente."
+                    );
+                    console.log(
+                      "Hubo un problema con la petición Fetch (1):" +
+                        error.message
+                    );
+                  });
+              }.bind(this)
+            )
             .catch(function (error) {
               $(".loader").fadeOut("slow");
               toast.error("Error al consultar. Intente nuevamente.");
-              console.log('Hubo un problema con la petición Fetch (2):' + error.message);
+              console.log(
+                "Hubo un problema con la petición Fetch (2):" + error.message
+              );
             });
-
         }
-
       }
-
     } else {
       toast.error("Seleccione un Archivo.");
     }
-  }
+  };
 
   eliminarArchivoVideo = (dato) => {
-    var destino = rutaExcavaciones + 'Videos/' + this.state.excavacionId + "/" + dato;
+    var destino =
+      rutaExcavaciones + "Videos/" + this.state.excavacionId + "/" + dato;
     var opcion = window.confirm("¿Está seguro que deseas eliminar el Archivo?");
     if (opcion == true) {
-
-      fetch(urlApi + '/excavacionId/' + this.state.excavacionId, {
-        method: 'get',
+      fetch(urlApi + "/excavacionId/" + this.state.excavacionId, {
+        method: "get",
         headers: {
-          'Authorization': 'Bearer ' + cookies.get('token')
-        }
+          Authorization: "Bearer " + cookies.get("token"),
+        },
       })
-        .then(response => {
+        .then((response) => {
           return response.json();
         })
-        .then(function (response) {
-          //aca ya tengo la excavacion, tengo que obtener los archivos de autorizacion y quitar el candidato a eliminar
-          $(".loader").removeAttr("style");
-          //elimino archivo del array
-          var archivos = response.excavacionId.videosExcavacion;
-          var contador = 0;
-          archivos.map((registro) => {
-            if (dato == registro) {
-              archivos.splice(contador, 1);
-            }
-            contador++;
-          });
-
-          var dataVideo = {
-            "videosExcavacion": archivos
-
-          }
-
-          //Actualizo la Exploracion
-          fetch(urlApi + '/excavacion/' + this.state.excavacionId, {
-            method: 'put',
-            body: JSON.stringify(dataVideo),
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': 'Bearer ' + cookies.get('token')
-            }
-          })
-            .then(function (response) {
-              if (response.ok) {
-                console.log("¡Se actualizaron los datos de la Excavación con Éxito!");
-                this.setState({ listArchivosVideo: archivos });
-
+        .then(
+          function (response) {
+            //aca ya tengo la excavacion, tengo que obtener los archivos de autorizacion y quitar el candidato a eliminar
+            $(".loader").removeAttr("style");
+            //elimino archivo del array
+            var archivos = response.excavacionId.videosExcavacion;
+            var contador = 0;
+            archivos.map((registro) => {
+              if (dato == registro) {
+                archivos.splice(contador, 1);
               }
-            }.bind(this))
-            .then(function (response) {
-              //Elimino Archivo del Server
-              fetch(urlApi + '/deleteArchivo', {
-                method: 'get',
-                headers: {
-                  'Content-Type': undefined,
-                  'path': destino,
-                  'Authorization': 'Bearer ' + cookies.get('token')
-                }
-              })
-                .then(response => {
-                  return response.json();
-                })
-                .then(function (response) {
-                  $(".loader").fadeOut("slow");
-                  if ((response.msg).trim() === 'OK') {
-                    console.log('ok');
-                    toast.success("¡Se eliminó el Archivo con Éxito!");
-                    this.setState({ archivoVideo: null, tableArchivosVideos: this.renderTableArchivosVideos() })
-
-                  } else {
-                    console.log('error');
-                    toast.error("¡Se produjo un error al eliminar archivo!");
-                  }
-                }.bind(this)).catch(function (error) {
-                  $(".loader").fadeOut("slow");
-                  toast.error("Error al eliminar. Intente nuevamente.");
-                  console.log('Hubo un problema con la petición Fetch (3):' + error.message);
-                });
-
-
-            }.bind(this))
-            .catch(function (error) {
-              $(".loader").fadeOut("slow");
-              toast.error("Error al Actualizar Exploracion. Intente nuevamente.");
-              console.log('Hubo un problema con la petición Fetch (2):' + error.message);
+              contador++;
             });
 
-        }.bind(this))
+            var dataVideo = {
+              videosExcavacion: archivos,
+            };
+
+            //Actualizo la Exploracion
+            fetch(urlApi + "/excavacion/" + this.state.excavacionId, {
+              method: "put",
+              body: JSON.stringify(dataVideo),
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: "Bearer " + cookies.get("token"),
+              },
+            })
+              .then(
+                function (response) {
+                  if (response.ok) {
+                    console.log(
+                      "¡Se actualizaron los datos de la Excavación con Éxito!"
+                    );
+                    this.setState({ listArchivosVideo: archivos });
+                  }
+                }.bind(this)
+              )
+              .then(
+                function (response) {
+                  //Elimino Archivo del Server
+                  fetch(urlApi + "/deleteArchivo", {
+                    method: "get",
+                    headers: {
+                      "Content-Type": undefined,
+                      path: destino,
+                      Authorization: "Bearer " + cookies.get("token"),
+                    },
+                  })
+                    .then((response) => {
+                      return response.json();
+                    })
+                    .then(
+                      function (response) {
+                        $(".loader").fadeOut("slow");
+                        if (response.msg.trim() === "OK") {
+                          console.log("ok");
+                          toast.success("¡Se eliminó el Archivo con Éxito!");
+                          this.setState({
+                            archivoVideo: null,
+                            tableArchivosVideos:
+                              this.renderTableArchivosVideos(),
+                          });
+                        } else {
+                          console.log("error");
+                          toast.error(
+                            "¡Se produjo un error al eliminar archivo!"
+                          );
+                        }
+                      }.bind(this)
+                    )
+                    .catch(function (error) {
+                      $(".loader").fadeOut("slow");
+                      toast.error("Error al eliminar. Intente nuevamente.");
+                      console.log(
+                        "Hubo un problema con la petición Fetch (3):" +
+                          error.message
+                      );
+                    });
+                }.bind(this)
+              )
+              .catch(function (error) {
+                $(".loader").fadeOut("slow");
+                toast.error(
+                  "Error al Actualizar Exploracion. Intente nuevamente."
+                );
+                console.log(
+                  "Hubo un problema con la petición Fetch (2):" + error.message
+                );
+              });
+          }.bind(this)
+        )
         .catch(function (error) {
           $(".loader").fadeOut("slow");
           toast.error("Error al consultar. Intente nuevamente.");
-          console.log('Hubo un problema con la petición Fetch (1):' + error.message);
+          console.log(
+            "Hubo un problema con la petición Fetch (1):" + error.message
+          );
         });
-
     }
-
   };
-
 
   handleDescripcionFotoChange = (evt) => {
     this.setState({ descripcionFoto: evt.target.value });
   };
-
-
-
-
 
   render() {
     const { validateddb } = this.state;
@@ -2064,10 +2284,7 @@ class AddExcavacion extends React.Component {
       value: opt._id,
     }));
 
-
     const { idExploracionCrear } = this.state;
-
-
 
     /*const { selectedPieza } = this.state;
     let optPiezas = this.state.piezas.map((opt) => ({
@@ -2091,8 +2308,7 @@ class AddExcavacion extends React.Component {
     }));
 */
 
-const { selectedHallazgo } = this.state;
-
+    const { selectedHallazgo } = this.state;
 
     return (
       <>
@@ -2100,7 +2316,7 @@ const { selectedHallazgo } = this.state;
         <div className="row">
           <div className="col-md-12">
             <div id="contenido" align="left" className="container">
-              <div className="loader" style={{ display: 'none' }}></div>
+              <div className="loader" style={{ display: "none" }}></div>
               <br />
               <h3 className="page-header" align="left">
                 <FontAwesomeIcon icon={faCompass} /> Nueva Excavación
@@ -2117,11 +2333,17 @@ const { selectedHallazgo } = this.state;
                 pauseOnHover
               />
 
-
-              <Tabs id="tabEjemplar" activeKey={this.state.key} onSelect={this.handleSelect}>
-                <Tab eventKey="dbasicos" title="Datos Básicos" disabled={this.state.tabbas}>
+              <Tabs
+                id="tabEjemplar"
+                activeKey={this.state.key}
+                onSelect={this.handleSelect}
+              >
+                <Tab
+                  eventKey="dbasicos"
+                  title="Datos Básicos"
+                  disabled={this.state.tabbas}
+                >
                   <Form id="form1" noValidate validated={validateddb}>
-
                     <fieldset>
                       <legend>Datos Básicos</legend>
                       <hr />
@@ -2141,7 +2363,6 @@ const { selectedHallazgo } = this.state;
                         </Form.Group>
                       </Form.Row>
 
-
                       <Form.Row>
                         <Form.Group className="col-sm-6" controlId="codigo">
                           <Form.Label>Código de Campo:</Form.Label>
@@ -2157,7 +2378,6 @@ const { selectedHallazgo } = this.state;
                           </Form.Control.Feedback>
                         </Form.Group>
 
-
                         <Form.Group className="col-sm-6" controlId="director">
                           <Form.Label>Director:</Form.Label>
                           <Select
@@ -2168,14 +2388,9 @@ const { selectedHallazgo } = this.state;
                             isClearable
                           />
                         </Form.Group>
-
-
                       </Form.Row>
 
-
-
                       <Form.Row>
-
                         <Form.Group className="col-sm-6" controlId="auxiliares">
                           <Form.Label>Equipo de Auxiliares:</Form.Label>
                           <Select
@@ -2188,8 +2403,10 @@ const { selectedHallazgo } = this.state;
                           />
                         </Form.Group>
 
-
-                        <Form.Group className="col-sm-6" controlId="profesionales">
+                        <Form.Group
+                          className="col-sm-6"
+                          controlId="profesionales"
+                        >
                           <Form.Label>Equipo de Profesionales:</Form.Label>
                           <Select
                             placeholder={"Seleccione..."}
@@ -2203,7 +2420,10 @@ const { selectedHallazgo } = this.state;
                       </Form.Row>
 
                       <Form.Row>
-                        <Form.Group className="col-sm-6" controlId="fechaInicio">
+                        <Form.Group
+                          className="col-sm-6"
+                          controlId="fechaInicio"
+                        >
                           <Form.Label>Fecha Inicio:</Form.Label>
                           <Form.Control
                             type="date"
@@ -2224,8 +2444,6 @@ const { selectedHallazgo } = this.state;
                             onChange={this.handleFTerminoChange}
                           />
                         </Form.Group>
-
-
                       </Form.Row>
                       <Form.Group controlId="muestra">
                         <Form.Check
@@ -2237,34 +2455,41 @@ const { selectedHallazgo } = this.state;
                         />
                       </Form.Group>
                       <br />
-                      <Form.Row >
-
-                        <Button variant="outline-secondary" type="button" id="siguiente1" onClick={this.handleForm1}>
+                      <Form.Row>
+                        <Button
+                          variant="outline-secondary"
+                          type="button"
+                          id="siguiente1"
+                          onClick={this.handleForm1}
+                        >
                           Siguiente <FontAwesomeIcon icon={faShare} />
                         </Button>
                         &nbsp;&nbsp;
                         <Link to="/excavaciones">
-                          <Button variant="outline-danger" type="button" id="cancela">
+                          <Button
+                            variant="outline-danger"
+                            type="button"
+                            id="cancela"
+                          >
                             <FontAwesomeIcon icon={faTimesCircle} /> Cancelar
                           </Button>
                         </Link>
                       </Form.Row>
                       <br />
-
                     </fieldset>
-
                   </Form>
                 </Tab>
 
-                <Tab eventKey="dhallazgo" title="Hallazgo" disabled={this.state.tabh}>
+                <Tab
+                  eventKey="dhallazgo"
+                  title="Hallazgo"
+                  disabled={this.state.tabh}
+                >
                   <Form id="form2" noValidate validated={validatedh}>
-                    <Form.Row >
-
+                    <Form.Row>
                       <Form.Group className="col-sm-8" controlId="tipoHallazgo">
                         <br />
                         <Form.Label>Tipo Hallazgo:</Form.Label>
-
-
 
                         <Select
                           placeholder={"Seleccione..."}
@@ -2273,30 +2498,38 @@ const { selectedHallazgo } = this.state;
                           value={selectedHallazgo}
                           isClearable
                         />
-
-
                       </Form.Group>
-
                     </Form.Row>
-                    <Form.Label>Si seleccionó Denuncia, adjunte archivo(s) Pdf a continuación de la misma:</Form.Label>
+                    <Form.Label>
+                      Si seleccionó Denuncia, adjunte archivo(s) Pdf a
+                      continuación de la misma:
+                    </Form.Label>
                     <Form.Row>
                       <Form.Group className="col-sm-8">
                         <label>Archivo:</label>
-                        <input type="file" className="form-control" id="filesAut" onChange={this.filehandleChange.bind(this)} />
+                        <input
+                          type="file"
+                          className="form-control"
+                          id="filesAut"
+                          onChange={this.filehandleChange.bind(this)}
+                        />
                       </Form.Group>
                     </Form.Row>
 
                     <Form.Row>
-                      <Form.Group className="col-sm-2" >
-                        <Button variant="primary" type="button" id="subirArch" onClick={() => this.subirDenuncia()} >
+                      <Form.Group className="col-sm-2">
+                        <Button
+                          variant="primary"
+                          type="button"
+                          id="subirArch"
+                          onClick={() => this.subirDenuncia()}
+                        >
                           <FontAwesomeIcon icon={faUpload} /> Subir
                         </Button>
                       </Form.Group>
                       <Form.Group className="col-sm-6">
                         <Alert show={this.state.showSuccess} variant="success">
-                          <p>
-                            Se subió el archivo con Éxito!!
-                          </p>
+                          <p>Se subió el archivo con Éxito!!</p>
                         </Alert>
 
                         <Alert show={this.state.showError} variant="danger">
@@ -2310,30 +2543,39 @@ const { selectedHallazgo } = this.state;
                     <Form.Row>
                       <Form.Group className="col-sm-8" controlId="filesAut">
                         <Table border="0">
-                          <tbody>
-                            {this.state.tableArchivosDen}
-                          </tbody>
-
+                          <tbody>{this.state.tableArchivosDen}</tbody>
                         </Table>
                       </Form.Group>
                     </Form.Row>
 
-                    <Form.Row >
-                      <Button variant="outline-secondary" type="button" id="anterior2" onClick={this.handleAntForm2}>
+                    <Form.Row>
+                      <Button
+                        variant="outline-secondary"
+                        type="button"
+                        id="anterior2"
+                        onClick={this.handleAntForm2}
+                      >
                         <FontAwesomeIcon icon={faReply} /> Anterior
                       </Button>
                       &nbsp;
-                      <Button variant="outline-secondary" type="button" id="siguiente2" onClick={this.handleForm2}>
+                      <Button
+                        variant="outline-secondary"
+                        type="button"
+                        id="siguiente2"
+                        onClick={this.handleForm2}
+                      >
                         Siguiente <FontAwesomeIcon icon={faShare} />
                       </Button>
                     </Form.Row>
-
                   </Form>
                 </Tab>
 
-                <Tab eventKey="dgeo" title="Datos Geográficos" disabled={this.state.tabgeo}>
+                <Tab
+                  eventKey="dgeo"
+                  title="Datos Geográficos"
+                  disabled={this.state.tabgeo}
+                >
                   <Form id="form3" noValidate validated={validatedgeo}>
-
                     <legend>Datos Geográficos</legend>
                     <hr />
                     <Form.Row>
@@ -2352,37 +2594,50 @@ const { selectedHallazgo } = this.state;
 
                     <br />
 
-
-
-                    <CrearExcavacion
-                      idExploracion={idExploracionCrear}
-                      setIdAreaExcavacion={this.setIdAreaExcavacion}
-                      setPuntoGpsExcavacion={this.setPuntoGpsExcavacion}
-                    />
+                    <Form.Row>
+                      <Form.Group className="col-sm-12">
+                        <CrearExcavacion
+                          idExploracion={idExploracionCrear}
+                          setIdAreaExcavacion={this.setIdAreaExcavacion}
+                          setPuntoGpsExcavacion={this.setPuntoGpsExcavacion}
+                        />
+                      </Form.Group>
+                    </Form.Row>
                     <br />
 
-                    <Form.Row >
-                      <Button variant="outline-secondary" type="button" id="anterior3" onClick={this.handleAntForm3}>
+                    <Form.Row>
+                      <Button
+                        variant="outline-secondary"
+                        type="button"
+                        id="anterior3"
+                        onClick={this.handleAntForm3}
+                      >
                         <FontAwesomeIcon icon={faReply} /> Anterior
                       </Button>
                       &nbsp;
-                      <Button variant="outline-secondary" type="button" id="siguiente3" onClick={this.handleForm3}>
+                      <Button
+                        variant="outline-secondary"
+                        type="button"
+                        id="siguiente3"
+                        onClick={this.handleForm3}
+                      >
                         Siguiente <FontAwesomeIcon icon={faShare} />
                       </Button>
                     </Form.Row>
-
-
                   </Form>
                 </Tab>
 
-                <Tab eventKey="dtax" title="Datos Geológicos/Taxonómicos" disabled={this.state.tabtax}>
+                <Tab
+                  eventKey="dtax"
+                  title="Datos Geológicos/Taxonómicos"
+                  disabled={this.state.tabtax}
+                >
                   <Form id="form4" noValidate validated={validatedtax}>
-
                     <Form.Row>
                       <Form.Group className="col-sm-12" controlId="geologicos">
                         <Form.Label>Geológicos:</Form.Label>
                         <Form.Control
-                          as='textarea'
+                          as="textarea"
                           onChange={this.handleGeologicosChange}
                           value={this.state.geologicos}
                         />
@@ -2393,7 +2648,7 @@ const { selectedHallazgo } = this.state;
                       <Form.Group className="col-sm-12" controlId="taxonomicos">
                         <Form.Label>Taxonómicos:</Form.Label>
                         <Form.Control
-                          as='textarea'
+                          as="textarea"
                           onChange={this.handleTaxonomicosChange}
                           value={this.state.taxonomicos}
                         />
@@ -2403,7 +2658,12 @@ const { selectedHallazgo } = this.state;
                     <hr />
                     <Form.Row>
                       <Form.Group className="mx-sm-3 mb-2">
-                        <Button variant="primary" type="button" id="guardar" onClick={this.handleForm4}>
+                        <Button
+                          variant="primary"
+                          type="button"
+                          id="guardar"
+                          onClick={this.handleForm4}
+                        >
                           <FontAwesomeIcon icon={faSave} /> Guardar
                         </Button>
                         &nbsp;&nbsp;
@@ -2414,18 +2674,15 @@ const { selectedHallazgo } = this.state;
                         </Link>
                       </Form.Group>
                     </Form.Row>
-
-
-
-
                   </Form>
                 </Tab>
 
-
-
-                <Tab eventKey="dbochones" title="Bochones" disabled={this.state.tabbochon}>
+                <Tab
+                  eventKey="dbochones"
+                  title="Bochones"
+                  disabled={this.state.tabbochon}
+                >
                   <Form id="form6" noValidate validated={validatedbochon}>
-
                     <Form.Row>
                       <Form.Group className="col-sm-6" controlId="codigoCampo">
                         <Form.Label>Código Campo:</Form.Label>
@@ -2454,39 +2711,30 @@ const { selectedHallazgo } = this.state;
                       </Form.Group>
                     </Form.Row>
 
-
                     <Form.Row>
                       <Form.Group className="col-sm-12" controlId="ejemplar">
                         <Form.Label>Ejemplar:</Form.Label>
                         <Form.Control
                           type="text"
-                          name='ejemlplar'
+                          name="ejemlplar"
                           value={this.state.ejemplar}
                           onChange={this.handleEjemplarChange}
-                          
                         />
-                      
                       </Form.Group>
-
-                      </Form.Row>
-                      <Form.Row>
+                    </Form.Row>
+                    <Form.Row>
                       <Form.Group className="col-sm-12" controlId="piezasAsoc">
                         <Form.Label>Piezas Asociadas:</Form.Label>
                         <Form.Control
                           type="text"
-                          name='piezasAsoc'
+                          name="piezasAsoc"
                           value={this.state.piezasAsoc}
                           onChange={this.handlePiezasAsocChange}
-                          
                         />
                       </Form.Group>
-                     
-
                     </Form.Row>
 
-
-
-                  {/* <Form.Row>
+                    {/* <Form.Row>
                       <Form.Group className="col-sm-12" controlId="ejemplarAsociado">
                         <Form.Label>Ejemplar:</Form.Label>
                         <Select
@@ -2514,27 +2762,30 @@ const { selectedHallazgo } = this.state;
                       </Form.Group>
                   </Form.Row> */}
 
-
-
                     <Form.Row>
-                      <Form.Group className="col-sm-12" controlId="infoAdicional">
+                      <Form.Group
+                        className="col-sm-12"
+                        controlId="infoAdicional"
+                      >
                         <Form.Label>Información Adicional:</Form.Label>
                         <Form.Control
-                          as='textarea'
+                          as="textarea"
                           onChange={this.handleInfoAdicionalChange}
                           value={this.state.infoAdicional}
                         />
                       </Form.Group>
                     </Form.Row>
 
-
-
                     <Form.Row>
                       <Form.Group className="mx-sm-3 mb-2">
-                        <Button variant="primary" type="button" id="guardarBochon" onClick={this.insertarBochon}>
+                        <Button
+                          variant="primary"
+                          type="button"
+                          id="guardarBochon"
+                          onClick={this.insertarBochon}
+                        >
                           <FontAwesomeIcon icon={faPlus} /> Agregar
                         </Button>
-
                       </Form.Group>
                     </Form.Row>
 
@@ -2550,16 +2801,17 @@ const { selectedHallazgo } = this.state;
                             <th>Información Adicional</th>
                           </tr>
                         </thead>
-                        <tbody>
-                          {this.state.tablaBochones}
-                        </tbody>
+                        <tbody>{this.state.tablaBochones}</tbody>
                       </Table>
                     </Form.Row>
-
                   </Form>
                 </Tab>
 
-                <Tab eventKey="dfotos" title="Fotos" disabled={this.state.tabfotos}>
+                <Tab
+                  eventKey="dfotos"
+                  title="Fotos"
+                  disabled={this.state.tabfotos}
+                >
                   <Form id="form7" noValidate validated={validatedfotos}>
                     <legend>Fotos</legend>
                     <hr />
@@ -2567,12 +2819,21 @@ const { selectedHallazgo } = this.state;
                     <Form.Row>
                       <Form.Group className="col-sm-12">
                         <label>Archivos:</label>
-                        <input type="file" className="form-control" id="fileFoto" accept="image/*" onChange={this.filesImagehandleChange.bind(this)} />
+                        <input
+                          type="file"
+                          className="form-control"
+                          id="fileFoto"
+                          accept="image/*"
+                          onChange={this.filesImagehandleChange.bind(this)}
+                        />
                       </Form.Group>
                     </Form.Row>
 
                     <Form.Row>
-                      <Form.Group className="col-sm-12" controlId="descripcionFoto">
+                      <Form.Group
+                        className="col-sm-12"
+                        controlId="descripcionFoto"
+                      >
                         <Form.Label>Descripción Breve:</Form.Label>
                         <small>(Para accesibilidad de la Web)</small>
                         <Form.Control
@@ -2584,16 +2845,22 @@ const { selectedHallazgo } = this.state;
                     </Form.Row>
 
                     <Form.Row>
-                      <Form.Group className="col-sm-2" >
-                        <Button variant="primary" type="button" id="subirFoto" onClick={() => this.subirFoto()} >
+                      <Form.Group className="col-sm-2">
+                        <Button
+                          variant="primary"
+                          type="button"
+                          id="subirFoto"
+                          onClick={() => this.subirFoto()}
+                        >
                           <FontAwesomeIcon icon={faUpload} /> Subir
                         </Button>
                       </Form.Group>
                       <Form.Group className="col-sm-6">
-                        <Alert show={this.state.showSuccessFoto} variant="success">
-                          <p>
-                            Se subió el archivo con Éxito!!
-                          </p>
+                        <Alert
+                          show={this.state.showSuccessFoto}
+                          variant="success"
+                        >
+                          <p>Se subió el archivo con Éxito!!</p>
                         </Alert>
 
                         <Alert show={this.state.showErrorFoto} variant="danger">
@@ -2606,7 +2873,6 @@ const { selectedHallazgo } = this.state;
 
                     <Form.Row>
                       <Form.Group className="col-sm-8" controlId="archivospdf">
-
                         <Table striped bordered hover responsive>
                           <thead className="thead-dark">
                             <tr>
@@ -2615,19 +2881,18 @@ const { selectedHallazgo } = this.state;
                               <th>Descripción</th>
                             </tr>
                           </thead>
-                          <tbody>
-                            {this.state.tableArchivosFotos}
-                          </tbody>
+                          <tbody>{this.state.tableArchivosFotos}</tbody>
                         </Table>
-
-
                       </Form.Group>
                     </Form.Row>
-
                   </Form>
                 </Tab>
 
-                <Tab eventKey="dvideos" title="Videos" disabled={this.state.tabvideos}>
+                <Tab
+                  eventKey="dvideos"
+                  title="Videos"
+                  disabled={this.state.tabvideos}
+                >
                   <Form id="form8" noValidate validated={validatedvideos}>
                     <legend>Videos</legend>
                     <hr />
@@ -2635,24 +2900,39 @@ const { selectedHallazgo } = this.state;
                     <Form.Row>
                       <Form.Group className="col-sm-8">
                         <label>Archivos:</label>
-                        <input type="file" className="form-control" id="filesVideo" accept="video/*" onChange={this.filesVideohandleChange.bind(this)} />
+                        <input
+                          type="file"
+                          className="form-control"
+                          id="filesVideo"
+                          accept="video/*"
+                          onChange={this.filesVideohandleChange.bind(this)}
+                        />
                       </Form.Group>
                     </Form.Row>
 
                     <Form.Row>
-                      <Form.Group className="col-sm-2" >
-                        <Button variant="primary" type="button" id="subirVideo" onClick={() => this.subirVideo()} >
+                      <Form.Group className="col-sm-2">
+                        <Button
+                          variant="primary"
+                          type="button"
+                          id="subirVideo"
+                          onClick={() => this.subirVideo()}
+                        >
                           <FontAwesomeIcon icon={faUpload} /> Subir
                         </Button>
                       </Form.Group>
                       <Form.Group className="col-sm-6">
-                        <Alert show={this.state.showSuccessVideo} variant="success">
-                          <p>
-                            Se subió el archivo con Éxito!!
-                          </p>
+                        <Alert
+                          show={this.state.showSuccessVideo}
+                          variant="success"
+                        >
+                          <p>Se subió el archivo con Éxito!!</p>
                         </Alert>
 
-                        <Alert show={this.state.showErrorVideo} variant="danger">
+                        <Alert
+                          show={this.state.showErrorVideo}
+                          variant="danger"
+                        >
                           <p>
                             El archivo no se pudo subir. Intente nuevamente.
                           </p>
@@ -2662,7 +2942,6 @@ const { selectedHallazgo } = this.state;
 
                     <Form.Row>
                       <Form.Group className="col-sm-8" controlId="archivospdf">
-
                         <Table striped bordered hover responsive>
                           <thead className="thead-dark">
                             <tr>
@@ -2670,22 +2949,13 @@ const { selectedHallazgo } = this.state;
                               <th>Nombre</th>
                             </tr>
                           </thead>
-                          <tbody>
-                            {this.state.tableArchivosVideos}
-                          </tbody>
+                          <tbody>{this.state.tableArchivosVideos}</tbody>
                         </Table>
-
-
                       </Form.Group>
                     </Form.Row>
-
                   </Form>
                 </Tab>
-
-
               </Tabs>
-
-
 
               <Modal
                 show={this.state.modalActualizarBochon}
@@ -2698,15 +2968,17 @@ const { selectedHallazgo } = this.state;
                   <Modal.Title>Editar Bochón</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                  <Form id="form9" noValidate validated={this.state.validatedMBochon}>
-
-
+                  <Form
+                    id="form9"
+                    noValidate
+                    validated={this.state.validatedMBochon}
+                  >
                     <Form.Row>
                       <Form.Group className="col-sm-6" controlId="codigoCampoM">
                         <Form.Label>Código Campo (*):</Form.Label>
                         <Form.Control
                           type="text"
-                          name='codigoCampoM'
+                          name="codigoCampoM"
                           value={this.state.codigoCampoM}
                           onChange={this.handleCodCampoMChange}
                           required
@@ -2720,7 +2992,7 @@ const { selectedHallazgo } = this.state;
                         <Form.Label>Nro. Bochón (*):</Form.Label>
                         <Form.Control
                           type="text"
-                          name='nroBochonM'
+                          name="nroBochonM"
                           value={this.state.nroBochonM}
                           onChange={this.handleNroBochonMChange}
                           required
@@ -2729,37 +3001,29 @@ const { selectedHallazgo } = this.state;
                       <Form.Control.Feedback type="invalid">
                         Por favor, ingrese Nro. Bochón.
                       </Form.Control.Feedback>
-
                     </Form.Row>
-
 
                     <Form.Row>
                       <Form.Group className="col-sm-12" controlId="ejemplarM">
                         <Form.Label>Ejemplar:</Form.Label>
                         <Form.Control
                           type="text"
-                          name='ejemlplarM'
+                          name="ejemlplarM"
                           value={this.state.ejemplarM}
                           onChange={this.handleEjemplarMChange}
-                          
                         />
-                      
                       </Form.Group>
-
-                      </Form.Row>
-                      <Form.Row>
+                    </Form.Row>
+                    <Form.Row>
                       <Form.Group className="col-sm-12" controlId="piezasAsocM">
                         <Form.Label>Piezas Asociadas:</Form.Label>
                         <Form.Control
                           type="text"
-                          name='piezasAsocM'
+                          name="piezasAsocM"
                           value={this.state.piezasAsocM}
                           onChange={this.handlePiezasAsocMChange}
-                          
                         />
                       </Form.Group>
-                     
-
                     </Form.Row>
 
                     {/*}      <Form.Row>
@@ -2791,35 +3055,42 @@ const { selectedHallazgo } = this.state;
     </Form.Row>*/}
 
                     <Form.Row>
-                      <Form.Group className="col-sm-12" controlId="infoAdicionalM">
+                      <Form.Group
+                        className="col-sm-12"
+                        controlId="infoAdicionalM"
+                      >
                         <Form.Label>Información Adicional:</Form.Label>
                         <Form.Control
-                          as='textarea'
-                          name='infoAdicionalM'
+                          as="textarea"
+                          name="infoAdicionalM"
                           onChange={this.handleInfoAdicionalMChange}
                           value={this.state.infoAdicionalM}
                         />
                       </Form.Group>
                     </Form.Row>
                     <small>(*) Campos Obligatorios</small>
-
                   </Form>
                 </Modal.Body>
                 <Modal.Footer>
-                  <Button variant="secondary" onClick={() => this.cerrarModalActualizarBochon()}>
+                  <Button
+                    variant="secondary"
+                    onClick={() => this.cerrarModalActualizarBochon()}
+                  >
                     Cerrar
                   </Button>
-                  <Button variant="primary" id="guardarAct" onClick={this.editarBochon}> <FontAwesomeIcon icon={faSave} /> Guardar</Button>
+                  <Button
+                    variant="primary"
+                    id="guardarAct"
+                    onClick={this.editarBochon}
+                  >
+                    {" "}
+                    <FontAwesomeIcon icon={faSave} /> Guardar
+                  </Button>
                 </Modal.Footer>
               </Modal>
 
-
-
-
-
               <br />
               <br />
-
             </div>
           </div>
         </div>

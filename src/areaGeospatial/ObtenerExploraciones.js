@@ -6,34 +6,58 @@ import Menu from "../components/Menu";
 import "./AreaGeoespacial.css";
 import "leaflet/dist/leaflet.css";
 import "react-toastify/dist/ReactToastify.css";
-
+import Cookies from "universal-cookie";
 import Locate from "leaflet.locatecontrol";
 import { puntoDentroDeArea, dibujarPoligono } from "./helpers";
 import { agregarGrilla } from "./GrillaMapa";
 
+const urlApi = process.env.REACT_APP_API_HOST;
+const cookies = new Cookies();
 export default class ObtenerExcavacion extends Component {
   constructor() {
     super();
     this.state = {
       exploraciones: [],
       puntosGpsExcavaciones: [],
+      denuncias: [],
       capasExploracion: true,
       capasExcavacion: true,
       capasPuntosGps: true,
       datosPuntoGps: false,
+      datosDenuncias: true,
       miUbicacion: false,
       grilla: false,
     };
   }
 
   componentDidMount() {
+    //var calles = L.tileLayer("http://{s}.tile.osm.org/{z}/{x}/{y}.png");
+    var calles = L.tileLayer(
+      "https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}",
+      {
+        maxZoom: 20,
+        subdomains: ["mt0", "mt1", "mt2", "mt3"],
+      }
+    );
+
+    var satelite = L.tileLayer(
+      "https://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}",
+      {
+        maxZoom: 20,
+        subdomains: ["mt0", "mt1", "mt2", "mt3"],
+      }
+    );
+
     const mapOptions = {
       center: [-38.9517, -68.0592],
       zoom: 13,
+      layers: [satelite, calles],
     };
     const map = new L.map("map", mapOptions);
-    L.tileLayer("http://{s}.tile.osm.org/{z}/{x}/{y}.png").addTo(map);
-    this.setState({ map });
+    L.control
+      .layers({ Satelite: satelite, Ciudad: calles })
+      .addTo(map)
+      .setPosition("topleft");
 
     map.on("click", this.onClickMap);
 
@@ -54,6 +78,7 @@ export default class ObtenerExcavacion extends Component {
     });
 
     this.obtenerTodasExploraciones();
+    this.obtenerTodasDenuncias();
   }
 
   onClickMap = (event) => {
@@ -79,34 +104,120 @@ export default class ObtenerExcavacion extends Component {
       );
 
       if (datosAreaExploracion) {
+        const fechaExploracion = new Date(datosAreaExploracion.fecha);
+        const dia = fechaExploracion.getDate();
+        const mes = fechaExploracion.getMonth() + 1; // Sumamos 1 para ajustar el índice de los meses
+        const anio = fechaExploracion.getFullYear();
         const datosExploracion = `<p><b>Area Exploración</b>
         <br />Nombre Area: ${datosAreaExploracion.nombre}
-        <br />Fecha: ${new Date(datosAreaExploracion.fecha)}
+        <br />Fecha: ${dia}/${mes}/${anio}
         </p>`;
 
         const nuevoPopUpExploracion = new L.popup({ elevation: 260.0 })
           .setLatLng([event.latlng.lat, event.latlng.lng])
           .setContent(datosExploracion);
         this.state.map.addLayer(nuevoPopUpExploracion);
+      } else {
+        const datosAreaDenuncia = this.perteneceAlgunArea(
+          "denuncias",
+          event.latlng
+        );
+
+        if (datosAreaDenuncia) {
+          const fechaDenuncia = new Date(datosAreaDenuncia.fecha);
+          const dia = fechaDenuncia.getDate();
+          const mes = fechaDenuncia.getMonth() + 1; // Sumamos 1 para ajustar el índice de los meses
+          const anio = fechaDenuncia.getFullYear();
+          const datosDenuncia = `<p><b>Area Denuncia</b>
+        <br />Denunciante: ${datosAreaDenuncia.denunciante}
+        <br />Fecha Denuncia: ${dia}/${mes}/${anio}
+        <br />Paleontologo: ${datosAreaDenuncia.paleontologo}
+        </p>`;
+
+          const nuevoPopUpDenuncia = new L.popup({ elevation: 260.0 })
+            .setLatLng([event.latlng.lat, event.latlng.lng])
+            .setContent(datosDenuncia);
+          this.state.map.addLayer(nuevoPopUpDenuncia);
+        }
       }
     }
   };
 
   perteneceAlgunArea = (datosAreas, punto) => {
     let datosAreaContenedora;
-
+    console.log(this.state[datosAreas]);
     this.state[datosAreas].forEach((area) => {
       const pertenece = puntoDentroDeArea(punto, area.coordenadas);
       if (pertenece) {
         datosAreaContenedora = area;
       }
     });
+    console.log(datosAreaContenedora);
     return datosAreaContenedora;
+  };
+
+  obtenerTodasDenuncias = async () => {
+    const response = await fetch(`${urlApi}/denuncias`, {
+      method: "GET",
+      headers: {
+        Authorization: "Bearer " + cookies.get("token"),
+      },
+    });
+    if (response.status !== 200) {
+      return toast.error("No existen denuncias cargadas en el sistema");
+    }
+
+    const resultado = await response.json();
+    const denuncias = resultado.denuncias;
+    let denunciasResultado = [];
+    denuncias.forEach(async (denuncia) => {
+      console.log(denuncia);
+
+      const response2 = await fetch(`${urlApi}/area/${denuncia.idArea}`, {
+        method: "GET",
+        headers: {
+          Authorization: "Bearer " + cookies.get("token"),
+        },
+      });
+      if (response2.status !== 200) {
+        return toast.error("Error la cargar denuncia");
+      } else {
+        const resultado2 = await response2.json();
+        const area = resultado2.area;
+
+        let coodenadasDenuncia = area.locacion.coordinates[0];
+        coodenadasDenuncia = coodenadasDenuncia.map((c) => ({
+          lat: c[0],
+          lng: c[1],
+        }));
+        const poligonoDenuncia = this.dibujarPoligonoArea(
+          coodenadasDenuncia,
+          "yellow"
+        );
+
+        const datosDenuncia = {
+          denunciante: denuncia.denunciante,
+          fecha: denuncia.fechaIngreso,
+          paleontologo: denuncia.paleontologo,
+          poligonoArea: poligonoDenuncia,
+          coordenadas: coodenadasDenuncia,
+        };
+
+        denunciasResultado = [...denunciasResultado, datosDenuncia];
+
+        //console.log(area)
+      }
+      this.setState({
+        denuncias: denunciasResultado,
+      });
+    });
   };
 
   obtenerTodasExploraciones = async () => {
     const response = await fetch(
-      "http://museo.fi.uncoma.edu.ar:3006/api/areaExploracion",
+      //"http://museo.fi.uncoma.edu.ar:3006/api/areaExploracion",
+      // `${urlApi}/areasExcavaciones`, {
+      `${urlApi}/areaExploracion`,
       {
         method: "GET",
         headers: {
@@ -131,9 +242,11 @@ export default class ObtenerExcavacion extends Component {
         puntosGpsExcavaciones = [];
 
       exploracionesCompletas.forEach((exploracionCompleta) => {
-        let coordenadasExploracion = exploracionCompleta.areaExploracion
-          ? exploracionCompleta.areaExploracion.locacion.coordinates[0]
-          : [];
+        let coordenadasExploracion =
+          exploracionCompleta.areaExploracion != {}
+            ? exploracionCompleta.areaExploracion.locacion.coordinates[0]
+            : [];
+        // if (coordenadasExploracion != [])
         coordenadasExploracion = coordenadasExploracion.map((c) => ({
           lat: c[0],
           lng: c[1],
@@ -144,38 +257,40 @@ export default class ObtenerExcavacion extends Component {
 
         let coordenadas;
         exploracionCompleta.excavaciones.forEach((excavacion) => {
-          coordenadas = excavacion.areaExcavacion.locacion.coordinates[0];
-          coordenadas = coordenadas.map((c) => ({ lat: c[0], lng: c[1] }));
+          if (excavacion.idArea != "") {
+            coordenadas = excavacion.areaExcavacion.locacion.coordinates[0];
+            coordenadas = coordenadas.map((c) => ({ lat: c[0], lng: c[1] }));
 
-          let poligono = this.dibujarPoligonoArea(coordenadas, "green");
-          poligonosExcavaciones = [...poligonosExcavaciones, poligono];
-          coordenadasExcavaciones = [...coordenadasExcavaciones, coordenadas];
+            let poligono = this.dibujarPoligonoArea(coordenadas, "green");
+            poligonosExcavaciones = [...poligonosExcavaciones, poligono];
+            coordenadasExcavaciones = [...coordenadasExcavaciones, coordenadas];
 
-          const datosExcavacion = {
-            nombre: excavacion.nombre,
-            ciudad: "Neuquen", //excavacion.localidad
-            provincia: "Neuquen", //excavacion.provincia
-            pais: "Argentina", //excavacion.pais
-            coordenadas,
-            poligonoArea: poligono,
-          };
-          excavaciones = [...excavaciones, datosExcavacion];
+            const datosExcavacion = {
+              nombre: excavacion.nombreArea,
+              ciudad: "Neuquen", //excavacion.localidad
+              provincia: "Neuquen", //excavacion.provincia
+              pais: "Argentina", //excavacion.pais
+              coordenadas,
+              poligonoArea: poligono,
+            };
+            excavaciones = [...excavaciones, datosExcavacion];
 
-          const marcador = this.dibujarPuntosGPS(
-            excavacion.puntoGps.coordinates
-          );
-          const datosPuntoGps = {
-            ciudad: "Neuquen",
-            provincia: "Neuquen",
-            pais: "Argentina",
-            coordenadas: marcador.getLatLng(),
-            marcador,
-          };
-          puntosGpsExcavaciones = [...puntosGpsExcavaciones, datosPuntoGps];
+            const marcador = this.dibujarPuntosGPS(
+              excavacion.puntoGps.coordinates
+            );
+            const datosPuntoGps = {
+              ciudad: "Neuquen",
+              provincia: "Neuquen",
+              pais: "Argentina",
+              coordenadas: marcador.getLatLng(),
+              marcador,
+            };
+            puntosGpsExcavaciones = [...puntosGpsExcavaciones, datosPuntoGps];
+          }
         });
 
         const datosExploracion = {
-          nombre: exploracionCompleta.nombre,
+          nombre: exploracionCompleta.areaExploracion.nombre,
           ciudad: exploracionCompleta.areaExploracion
             ? exploracionCompleta.areaExploracion.ciudad
             : "Neuquen",
@@ -185,7 +300,7 @@ export default class ObtenerExcavacion extends Component {
           pais: exploracionCompleta.areaExploracion
             ? exploracionCompleta.areaExploracion.pais
             : "Argentina",
-          fecha: exploracionCompleta.fecha,
+          fecha: exploracionCompleta.areaExploracion.fecha,
           coordenadas: coordenadasExploracion,
           poligonoArea: poligonoExploracion,
         };
@@ -231,6 +346,19 @@ export default class ObtenerExcavacion extends Component {
   };
 
   handleInputArea = (campo, datosArea, color) => {
+    if (this.state[campo]) {
+      this.removerCapa(datosArea, "poligonoArea");
+    } else {
+      this.state[datosArea].forEach((area) => {
+        this.dibujarPoligonoArea(area.coordenadas, color, area);
+      });
+    }
+    this.setState({
+      [campo]: !this.state[campo],
+    });
+  };
+
+  handleInputDatosDenuncias = (campo, datosArea, color) => {
     if (this.state[campo]) {
       this.removerCapa(datosArea, "poligonoArea");
     } else {
@@ -319,7 +447,7 @@ export default class ObtenerExcavacion extends Component {
       <>
         <Menu />
         <div className="datos-geograficos-contenedor">
-          <h1>Datos Geográficos</h1>
+          <h1> Datos Geográficos </h1>
           <div className="principal">
             <ToastContainer
               position="top-right"
@@ -350,7 +478,7 @@ export default class ObtenerExcavacion extends Component {
                       )
                     }
                   />
-                  Capas de Exploracion
+                  Capas de Exploracion{" "}
                 </label>
 
                 <label>
@@ -367,6 +495,22 @@ export default class ObtenerExcavacion extends Component {
                     }
                   />
                   Capas de Excavacion
+                </label>
+
+                <label>
+                  <input
+                    name="datosDenuncias"
+                    type="checkbox"
+                    checked={this.state.datosDenuncias}
+                    onChange={() =>
+                      this.handleInputDatosDenuncias(
+                        "datosDenuncias",
+                        "denuncias",
+                        "yellow"
+                      )
+                    }
+                  />
+                  Capas de Denuncias
                 </label>
 
                 <label>
@@ -412,7 +556,7 @@ export default class ObtenerExcavacion extends Component {
                       )
                     }
                   />
-                  Agregar Grilla
+                  Agregar Grilla{" "}
                 </label>
               </form>
             </div>

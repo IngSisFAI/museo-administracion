@@ -369,6 +369,13 @@ class MainExcavaciones extends React.Component {
                 data={this.state.excavaciones}
                 actions={[
                   {
+                    icon: 'visibility',   
+                    tooltip: 'Mostrar Excavación',
+                    onClick: (event, rowData) => {
+                      this.props.history.push(`/showExcavacion/${rowData._id}`);
+                  }
+                },
+                  {
                     icon: "edit",
                     tooltip: "Editar Excavación",
                     onClick: (event, rowData) => {
