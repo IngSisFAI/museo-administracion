@@ -210,6 +210,13 @@ class MainEjemplares extends React.Component {
                 data={this.state.ejemplares}
                 actions={[
                   {
+                    icon: 'visibility',   
+                    tooltip: 'Mostrar Ejemplar',
+                    onClick: (event, rowData) => {
+                      this.props.history.push(`/showEjemplar/${rowData._id}`);
+                  }
+                },
+                  {
                     icon: 'edit',
                     tooltip: 'Editar Excavación',
                     onClick: (event, rowData) => {

@@ -121,6 +121,7 @@ class AddEjemplar extends React.Component {
       selectedBochon: null,
       selectedExcavacionM: null,
       selectedBochonM: null,
+      selectedPreparador: null,
     }
 
   }
@@ -463,7 +464,7 @@ class AddEjemplar extends React.Component {
     if (form.checkValidity() === false) {
       event.stopPropagation();
     } else {
-
+if(true){
       $(".loader").removeAttr("style");
       var coleccionName = "";
       var coleccionId = "";
@@ -473,6 +474,7 @@ class AddEjemplar extends React.Component {
       }
 
       var idPreparador = "";
+      
       if (this.state.selectedPreparador !== null) {
         idPreparador = this.state.selectedPreparador.value
       }
@@ -550,7 +552,11 @@ class AddEjemplar extends React.Component {
             error.message
           );
         });
-
+      }
+      else {
+        $(".loader").fadeOut("slow");
+        toast.error("Debe seleccionar un Preparador.");
+      }
 
     }
 
@@ -1963,6 +1969,8 @@ class AddEjemplar extends React.Component {
       value: opt._id,
     }));
 
+    //const { selectedPreparador } = optPreparador[0];
+
     const { selectedColeccion } = this.state;
     let optColecciones = this.state.colecciones.map((opt) => ({
       label: opt.nombre,
@@ -2364,7 +2372,7 @@ class AddEjemplar extends React.Component {
                     <Form.Row>
                       <Form.Group className="col-sm-12" controlId="ubicacion">
                         <Form.Label>Ubicación:</Form.Label>
-                        <Form.Control type="text" autoComplete="off" onChange={this.handleUbicacionChange} value={this.state.ubicacion} />
+                        <Form.Control type="text" autoComplete="off" onChange={this.handleUbicacionChange} value={this.state.ubicacion} required/>
                       </Form.Group>
                     </Form.Row>
 
@@ -2395,6 +2403,7 @@ class AddEjemplar extends React.Component {
                           onChange={this.handlePreparadorChange}
                           value={selectedPreparador}
                           isClearable
+                          required
                         />
                       </Form.Group>
                     </Form.Row>
