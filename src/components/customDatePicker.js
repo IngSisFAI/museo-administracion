@@ -6,13 +6,13 @@ import {
 } from "@material-ui/pickers";
 import React, { useState } from "react";
 
-function invalid(fecha) {
-  if (fecha === null || (fecha.toString()).trim() === 'Invalid Date')
-    return true;
-  else
-    return false;
+// function invalid(fecha) {
+//   if (fecha === null || (fecha.toString()).trim() === 'Invalid Date')
+//     return true;
+//   else
+//     return false;
 
-}
+// }
 
 const CustomDatePicker = (props) => {
   const [date, setDate] = useState(null);

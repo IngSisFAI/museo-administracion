@@ -6,12 +6,13 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import ModificarDenuncia from '../../areaGeospatial/ModificarDenuncia';
 import Moment from 'moment';
 import {
-  faPlus,
-  faTrash,
+  //faPlus,
+  //faTrash,
   faTimesCircle,
   faHandshake,
 } from "@fortawesome/free-solid-svg-icons";
-import { withRouter, Link, Redirect } from "react-router-dom";
+import { withRouter, Link, //Redirect 
+} from "react-router-dom";
 import Menu from "../Menu";
 import Cookies from "universal-cookie";
 import $ from "jquery";

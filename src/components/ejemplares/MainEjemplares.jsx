@@ -175,7 +175,7 @@ class MainEjemplares extends React.Component {
           <Form.Row>
             <div id="contenido" align="left" className="container">
 
-              <legend> <FontAwesomeIcon icon={faIdCard} /> Inventario MUC </legend>
+              <legend> <FontAwesomeIcon icon={faIdCard} /> Inventario MPCN </legend>
               <hr />
               <Link to='/addEjemplar'>
                 <Button variant="primary" type="buttom" >

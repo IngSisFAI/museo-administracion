@@ -3,7 +3,8 @@ import './Login.css'
 import { Form, Button, Alert} from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faSignInAlt} from '@fortawesome/free-solid-svg-icons'
-import  Imagen from './iconoMUC.jpeg';
+//import  Imagen from './iconoMUC.jpeg';
+import  Imagen from './logoRoca.jpg';
 import axios from 'axios';
 import md5 from 'md5';
 import Cookies from "universal-cookie"
@@ -98,8 +99,8 @@ class Login extends React.Component {
                <div className="fadeIn first">
                  <br/>
                  <p>Sistema de Administración</p>
-                 <p>Museo de Ciencias Naturales - UNComa.</p>
-                 <img src={Imagen} id="icono" alt="Museo Icono" />
+                 <p>Museo Patagónico de Ciencias Naturales</p>
+                 <img src={Imagen} id="icono" alt="Museo Icono" className="img-fluid" />
                  <br/>
                  <br/>
               </div>

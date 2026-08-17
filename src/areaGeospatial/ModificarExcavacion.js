@@ -47,7 +47,7 @@ export default class ModificarExcavacion extends Component {
    })
 
    const mapOptions = {
-       center: [-38.9517, -68.0592],
+       center: [-39.031394436276734, -67.57621878944067],
        zoom: 13,
        layers: [satelite,calles]
    };

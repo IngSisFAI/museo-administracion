@@ -1,5 +1,5 @@
 import React from 'react';
-import logo from './logo_muc.jpg';
+import logo from './logoRoca.jpg';
 import Menu from './Menu'
 import Cookies from 'universal-cookie';
 
@@ -25,7 +25,7 @@ render(){
          <Menu />
           <div className="container">
                         <div style={{paddingTop:'5%', textAlign:'center'}}>              
-                                <h2>MUSEO DE CIENCIAS NATURALES</h2>
+                                <h2>MUSEO PATAGÓNICO DE CIENCIAS NATURALES</h2>
                                 <span style={{textAlign: 'center', fontSize: '22px', color:'#777', fontWeight: 'bold'}} >Sistema de Administración</span>
                                 <br/><span style={{textAlign: 'center', fontSize: '18px', color:'#777'}} >Universidad Nacional del Comahue</span>
                 

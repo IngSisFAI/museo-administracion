@@ -225,7 +225,7 @@ class ShowExcavacion extends React.Component {
                 (option) => option._id === excavacions.excavacionId.directorId
               );
 
-              if (directorSelect !== []) {
+              if (directorSelect != []) {
                 directorS = {
                   label:
                     directorSelect[0].nombres +
@@ -237,7 +237,7 @@ class ShowExcavacion extends React.Component {
             }
 
             var profesionalesSelect = [];
-            if (excavacions.excavacionId.profesionales !== []) {
+            if (excavacions.excavacionId.profesionales != []) {
               profesionalesSelect = this.state.profesionales.filter(({ _id }) =>
                 excavacions.excavacionId.profesionales.includes(_id)
               );
@@ -248,7 +248,7 @@ class ShowExcavacion extends React.Component {
             }
 
             var auxiliaresSelect = [];
-            if (excavacions.excavacionId.auxiliares !== []) {
+            if (excavacions.excavacionId.auxiliares != []) {
               auxiliaresSelect = this.state.auxiliares.filter(({ _id }) =>
                 excavacions.excavacionId.auxiliares.includes(_id)
               );
@@ -277,7 +277,7 @@ class ShowExcavacion extends React.Component {
                 (option) =>
                   option._id === excavacions.excavacionId.idExploracion
               );
-              if (exploracionSelect !== []) {
+              if (exploracionSelect != []) {
                 exploracionS = {
                   label: exploracionSelect[0].nombreArea,
                   value: exploracionSelect[0]._id,

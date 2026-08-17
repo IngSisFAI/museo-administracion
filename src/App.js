@@ -30,6 +30,7 @@ import Ejemplares from "./components/ejemplares/MainEjemplares";
 import AddEjemplar from "./components/ejemplares/AddEjemplar";
 import EditEjemplar from "./components/ejemplares/EditEjemplar";
 import ShowEjemplar from "./components/ejemplares/ShowEjemplar";
+import ExportEjemplares from "./components/ejemplares/ExportEjemplares";
 
 //Bochones
 import Bochones from "./components/bochones/MainBochones";
@@ -75,6 +76,7 @@ import AddDenuncia from "./components/denuncias/AddDenuncia";
 import EditDenuncia from "./components/denuncias/EditDenuncia";
 import ShowDenuncia from "./components/denuncias/ShowDenuncia";
 
+
 class App extends Component {
   render() {
     return (
@@ -95,6 +97,7 @@ class App extends Component {
           <Route path="/editExcavacion/:id" component={EditExcavacion} />{" "}
           <Route path="/showExcavacion/:id" component={ShowExcavacion} />{" "}
           <Route path="/ejemplares" component={Ejemplares} />{" "}
+          <Route path="/exportEjemplares" component={ExportEjemplares} />{" "}
           <Route path="/addEjemplar" component={AddEjemplar} />{" "}
           <Route path="/editEjemplar/:id" component={EditEjemplar} />{" "}
           <Route path="/showEjemplar/:id" component={ShowEjemplar} />{" "}

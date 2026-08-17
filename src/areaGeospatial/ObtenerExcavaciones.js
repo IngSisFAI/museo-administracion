@@ -33,7 +33,7 @@ export default class ObtenerExcavacion extends Component {
 
     componentDidMount() {
         const mapOptions = {
-            center: [-38.9517, -68.0592],
+            center: [-39.031394436276734, -67.57621878944067],
             zoom: 13,
         };
         const map = new L.map("map", mapOptions);
